@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      stacked_generator|stackedRouterGenerator:
+        enabled: true
+        options:
+          navigator2: true
+          generate_for:
+            - lib/app/app.dart
+      stacked_generator|stackedLocatorGenerator:
+        enabled: true
+        options:
+          generate_for:
+            - lib/app/app.dart

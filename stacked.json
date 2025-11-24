@@ -1,0 +1,10 @@
+{
+    "stacked_app": {
+        "views_path": "lib/ui/views",
+        "view_model_path": "lib/ui/common",
+        "bottom_sheets_path": "lib/ui/bottom_sheets",
+        "dialogs_path": "lib/ui/dialogs",
+        "services_path": "lib/services",
+        "line_length": 80
+    }
+}
