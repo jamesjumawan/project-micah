@@ -24,7 +24,7 @@ Future<void> bootstrap(
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
-  await setupLocator();
+  await setupLocator(stackedRouter: stackedRouter);
   setupDialogUi();
   setupBottomSheetUi();
   runApp(await builder());

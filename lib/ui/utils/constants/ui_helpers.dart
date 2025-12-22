@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_micah/ui/utils/constants/app_colors.dart';
 
 class UIHelpers {
   UIHelpers._();
@@ -99,4 +100,59 @@ class UIHelpers {
     }
     return width;
   }
+
+  /// Apply text style deltas to a base [TextStyle]. This centralizes the
+  /// logic so callers don't have to use `copyWith` across the codebase.
+  static TextStyle? applyTextStyle(
+    TextStyle? base, {
+    double? fontSize,
+    Color? color,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
+    TextDecoration? decoration,
+  }) {
+    final delta = TextStyle(
+      fontSize: fontSize,
+      color: color,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      decoration: decoration,
+    );
+
+    if (base == null) return delta;
+    return base.merge(delta);
+  }
+}
+
+// TextStyle helper utilities to avoid repeated use of copyWith throughout the
+// codebase. Use these helpers from extensions below.
+// Public extension for convenient TextStyle transformations. This mirrors the
+// getters you requested but delegates the actual style creation to the
+// UIHelpers internals so we avoid sprinkling copyWith across the codebase.
+extension TextStylesExtension on TextStyle? {
+  TextStyle? get fontSize12 => UIHelpers.applyTextStyle(this, fontSize: 12);
+  TextStyle? get fontSize14 => UIHelpers.applyTextStyle(this, fontSize: 14);
+  TextStyle? get fontSize16 => UIHelpers.applyTextStyle(this, fontSize: 16);
+  TextStyle? get fontSize18 => UIHelpers.applyTextStyle(this, fontSize: 18);
+  TextStyle? get fontSize20 => UIHelpers.applyTextStyle(this, fontSize: 20);
+  TextStyle? get fontSize24 => UIHelpers.applyTextStyle(this, fontSize: 24);
+
+  TextStyle? get primary =>
+      UIHelpers.applyTextStyle(this, color: AppColors.primary);
+  TextStyle? get secondary =>
+      UIHelpers.applyTextStyle(this, color: AppColors.secondary);
+  TextStyle? get accentRed =>
+      UIHelpers.applyTextStyle(this, color: AppColors.error);
+  TextStyle? get white =>
+      UIHelpers.applyTextStyle(this, color: AppColors.textWhite);
+  TextStyle? get black => UIHelpers.applyTextStyle(this, color: Colors.black);
+
+  TextStyle? get bold =>
+      UIHelpers.applyTextStyle(this, fontWeight: FontWeight.bold);
+  TextStyle? get normal =>
+      UIHelpers.applyTextStyle(this, fontWeight: FontWeight.normal);
+  TextStyle? get italic =>
+      UIHelpers.applyTextStyle(this, fontStyle: FontStyle.italic);
+  TextStyle? get underline =>
+      UIHelpers.applyTextStyle(this, decoration: TextDecoration.underline);
 }

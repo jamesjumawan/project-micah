@@ -6,30 +6,31 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:flutter/material.dart' as _i7;
-import 'package:stacked/stacked.dart' as _i6;
-import 'package:stacked_services/stacked_services.dart' as _i5;
+import 'package:flutter/material.dart' as _i8;
+import 'package:stacked/stacked.dart' as _i7;
+import 'package:stacked_services/stacked_services.dart' as _i6;
 
 import '../ui/views/categories/categories_view.dart' as _i3;
+import '../ui/views/details/details_view.dart' as _i5;
 import '../ui/views/home/home_view.dart' as _i2;
 import '../ui/views/search/search_view.dart' as _i4;
 import '../ui/views/startup/startup_view.dart' as _i1;
 
 final stackedRouter = StackedRouterWeb(
-  navigatorKey: _i5.StackedService.navigatorKey,
+  navigatorKey: _i6.StackedService.navigatorKey,
 );
 
-class StackedRouterWeb extends _i6.RootStackRouter {
-  StackedRouterWeb({_i7.GlobalKey<_i7.NavigatorState>? navigatorKey})
+class StackedRouterWeb extends _i7.RootStackRouter {
+  StackedRouterWeb({_i8.GlobalKey<_i8.NavigatorState>? navigatorKey})
       : super(navigatorKey);
 
   @override
-  final Map<String, _i6.PageFactory> pagesMap = {
+  final Map<String, _i7.PageFactory> pagesMap = {
     StartupViewRoute.name: (routeData) {
       final args = routeData.argsAs<StartupViewArgs>(
         orElse: () => const StartupViewArgs(),
       );
-      return _i6.CustomPage<dynamic>(
+      return _i7.CustomPage<dynamic>(
         routeData: routeData,
         child: _i1.StartupView(key: args.key),
         opaque: true,
@@ -40,7 +41,7 @@ class StackedRouterWeb extends _i6.RootStackRouter {
       final args = routeData.argsAs<HomeViewArgs>(
         orElse: () => const HomeViewArgs(),
       );
-      return _i6.CustomPage<dynamic>(
+      return _i7.CustomPage<dynamic>(
         routeData: routeData,
         child: _i2.HomeView(key: args.key),
         opaque: true,
@@ -51,9 +52,12 @@ class StackedRouterWeb extends _i6.RootStackRouter {
       final args = routeData.argsAs<CategoriesViewArgs>(
         orElse: () => const CategoriesViewArgs(),
       );
-      return _i6.CustomPage<dynamic>(
+      return _i7.CustomPage<dynamic>(
         routeData: routeData,
-        child: _i3.CategoriesView(key: args.key),
+        child: _i3.CategoriesView(
+          key: args.key,
+          selectedCategory: args.selectedCategory,
+        ),
         opaque: true,
         barrierDismissible: false,
       );
@@ -62,9 +66,20 @@ class StackedRouterWeb extends _i6.RootStackRouter {
       final args = routeData.argsAs<SearchViewArgs>(
         orElse: () => const SearchViewArgs(),
       );
-      return _i6.CustomPage<dynamic>(
+      return _i7.CustomPage<dynamic>(
         routeData: routeData,
         child: _i4.SearchView(key: args.key),
+        opaque: true,
+        barrierDismissible: false,
+      );
+    },
+    DetailsViewRoute.name: (routeData) {
+      final args = routeData.argsAs<DetailsViewArgs>(
+        orElse: () => const DetailsViewArgs(),
+      );
+      return _i7.CustomPage<dynamic>(
+        routeData: routeData,
+        child: _i5.DetailsView(key: args.key),
         opaque: true,
         barrierDismissible: false,
       );
@@ -72,18 +87,19 @@ class StackedRouterWeb extends _i6.RootStackRouter {
   };
 
   @override
-  List<_i6.RouteConfig> get routes => [
-        _i6.RouteConfig(StartupViewRoute.name, path: '/'),
-        _i6.RouteConfig(HomeViewRoute.name, path: '/home-view'),
-        _i6.RouteConfig(CategoriesViewRoute.name, path: '/categories-view'),
-        _i6.RouteConfig(SearchViewRoute.name, path: '/search-view'),
+  List<_i7.RouteConfig> get routes => [
+        _i7.RouteConfig(StartupViewRoute.name, path: '/'),
+        _i7.RouteConfig(HomeViewRoute.name, path: '/home-view'),
+        _i7.RouteConfig(CategoriesViewRoute.name, path: '/categories-view'),
+        _i7.RouteConfig(SearchViewRoute.name, path: '/search-view'),
+        _i7.RouteConfig(DetailsViewRoute.name, path: '/details-view'),
       ];
 }
 
 /// generated route for
 /// [_i1.StartupView]
-class StartupViewRoute extends _i6.PageRouteInfo<StartupViewArgs> {
-  StartupViewRoute({_i7.Key? key})
+class StartupViewRoute extends _i7.PageRouteInfo<StartupViewArgs> {
+  StartupViewRoute({_i8.Key? key})
       : super(
           StartupViewRoute.name,
           path: '/',
@@ -96,7 +112,7 @@ class StartupViewRoute extends _i6.PageRouteInfo<StartupViewArgs> {
 class StartupViewArgs {
   const StartupViewArgs({this.key});
 
-  final _i7.Key? key;
+  final _i8.Key? key;
 
   @override
   String toString() {
@@ -106,8 +122,8 @@ class StartupViewArgs {
 
 /// generated route for
 /// [_i2.HomeView]
-class HomeViewRoute extends _i6.PageRouteInfo<HomeViewArgs> {
-  HomeViewRoute({_i7.Key? key})
+class HomeViewRoute extends _i7.PageRouteInfo<HomeViewArgs> {
+  HomeViewRoute({_i8.Key? key})
       : super(
           HomeViewRoute.name,
           path: '/home-view',
@@ -120,7 +136,7 @@ class HomeViewRoute extends _i6.PageRouteInfo<HomeViewArgs> {
 class HomeViewArgs {
   const HomeViewArgs({this.key});
 
-  final _i7.Key? key;
+  final _i8.Key? key;
 
   @override
   String toString() {
@@ -130,32 +146,35 @@ class HomeViewArgs {
 
 /// generated route for
 /// [_i3.CategoriesView]
-class CategoriesViewRoute extends _i6.PageRouteInfo<CategoriesViewArgs> {
-  CategoriesViewRoute({_i7.Key? key})
+class CategoriesViewRoute extends _i7.PageRouteInfo<CategoriesViewArgs> {
+  CategoriesViewRoute({_i8.Key? key, String? selectedCategory})
       : super(
           CategoriesViewRoute.name,
           path: '/categories-view',
-          args: CategoriesViewArgs(key: key),
+          args:
+              CategoriesViewArgs(key: key, selectedCategory: selectedCategory),
         );
 
   static const String name = 'CategoriesView';
 }
 
 class CategoriesViewArgs {
-  const CategoriesViewArgs({this.key});
+  const CategoriesViewArgs({this.key, this.selectedCategory});
 
-  final _i7.Key? key;
+  final _i8.Key? key;
+
+  final String? selectedCategory;
 
   @override
   String toString() {
-    return 'CategoriesViewArgs{key: $key}';
+    return 'CategoriesViewArgs{key: $key, selectedCategory: $selectedCategory}';
   }
 }
 
 /// generated route for
 /// [_i4.SearchView]
-class SearchViewRoute extends _i6.PageRouteInfo<SearchViewArgs> {
-  SearchViewRoute({_i7.Key? key})
+class SearchViewRoute extends _i7.PageRouteInfo<SearchViewArgs> {
+  SearchViewRoute({_i8.Key? key})
       : super(
           SearchViewRoute.name,
           path: '/search-view',
@@ -168,7 +187,7 @@ class SearchViewRoute extends _i6.PageRouteInfo<SearchViewArgs> {
 class SearchViewArgs {
   const SearchViewArgs({this.key});
 
-  final _i7.Key? key;
+  final _i8.Key? key;
 
   @override
   String toString() {
@@ -176,60 +195,106 @@ class SearchViewArgs {
   }
 }
 
-extension RouterStateExtension on _i5.RouterService {
+/// generated route for
+/// [_i5.DetailsView]
+class DetailsViewRoute extends _i7.PageRouteInfo<DetailsViewArgs> {
+  DetailsViewRoute({_i8.Key? key})
+      : super(
+          DetailsViewRoute.name,
+          path: '/details-view',
+          args: DetailsViewArgs(key: key),
+        );
+
+  static const String name = 'DetailsView';
+}
+
+class DetailsViewArgs {
+  const DetailsViewArgs({this.key});
+
+  final _i8.Key? key;
+
+  @override
+  String toString() {
+    return 'DetailsViewArgs{key: $key}';
+  }
+}
+
+extension RouterStateExtension on _i6.RouterService {
   Future<dynamic> navigateToStartupView({
-    _i7.Key? key,
-    void Function(_i6.NavigationFailure)? onFailure,
+    _i8.Key? key,
+    void Function(_i7.NavigationFailure)? onFailure,
   }) async {
     return navigateTo(StartupViewRoute(key: key), onFailure: onFailure);
   }
 
   Future<dynamic> navigateToHomeView({
-    _i7.Key? key,
-    void Function(_i6.NavigationFailure)? onFailure,
+    _i8.Key? key,
+    void Function(_i7.NavigationFailure)? onFailure,
   }) async {
     return navigateTo(HomeViewRoute(key: key), onFailure: onFailure);
   }
 
   Future<dynamic> navigateToCategoriesView({
-    _i7.Key? key,
-    void Function(_i6.NavigationFailure)? onFailure,
+    _i8.Key? key,
+    String? selectedCategory,
+    void Function(_i7.NavigationFailure)? onFailure,
   }) async {
-    return navigateTo(CategoriesViewRoute(key: key), onFailure: onFailure);
+    return navigateTo(
+      CategoriesViewRoute(key: key, selectedCategory: selectedCategory),
+      onFailure: onFailure,
+    );
   }
 
   Future<dynamic> navigateToSearchView({
-    _i7.Key? key,
-    void Function(_i6.NavigationFailure)? onFailure,
+    _i8.Key? key,
+    void Function(_i7.NavigationFailure)? onFailure,
   }) async {
     return navigateTo(SearchViewRoute(key: key), onFailure: onFailure);
   }
 
+  Future<dynamic> navigateToDetailsView({
+    _i8.Key? key,
+    void Function(_i7.NavigationFailure)? onFailure,
+  }) async {
+    return navigateTo(DetailsViewRoute(key: key), onFailure: onFailure);
+  }
+
   Future<dynamic> replaceWithStartupView({
-    _i7.Key? key,
-    void Function(_i6.NavigationFailure)? onFailure,
+    _i8.Key? key,
+    void Function(_i7.NavigationFailure)? onFailure,
   }) async {
     return replaceWith(StartupViewRoute(key: key), onFailure: onFailure);
   }
 
   Future<dynamic> replaceWithHomeView({
-    _i7.Key? key,
-    void Function(_i6.NavigationFailure)? onFailure,
+    _i8.Key? key,
+    void Function(_i7.NavigationFailure)? onFailure,
   }) async {
     return replaceWith(HomeViewRoute(key: key), onFailure: onFailure);
   }
 
   Future<dynamic> replaceWithCategoriesView({
-    _i7.Key? key,
-    void Function(_i6.NavigationFailure)? onFailure,
+    _i8.Key? key,
+    String? selectedCategory,
+    void Function(_i7.NavigationFailure)? onFailure,
   }) async {
-    return replaceWith(CategoriesViewRoute(key: key), onFailure: onFailure);
+    return replaceWith(
+      CategoriesViewRoute(key: key, selectedCategory: selectedCategory),
+      onFailure: onFailure,
+    );
   }
 
   Future<dynamic> replaceWithSearchView({
-    _i7.Key? key,
-    void Function(_i6.NavigationFailure)? onFailure,
+    _i8.Key? key,
+    void Function(_i7.NavigationFailure)? onFailure,
   }) async {
     return replaceWith(SearchViewRoute(key: key), onFailure: onFailure);
+  }
+
+  Future<dynamic> replaceWithDetailsView({
+    _i8.Key? key,
+    void Function(_i7.NavigationFailure)? onFailure,
+  }) async {
+    return replaceWith(DetailsViewRoute(key: key), onFailure: onFailure);
   }
 }

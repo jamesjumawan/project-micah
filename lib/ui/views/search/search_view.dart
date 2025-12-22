@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stacked/stacked.dart';
 
+import 'search_view.desktop.dart';
+import 'search_view.tablet.dart';
+import 'search_view.mobile.dart';
 import 'search_viewmodel.dart';
 
 class SearchView extends StackedView<SearchViewModel> {
@@ -12,12 +16,10 @@ class SearchView extends StackedView<SearchViewModel> {
     SearchViewModel viewModel,
     Widget? child,
   ) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Container(
-        padding: const EdgeInsets.only(left: 25.0, right: 25.0),
-        child: const Center(child: Text("SearchView")),
-      ),
+    return ScreenTypeLayout.builder(
+      mobile: (_) => const SearchViewMobile(),
+      tablet: (_) => const SearchViewTablet(),
+      desktop: (_) => const SearchViewDesktop(),
     );
   }
 

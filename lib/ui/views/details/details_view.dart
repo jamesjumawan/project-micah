@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stacked/stacked.dart';
 
+import 'details_view.desktop.dart';
+import 'details_view.tablet.dart';
+import 'details_view.mobile.dart';
 import 'details_viewmodel.dart';
 
 class DetailsView extends StackedView<DetailsViewModel> {
@@ -12,12 +16,10 @@ class DetailsView extends StackedView<DetailsViewModel> {
     DetailsViewModel viewModel,
     Widget? child,
   ) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Container(
-        padding: const EdgeInsets.only(left: 25.0, right: 25.0),
-        child: const Center(child: Text("DetailsView")),
-      ),
+    return ScreenTypeLayout.builder(
+      mobile: (_) => const DetailsViewMobile(),
+      tablet: (_) => const DetailsViewTablet(),
+      desktop: (_) => const DetailsViewDesktop(),
     );
   }
 

@@ -1,14 +1,17 @@
 {
-    "stacked_app": {
-        "views_path": "lib/ui/views",
-        "view_model_path": "lib/ui/views",
-        "bottom_sheets_path": "lib/ui/bottom_sheets",
-        "dialogs_path": "lib/ui/dialogs",
-        "services_path": "lib/services",
-        "line_length": 80,
-        "v1": false,
-        "locator_name": "locator",
-        "register_mocks_function": "registerServices",
-        "test_helpers_file_path": "test/helpers/test_helpers.dart"
-    }
+    "bottom_sheets_path": "ui/bottom_sheets",
+    "dialogs_path": "ui/dialogs",
+    "line_length": 80,
+    "locator_name": "locator",
+    "prefer_web": true,
+    "register_mocks_function": "registerServices",
+    "services_path": "services",
+    "stacked_app_file_path": "app/app.dart",
+    "test_helpers_file_path": "helpers/test_helpers.dart",
+    "test_services_path": "services",
+    "test_views_path": "viewmodels",
+    "test_widgets_path": "widget_models",
+    "v1": false,
+    "views_path": "ui/views",
+    "widgets_path": "ui/widgets/common"
 }

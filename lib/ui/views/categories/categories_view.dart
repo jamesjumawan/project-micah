@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stacked/stacked.dart';
 
+import 'categories_view.desktop.dart';
+import 'categories_view.tablet.dart';
+import 'categories_view.mobile.dart';
 import 'categories_viewmodel.dart';
 
 class CategoriesView extends StackedView<CategoriesViewModel> {
-  const CategoriesView({super.key});
+  final String? selectedCategory;
+
+  const CategoriesView({super.key, this.selectedCategory});
 
   @override
   Widget builder(
@@ -12,12 +18,15 @@ class CategoriesView extends StackedView<CategoriesViewModel> {
     CategoriesViewModel viewModel,
     Widget? child,
   ) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Container(
-        padding: const EdgeInsets.only(left: 25.0, right: 25.0),
-        child: const Center(child: Text("CategoriesView")),
-      ),
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (viewModel.categoryParts.isEmpty) {
+        viewModel.fetchCategoryParts(viewModel.selectedCategory);
+      }
+    });
+    return ScreenTypeLayout.builder(
+      mobile: (_) => const CategoriesViewMobile(),
+      tablet: (_) => const CategoriesViewTablet(),
+      desktop: (_) => const CategoriesViewDesktop(),
     );
   }
 
@@ -25,5 +34,5 @@ class CategoriesView extends StackedView<CategoriesViewModel> {
   CategoriesViewModel viewModelBuilder(
     BuildContext context,
   ) =>
-      CategoriesViewModel();
+      CategoriesViewModel(selectedCategory: selectedCategory);
 }

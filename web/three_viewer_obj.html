@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Three.js OBJ Viewer</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: #f5f5f500;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+
+<body>
+    <div id="container"></div>
+    <div id="loading">Loading 3D model...</div>
+    <script>
+        function queryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        // Support multiple models (comma-separated encoded values) and mtls
+        // Query params: ?models=<enc1>,<enc2>&mtls=<enc1>,<enc2>
+        const modelsParam = queryParam('models');
+        const mtlsParam = queryParam('mtls');
+        const modelPath = modelsParam; // legacy single-model param not used here
+        const modelPaths = modelsParam ? modelsParam.split(',').map(decodeURIComponent).filter(Boolean) : [];
+        const mtlPaths = mtlsParam ? mtlsParam.split(',').map(decodeURIComponent).filter(Boolean) : [];
+
+        console.log('three_viewer: raw query modelsParam=', modelsParam);
+        console.log('three_viewer: parsed modelPaths=', modelPaths);
+        console.log('three_viewer: raw query mtlsParam=', mtlsParam);
+        console.log('three_viewer: parsed mtlPaths=', mtlPaths);
+
+        const loadingEl = document.getElementById('loading');
+        function setLoadingText(msg) {
+            if (loadingEl) loadingEl.innerText = msg;
+            console.log(msg);
+        }
+        setLoadingText('Loading model...');
+
+        const container = document.getElementById('container');
+
+        const scene = new THREE.Scene();
+        // Use a transparent scene background so the Flutter app's background
+        // (or whatever is behind the iframe) shows through.
+        scene.background = null;
+
+        // Camera and renderer. Use container size for sizing and cap DPR to
+        // avoid excessive GPU load on high-density displays.
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+        camera.position.set(2, 2, 2);
+
+
+        // Render with alpha so the canvas can be composited. Cap devicePixelRatio
+        // to 2 for performance on very high-DPR devices.
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const dpr = Math.min(window.devicePixelRatio ? window.devicePixelRatio : 1, 2);
+        renderer.setPixelRatio(dpr);
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+
+        function resizeRenderer() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            console.log(camera.aspect);
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        const resizeObserver = new ResizeObserver(() => {
+            resizeRenderer();
+        });
+        resizeObserver.observe(container);
+
+        // Ensure correct size after layout settles
+        setTimeout(() => {
+            resizeRenderer();
+        }, 100);
+
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Lighting: keep ambient low and add stronger directional + rim light
+        const ambient = new THREE.AmbientLight(0xffffff, 0.25);
+        scene.add(ambient);
+        const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+        dir.position.set(10, 10, 10);
+        scene.add(dir);
+        // subtle rim/back light so silhouettes show on a dark background
+        const rim = new THREE.PointLight(0xffffff, 0.6);
+        rim.position.set(-5, 5, -5);
+        scene.add(rim);
+
+        // We'll load all modelPaths (or the single `modelPath` for legacy)
+        const toLoad = modelPaths && modelPaths.length ? modelPaths : (modelPath ? [modelPath] : []);
+        const toMtls = mtlPaths && mtlPaths.length ? mtlPaths : [];
+        console.log('three_viewer: toLoad=', toLoad, 'toMtls=', toMtls);
+
+        if (toLoad.length) {
+            const loadedObjects = [];
+
+            function loadSingleModel(idx) {
+                if (idx >= toLoad.length) {
+                    // All loaded: group them, center and scale the whole group
+                    const group = new THREE.Group();
+                    loadedObjects.forEach(o => group.add(o));
+                    const box = new THREE.Box3().setFromObject(group);
+                    const center = box.getCenter(new THREE.Vector3());
+                    group.position.sub(center);
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = maxDim > 0 ? (1.5 / maxDim) : 1.0;
+                    group.scale.setScalar(scale);
+                    scene.add(group);
+                    document.getElementById('loading').style.display = 'none';
+                    startLoop();
+                    return;
+                }
+
+                const path = toLoad[idx];
+                console.log('three_viewer: preparing to load', path);
+                const lower = path.toLowerCase();
+                // Ensure path is a properly encoded URI when passing to loaders
+                const encodedPath = encodeURI(path);
+                // Helper to finalize object: set userData model source and push
+                const finalize = function (obj) {
+                    obj.userData = obj.userData || {};
+                    obj.userData.source = path;
+                    console.log('three_viewer: loaded object from', path);
+                    // Ensure each mesh knows its source for click reporting
+                    obj.traverse(function (child) {
+                        if (child.isMesh) child.userData = child.userData || {}, child.userData.source = path;
+                    });
+                    loadedObjects.push(obj);
+                    // load next
+                    loadSingleModel(idx + 1);
+                };
+
+                if (lower.endsWith('.glb') || lower.endsWith('.gltf')) {
+                    const gltfLoader = new THREE.GLTFLoader();
+                    gltfLoader.load(encodedPath, function (gltf) {
+                        const obj = gltf.scene || gltf.scenes[0];
+                        finalize(obj);
+                    }, function (xhr) {
+                        if (xhr && xhr.loaded && xhr.total) console.log('three_viewer: gltf progress', encodedPath, Math.round((xhr.loaded / xhr.total) * 100) + '%');
+                    }, function (err) {
+                        console.error('GLTF load error for', encodedPath, err);
+                        setLoadingText('Error loading GLTF/GLB (see console)');
+                        loadSingleModel(idx + 1);
+                    });
+                } else {
+                    const mtlToUse = toMtls[idx] || null;
+                    const onObjLoaded = function (obj) {
+                        // Convert materials if present (same as before)
+                        obj.traverse(function (child) {
+                            if (!child.isMesh || !child.material) return;
+                            const mat = child.material;
+                            if (mat.type === 'MeshStandardMaterial') { mat.needsUpdate = true; return; }
+                            const std = new THREE.MeshStandardMaterial({ color: mat.color ? mat.color.clone() : new THREE.Color(0xffffff), side: THREE.DoubleSide });
+                            if (mat.map) std.map = mat.map;
+                            if (mat.bumpMap) std.normalMap = mat.bumpMap;
+                            if (mat.normalMap) std.normalMap = mat.normalMap;
+                            if (mat.specularMap) std.roughnessMap = mat.specularMap;
+                            if (mat.envMap) std.metalnessMap = mat.envMap;
+                            if (mat.metalnessMap) std.metalnessMap = mat.metalnessMap;
+                            if (std.metalnessMap) std.metalness = 1.0;
+                            if (std.roughnessMap && !std.roughness) std.roughness = 1.0;
+                            if (std.normalMap) std.normalScale = mat.normalScale || new THREE.Vector2(1, 1);
+                            std.opacity = mat.opacity !== undefined ? mat.opacity : 1.0;
+                            std.transparent = !!mat.transparent;
+                            std.needsUpdate = true;
+                            child.material = std;
+                        });
+                        finalize(obj);
+                    };
+
+                    const loadObjWithMaterials = function (materials) {
+                        const objLoader = new THREE.OBJLoader();
+                        if (materials) objLoader.setMaterials(materials);
+                        objLoader.load(encodedPath, onObjLoaded, function (xhr) {
+                            if (xhr && xhr.loaded && xhr.total) console.log('three_viewer: obj progress', encodedPath, Math.round((xhr.loaded / xhr.total) * 100) + '%');
+                        }, function (err) {
+                            console.error('OBJ load error for', encodedPath, err);
+                            setLoadingText('Error loading OBJ (see console)');
+                            loadSingleModel(idx + 1);
+                        });
+                    };
+
+                    if (mtlToUse) {
+                        const encodedMtl = encodeURI(mtlToUse);
+                        const mtlLoader = new THREE.MTLLoader();
+                        mtlLoader.load(encodedMtl, function (materials) {
+                            materials.preload();
+                            loadObjWithMaterials(materials);
+                        }, function (xhr) {
+                            if (xhr && xhr.loaded && xhr.total) console.log('three_viewer: mtl progress', encodedMtl, Math.round((xhr.loaded / xhr.total) * 100) + '%');
+                        }, function (err) {
+                            console.warn('MTL load failed for', encodedMtl, err);
+                            setLoadingText('MTL load failed, loading OBJ without materials');
+                            loadObjWithMaterials(null);
+                        });
+                    } else {
+                        loadObjWithMaterials(null);
+                    }
+                }
+            }
+
+            // Start loading models sequentially
+            loadSingleModel(0);
+        } else {
+            document.getElementById('loading').innerText = 'No model specified';
+        }
+
+
+        // Raycaster for click detection
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+
+        function onPointerDown(event) {
+            // compute normalized device coords
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            if (intersects && intersects.length) {
+                const top = intersects[0].object;
+                const source = top.userData && top.userData.source ? top.userData.source : (top.parent && top.parent.userData ? top.parent.userData.source : null);
+                if (source) {
+                    // Send message to parent Flutter app with the model path that was clicked
+                    window.parent.postMessage({ type: 'partClick', model: source }, '*');
+                }
+            }
+        }
+
+        // Listen for pointer events on the canvas
+        renderer.domElement.addEventListener('pointerdown', onPointerDown);
+
+
+        // centralize animation loop start/stop logic so both loaders can call it
+        let rafId = null;
+        let running = !document.hidden;
+        function startLoop() {
+            function animate() {
+                if (!running) return;
+                rafId = requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            if (running) animate();
+        }
+
+        document.addEventListener('visibilitychange', function () {
+            running = !document.hidden;
+            if (running && !rafId) startLoop();
+            if (!running && rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            console.log(camera.aspect);
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

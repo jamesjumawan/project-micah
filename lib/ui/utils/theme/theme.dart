@@ -8,7 +8,103 @@ class TAppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     fontFamily: GoogleFonts.archivo().fontFamily,
-    textTheme: GoogleFonts.archivoTextTheme(),
+    textTheme: GoogleFonts.archivoTextTheme().copyWith(
+      // Display styles
+      displayLarge: GoogleFonts.archivo(
+        fontSize: 57,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+        letterSpacing: -0.25,
+      ),
+      displayMedium: GoogleFonts.archivo(
+        fontSize: 45,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+        letterSpacing: 0,
+      ),
+      displaySmall: GoogleFonts.archivo(
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+        letterSpacing: 0,
+      ),
+      // Headline styles
+      headlineLarge: GoogleFonts.archivo(
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+        letterSpacing: 0,
+      ),
+      headlineMedium: GoogleFonts.archivo(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+        letterSpacing: 0,
+      ),
+      headlineSmall: GoogleFonts.archivo(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+        letterSpacing: 0,
+      ),
+      // Title styles
+      titleLarge: GoogleFonts.archivo(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+        letterSpacing: 0,
+      ),
+      titleMedium: GoogleFonts.archivo(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+        letterSpacing: 0.15,
+      ),
+      titleSmall: GoogleFonts.archivo(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+        letterSpacing: 0.1,
+      ),
+      // Body styles
+      bodyLarge: GoogleFonts.archivo(
+        fontSize: 16,
+        fontWeight: FontWeight.normal,
+        color: AppColors.textPrimary,
+        letterSpacing: 0.5,
+      ),
+      bodyMedium: GoogleFonts.archivo(
+        fontSize: 14,
+        fontWeight: FontWeight.normal,
+        color: AppColors.textPrimary,
+        letterSpacing: 0.25,
+      ),
+      bodySmall: GoogleFonts.archivo(
+        fontSize: 12,
+        fontWeight: FontWeight.normal,
+        color: AppColors.textSecondary,
+        letterSpacing: 0.4,
+      ),
+      // Label styles
+      labelLarge: GoogleFonts.archivo(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+        letterSpacing: 0.1,
+      ),
+      labelMedium: GoogleFonts.archivo(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+        letterSpacing: 0.5,
+      ),
+      labelSmall: GoogleFonts.archivo(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textSecondary,
+        letterSpacing: 0.5,
+      ),
+    ),
     brightness: Brightness.light,
     colorScheme: ColorScheme.light(
       primary: AppColors.primary,
@@ -55,6 +151,9 @@ class TAppTheme {
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
+      visualDensity: VisualDensity.compact,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      isDense: true,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: AppColors.border),
@@ -71,7 +170,6 @@ class TAppTheme {
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: AppColors.error),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     ),
     cardTheme: CardThemeData(
       color: AppColors.cardLight,
@@ -89,7 +187,104 @@ class TAppTheme {
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     fontFamily: GoogleFonts.archivo().fontFamily,
-    textTheme: GoogleFonts.archivoTextTheme(ThemeData.dark().textTheme),
+    textTheme:
+        GoogleFonts.archivoTextTheme(ThemeData.dark().textTheme).copyWith(
+      // Display styles
+      displayLarge: GoogleFonts.archivo(
+        fontSize: 57,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textWhite,
+        letterSpacing: -0.25,
+      ),
+      displayMedium: GoogleFonts.archivo(
+        fontSize: 45,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textWhite,
+        letterSpacing: 0,
+      ),
+      displaySmall: GoogleFonts.archivo(
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textWhite,
+        letterSpacing: 0,
+      ),
+      // Headline styles
+      headlineLarge: GoogleFonts.archivo(
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textWhite,
+        letterSpacing: 0,
+      ),
+      headlineMedium: GoogleFonts.archivo(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textWhite,
+        letterSpacing: 0,
+      ),
+      headlineSmall: GoogleFonts.archivo(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textWhite,
+        letterSpacing: 0,
+      ),
+      // Title styles
+      titleLarge: GoogleFonts.archivo(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textWhite,
+        letterSpacing: 0,
+      ),
+      titleMedium: GoogleFonts.archivo(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textWhite,
+        letterSpacing: 0.15,
+      ),
+      titleSmall: GoogleFonts.archivo(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textWhite,
+        letterSpacing: 0.1,
+      ),
+      // Body styles
+      bodyLarge: GoogleFonts.archivo(
+        fontSize: 16,
+        fontWeight: FontWeight.normal,
+        color: AppColors.textWhite,
+        letterSpacing: 0.5,
+      ),
+      bodyMedium: GoogleFonts.archivo(
+        fontSize: 14,
+        fontWeight: FontWeight.normal,
+        color: AppColors.textWhite,
+        letterSpacing: 0.25,
+      ),
+      bodySmall: GoogleFonts.archivo(
+        fontSize: 12,
+        fontWeight: FontWeight.normal,
+        color: AppColors.textWhite,
+        letterSpacing: 0.4,
+      ),
+      // Label styles
+      labelLarge: GoogleFonts.archivo(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textWhite,
+        letterSpacing: 0.1,
+      ),
+      labelMedium: GoogleFonts.archivo(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textWhite,
+        letterSpacing: 0.5,
+      ),
+      labelSmall: GoogleFonts.archivo(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textWhite,
+        letterSpacing: 0.5,
+      ),
+    ),
     brightness: Brightness.dark,
     colorScheme: ColorScheme.dark(
       primary: AppColors.primary,

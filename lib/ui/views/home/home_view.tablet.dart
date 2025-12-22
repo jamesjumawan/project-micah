@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:project_micah/ui/utils/constants/ui_helpers.dart';
+import 'package:project_micah/ui/utils/screen_types/index.dart';
+import 'package:project_micah/ui/widgets/common/categories_card/categories_list.dart';
+import 'package:project_micah/ui/widgets/common/home_banner/home_banner.dart';
+import 'package:project_micah/ui/widgets/common/motorcycle_big_card/motorcycle_big_card_list.dart';
 import 'package:stacked/stacked.dart';
 
 import 'home_viewmodel.dart';
@@ -8,27 +13,22 @@ class HomeViewTablet extends ViewModelWidget<HomeViewModel> {
 
   @override
   Widget build(BuildContext context, HomeViewModel viewModel) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(viewModel.title),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Tablet View', style: TextStyle(fontSize: 24)),
-            const SizedBox(height: 24),
-            Text(
-              'Counter: ${viewModel.counter}',
-              style: Theme.of(context).textTheme.headlineLarge,
+    return TabletView(
+      padding: EdgeInsets.zero,
+      body: Column(
+        children: [
+          HomeBanner(),
+          Padding(
+            padding: UIHelpers.pagePadding(context),
+            child: Column(
+              children: [
+                CategoriesList(categories: viewModel.categories),
+                UIHelpers.verticalSpace24,
+                MotorcycleBigCardList(items: viewModel.featuredMotorcycles),
+              ],
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: viewModel.incrementCounter,
-        child: const Icon(Icons.add),
+          )
+        ],
       ),
     );
   }

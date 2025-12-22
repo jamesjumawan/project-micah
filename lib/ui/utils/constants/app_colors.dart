@@ -40,7 +40,7 @@ class AppColors {
   static const Color borderDark = Color(0xFF424242);
 
   // Divider
-  static const Color divider = Color(0xFFBDBDBD);
+  static const Color divider = Color(0xFFE2E2E2);
 
   // Card
   static const Color cardLight = Color(0xFFFFFFFF);

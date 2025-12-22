@@ -1,0 +1,12 @@
+{
+    // Increase project search depth so the Dart extension can locate the pubspec.yaml
+    // and recognise this as a Flutter project when the workspace isn't opened at
+    // the repo root.
+    "dart.projectSearchDepth": 5,
+    // Optional: restrict Dart analysis to the project folder to speed up analysis
+    "dart.analysisExcludedFolders": [
+        "**/.pub-cache",
+        "**/.dart_tool",
+        "**/build"
+    ]
+}
