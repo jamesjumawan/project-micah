@@ -2,6 +2,10 @@ import 'package:stacked/stacked.dart';
 import 'package:project_micah/models/category_model.dart';
 
 class DetailsViewModel extends BaseViewModel {
+  // AWS S3 base URL for assets
+  static const String _assetsBaseUrl =
+      'https://micah-assets.s3.us-east-1.amazonaws.com/assets';
+
   // Mode: true = assemble (full motorcycle), false = disassemble (parts view)
   bool _isAssembleMode = true;
   bool get isAssembleMode => _isAssembleMode;
@@ -197,9 +201,9 @@ class DetailsViewModel extends BaseViewModel {
   // Full assembly model paths
 
   final String assembleModelPath =
-      'assets/sample_3d_object/manual_breaking/blt150_01.obj';
+      '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_01.obj';
   final String assembleMtlPath =
-      'assets/sample_3d_object/manual_breaking/blt150_01.mtl';
+      '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_01.mtl';
 
   // ================================================================================================================
 
@@ -216,55 +220,55 @@ class DetailsViewModel extends BaseViewModel {
   // Parts models mapping. Keys should match part names used in the UI
   // Some parts may not have an associated .mtl (empty string)
   final Map<String, Map<String, String>> partsModels = {
-    '02': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_02.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_02.mtl',
+    'Right Side Mirror': {
+      'displayName': 'Right Side Mirror',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_02.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_02.mtl',
     },
-    '03': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_03.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_03.mtl',
+    'Left Side Mirror': {
+      'displayName': 'Left Side Mirror',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_03.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_03.mtl',
     },
-    '04': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_04.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_04.mtl',
+    'Handle Bar': {
+      'displayName': 'Handle Bar',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_04.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_04.mtl',
     },
-    '05': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_05.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_05.mtl',
+    'Front Frame': {
+      'displayName': 'Front Frame',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_05.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_05.mtl',
     },
-    '06': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_06.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_06.mtl',
+    'Back Frame': {
+      'displayName': 'Back Frame',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_06.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_06.mtl',
     },
-    '07': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_07.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_07.mtl',
+    'Front Wheel': {
+      'displayName': 'Front Wheel',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_07.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_07.mtl',
     },
-    '08': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_08.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_08.mtl',
+    'Rear Fender': {
+      'displayName': 'Rear Fender',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_08.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_08.mtl',
     },
-    '09': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_09.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_09.mtl',
+    'Exhaust Pipe': {
+      'displayName': '09',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_09.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_09.mtl',
     },
-    '10': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_10.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_10.mtl',
+    'Rear Wheel': {
+      'displayName': 'Rear Wheel',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_10.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_10.mtl',
     },
-    '11': {
+    'Rear Shock Absorber': {
       'displayName': 'Rear Shock Absorber',
-      'obj': 'assets/sample_3d_object/manual_breaking/blt150_11.obj',
-      'mtl': 'assets/sample_3d_object/manual_breaking/blt150_11.mtl',
+      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_11.obj',
+      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_11.mtl',
     },
 
     // ================================================================================================================
