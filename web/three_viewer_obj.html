@@ -50,17 +50,19 @@
         // - disassemblyModels=<enc1>,<enc2>
         // - disassemblyMtls=<enc1>,<enc2>
         // - mode=assemble|disassemble (initial mode)
-        
+
         const assemblyModelsParam = queryParam('assemblyModels');
         const assemblyMtlsParam = queryParam('assemblyMtls');
         const disassemblyModelsParam = queryParam('disassemblyModels');
         const disassemblyMtlsParam = queryParam('disassemblyMtls');
         const initialMode = queryParam('mode') || 'assemble';
-        
+        const disassemblyDistanceParam = queryParam('disassemblyDistance');
+
         const assemblyModels = assemblyModelsParam ? assemblyModelsParam.split(',').map(decodeURIComponent).filter(Boolean) : [];
         const assemblyMtls = assemblyMtlsParam ? assemblyMtlsParam.split(',').map(decodeURIComponent).filter(Boolean) : [];
         const disassemblyModels = disassemblyModelsParam ? disassemblyModelsParam.split(',').map(decodeURIComponent).filter(Boolean) : [];
         const disassemblyMtls = disassemblyMtlsParam ? disassemblyMtlsParam.split(',').map(decodeURIComponent).filter(Boolean) : [];
+        let disassemblyDistance = disassemblyDistanceParam ? parseFloat(disassemblyDistanceParam) : 1.0;
 
         console.log('three_viewer: assemblyModels=', assemblyModels);
         console.log('three_viewer: disassemblyModels=', disassemblyModels);
@@ -102,15 +104,15 @@
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        
+
         // Limit vertical rotation angle (polar angle)
         // 0 = straight down, PI = straight up, PI/2 = horizon
         controls.minPolarAngle = Math.PI * 0.15; // ~27° from top (prevent looking straight down)
         controls.maxPolarAngle = Math.PI * 0.85; // ~153° from top (prevent looking straight up)
-        
-        console.log('three_viewer: Vertical viewing angle limited to', 
-                    Math.round(controls.minPolarAngle * 180 / Math.PI), '° to', 
-                    Math.round(controls.maxPolarAngle * 180 / Math.PI), '°');
+
+        console.log('three_viewer: Vertical viewing angle limited to',
+            Math.round(controls.minPolarAngle * 180 / Math.PI), '° to',
+            Math.round(controls.maxPolarAngle * 180 / Math.PI), '°');
 
         // Lighting
         const ambient = new THREE.AmbientLight(0xffffff, 0.25);
@@ -131,6 +133,9 @@
         // Track current mode
         let currentMode = initialMode;
 
+        // Store original positions for each disassembly object to recalculate explosions
+        const originalPositions = new Map();
+
         // Function to toggle between modes
         function setMode(mode) {
             currentMode = mode;
@@ -140,22 +145,28 @@
         }
 
         // Listen for messages from Flutter to toggle mode
-        window.addEventListener('message', function(event) {
+        window.addEventListener('message', function (event) {
             try {
                 const data = event.data;
-                let type, mode;
-                
+                let type, mode, distance;
+
                 if (typeof data === 'string') {
                     const parsed = JSON.parse(data);
                     type = parsed.type;
                     mode = parsed.mode;
+                    distance = parsed.distance;
                 } else if (typeof data === 'object') {
                     type = data.type;
                     mode = data.mode;
+                    distance = data.distance;
                 }
 
                 if (type === 'toggleMode' && mode) {
                     setMode(mode);
+                } else if (type === 'updateDisassemblyDistance' && distance !== undefined) {
+                    disassemblyDistance = distance;
+                    updateDisassemblyPositions();
+                    console.log('three_viewer: Updated disassembly distance to', distance);
                 }
             } catch (e) {
                 // Ignore malformed messages
@@ -169,7 +180,7 @@
         function updateLoadingProgress() {
             loadedCount++;
             setLoadingText(`Loading models... ${loadedCount}/${totalModelsToLoad}`);
-            
+
             if (loadedCount === totalModelsToLoad) {
                 // All models loaded, finalize setup
                 finalizeSetup();
@@ -180,7 +191,7 @@
             console.log('three_viewer: Finalizing setup...');
             console.log('three_viewer: assemblyGroup has', assemblyGroup.children.length, 'children');
             console.log('three_viewer: disassemblyGroup has', disassemblyGroup.children.length, 'children');
-            
+
             // Scale each group to fit viewport, but preserve Blender origin
             [assemblyGroup, disassemblyGroup].forEach(group => {
                 if (group.children.length > 0) {
@@ -188,16 +199,16 @@
                     const box = new THREE.Box3().setFromObject(group);
                     const size = box.getSize(new THREE.Vector3());
                     const maxDim = Math.max(size.x, size.y, size.z);
-                    
+
                     console.log('three_viewer: Group', group.name, 'bounding box size:', size, 'maxDim:', maxDim);
-                    
+
                     // DON'T center the group - respect Blender's origin positioning
                     // group.position.sub(center); // REMOVED - this was shifting everything
-                    
+
                     // Only scale to fit viewport (1.5 units)
                     const scale = maxDim > 0 ? (1.5 / maxDim) : 1.0;
                     group.scale.setScalar(scale);
-                    
+
                     console.log('three_viewer: Group', group.name, 'scaled to:', scale);
                     console.log('three_viewer: Group', group.name, 'position (preserved from Blender):', group.position);
                     console.log('three_viewer: Group', group.name, 'children count:', group.children.length);
@@ -205,36 +216,68 @@
             });
 
             // Apply exploded view displacement to disassembly group
-            // IMPORTANT: Calculate displacement based on each object's geometry center
-            // You can adjust these multipliers to control explosion on each axis
-            const explosionMultiplierX = 1.5; // 0.5 = 1.5x distance on X axis
-            const explosionMultiplierY = 0.5; // 0.5 = 1.5x distance on Y axis
-            const explosionMultiplierZ = 0.5; // 0.5 = 1.5x distance on Z axis
-            
+            // Store original positions and calculate initial disassembly
             if (disassemblyGroup.children.length > 0) {
-                disassemblyGroup.children.forEach(function(child) {
+                disassemblyGroup.children.forEach(function (child) {
                     // Calculate the center of this object's geometry
                     const box = new THREE.Box3().setFromObject(child);
                     const center = new THREE.Vector3();
                     box.getCenter(center);
-                    
+
+                    // Store original position (before any displacement)
+                    originalPositions.set(child.uuid, child.position.clone());
+
                     // Calculate displacement with per-axis multipliers
+                    const explosionMultiplierX = 1.5 * disassemblyDistance;
+                    const explosionMultiplierY = 0.5 * disassemblyDistance;
+                    const explosionMultiplierZ = 0.5 * disassemblyDistance;
+
                     const displacement = new THREE.Vector3(
                         center.x * explosionMultiplierX,
                         center.y * explosionMultiplierY,
                         center.z * explosionMultiplierZ
                     );
-                    
+
                     // Apply the displacement to the object's position
                     child.position.add(displacement);
-                    
-                    console.log('three_viewer: Displaced', child.name || 'object', 
-                                'center at', center.length().toFixed(2), 
-                                'by', displacement.length().toFixed(2), 'units');
+
+                    console.log('three_viewer: Displaced', child.name || 'object',
+                        'center at', center.length().toFixed(2),
+                        'by', displacement.length().toFixed(2), 'units');
                 });
-                
-                console.log('three_viewer: Applied exploded view to disassembly group');
+
+                console.log('three_viewer: Applied exploded view to disassembly group with distance', disassemblyDistance);
             }
+
+            // Function to update disassembly positions based on slider
+            window.updateDisassemblyPositions = function () {
+                if (disassemblyGroup.children.length === 0) return;
+
+                disassemblyGroup.children.forEach(function (child) {
+                    // Reset to original position
+                    const original = originalPositions.get(child.uuid);
+                    if (!original) return;
+
+                    child.position.copy(original);
+
+                    // Recalculate displacement with new distance
+                    const box = new THREE.Box3().setFromObject(child);
+                    const center = new THREE.Vector3();
+                    box.getCenter(center);
+
+                    const explosionMultiplierX = 1.5 * disassemblyDistance;
+                    const explosionMultiplierY = 0.5 * disassemblyDistance;
+                    const explosionMultiplierZ = 0.5 * disassemblyDistance;
+
+                    const displacement = new THREE.Vector3(
+                        center.x * explosionMultiplierX,
+                        center.y * explosionMultiplierY,
+                        center.z * explosionMultiplierZ
+                    );
+
+                    child.position.add(displacement);
+                });
+            };
 
             // Add both groups to scene
             scene.add(assemblyGroup);
@@ -295,21 +338,21 @@
                         obj.traverse(function (child) {
                             if (!child.isMesh || !child.material) return;
                             const mat = child.material;
-                            
+
                             // If already a standard material, just update it
-                            if (mat.type === 'MeshStandardMaterial') { 
-                                mat.needsUpdate = true; 
-                                return; 
+                            if (mat.type === 'MeshStandardMaterial') {
+                                mat.needsUpdate = true;
+                                return;
                             }
-                            
+
                             // Convert to MeshStandardMaterial with proper PBR values
-                            const std = new THREE.MeshStandardMaterial({ 
+                            const std = new THREE.MeshStandardMaterial({
                                 color: mat.color ? mat.color.clone() : new THREE.Color(0xcccccc),
                                 side: THREE.DoubleSide,
                                 metalness: 0.1,
                                 roughness: 0.8,
                             });
-                            
+
                             // Copy textures from MTL material
                             if (mat.map) std.map = mat.map;
                             if (mat.bumpMap) std.normalMap = mat.bumpMap;
@@ -317,11 +360,11 @@
                             if (mat.specularMap) std.roughnessMap = mat.specularMap;
                             if (mat.envMap) std.metalnessMap = mat.envMap;
                             if (mat.metalnessMap) std.metalnessMap = mat.metalnessMap;
-                            
+
                             if (std.metalnessMap) std.metalness = 0.5;
                             if (std.roughnessMap) std.roughness = 0.9;
                             if (std.normalMap) std.normalScale = mat.normalScale || new THREE.Vector2(1, 1);
-                            
+
                             std.opacity = mat.opacity !== undefined ? mat.opacity : 1.0;
                             std.transparent = !!mat.transparent;
                             std.needsUpdate = true;
@@ -379,8 +422,8 @@
             const intersects = raycaster.intersectObjects(scene.children, true);
             if (intersects && intersects.length) {
                 const top = intersects[0].object;
-                const source = top.userData && top.userData.source ? top.userData.source : 
-                              (top.parent && top.parent.userData ? top.parent.userData.source : null);
+                const source = top.userData && top.userData.source ? top.userData.source :
+                    (top.parent && top.parent.userData ? top.parent.userData.source : null);
                 if (source) {
                     window.parent.postMessage({ type: 'partClick', model: source }, '*');
                 }

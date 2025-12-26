@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
-// ignore: avoid_web_libraries_in_flutter
 import 'dart:async';
 import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'dart:ui_web' as ui_web;
 
@@ -26,6 +26,9 @@ class ThreeDViewer extends StatefulWidget {
   final bool isAssembleMode;
   final Function(bool)? onToggleMode;
 
+  /// Distance multiplier for disassembled parts (0.0 to 3.0)
+  final double disassemblyDistance;
+
   /// Called when the embedded web viewer posts a `partClick` message with
   /// the model path. Receives the model path string as provided by the
   /// iframe (e.g. 'assets/sample_3d_object/blt150_rearShockAbsorber_final_00.obj').
@@ -42,6 +45,7 @@ class ThreeDViewer extends StatefulWidget {
     this.isAssembleMode = true,
     this.onToggleMode,
     this.onPartSelected,
+    this.disassemblyDistance = 1.0,
   });
 
   @override
@@ -52,10 +56,12 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
   late String viewType;
   StreamSubscription<html.MessageEvent>? _messageSub;
   html.IFrameElement? _iframe;
+  late double _currentDisassemblyDistance;
 
   @override
   void initState() {
     super.initState();
+    _currentDisassemblyDistance = widget.disassemblyDistance;
     _registerViewer();
     // Listen for postMessage events from the iframe (Three.js viewer).
     _messageSub = html.window.onMessage.listen((html.MessageEvent event) {
@@ -95,6 +101,11 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
       _sendToggleModeMessage();
     }
 
+    // If disassembly distance changed, send update message
+    if (oldWidget.disassemblyDistance != widget.disassemblyDistance) {
+      _sendDisassemblyDistanceMessage(widget.disassemblyDistance);
+    }
+
     // Only re-register if model paths actually changed (e.g., motorcycle changed)
     final oldAssembly = oldWidget.assemblyModelPaths.join('|');
     final newAssembly = widget.assemblyModelPaths.join('|');
@@ -115,6 +126,16 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
     if (_iframe != null) {
       _iframe!.contentWindow?.postMessage(message, '*');
       debugPrint('three_d_viewer: Sent toggle message: $mode');
+    }
+  }
+
+  void _sendDisassemblyDistanceMessage(double distance) {
+    final message = {'type': 'updateDisassemblyDistance', 'distance': distance};
+
+    // Send message to iframe
+    if (_iframe != null) {
+      _iframe!.contentWindow?.postMessage(message, '*');
+      debugPrint('three_d_viewer: Sent disassembly distance: $distance');
     }
   }
 
@@ -151,6 +172,9 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
     // Set initial mode
     final initialMode = widget.isAssembleMode ? 'assemble' : 'disassemble';
     src = '$src&mode=$initialMode';
+
+    // Set disassembly distance
+    src = '$src&disassemblyDistance=${widget.disassemblyDistance}';
 
     ui_web.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
       final element = html.DivElement()
@@ -190,29 +214,89 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
           Container(
             color: AppColors.surface,
             padding: const EdgeInsets.all(16.0),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: Text(
-                    widget.modelName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.modelName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
+                    // Assemble/Disassemble toggle buttons
+                    if (widget.onToggleMode != null) ...[
+                      _ToggleButton(
+                        label: 'ASSEMBLE',
+                        isSelected: widget.isAssembleMode,
+                        onTap: () => widget.onToggleMode!(true),
+                      ),
+                      const SizedBox(width: 8),
+                      _ToggleButton(
+                        label: 'DISASSEMBLE',
+                        isSelected: !widget.isAssembleMode,
+                        onTap: () => widget.onToggleMode!(false),
+                      ),
+                    ],
+                  ],
                 ),
-                // Assemble/Disassemble toggle buttons
-                if (widget.onToggleMode != null) ...[
-                  _ToggleButton(
-                    label: 'ASSEMBLE',
-                    isSelected: widget.isAssembleMode,
-                    onTap: () => widget.onToggleMode!(true),
-                  ),
-                  const SizedBox(width: 8),
-                  _ToggleButton(
-                    label: 'DISASSEMBLE',
-                    isSelected: !widget.isAssembleMode,
-                    onTap: () => widget.onToggleMode!(false),
+                // Disassembly distance slider
+                if (!widget.isAssembleMode) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Text(
+                        'Part Distance:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            activeTrackColor: AppColors.primary,
+                            inactiveTrackColor:
+                                AppColors.primary.withOpacity(0.3),
+                            thumbColor: AppColors.primary,
+                            overlayColor: AppColors.primary.withOpacity(0.2),
+                            trackHeight: 3,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 8,
+                            ),
+                          ),
+                          child: Slider(
+                            value: _currentDisassemblyDistance,
+                            min: 0.0,
+                            max: 20.0,
+                            divisions: 100,
+                            label:
+                                _currentDisassemblyDistance.toStringAsFixed(1),
+                            onChanged: (value) {
+                              setState(() {
+                                _currentDisassemblyDistance = value;
+                              });
+                              _sendDisassemblyDistanceMessage(value);
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 35,
+                        child: Text(
+                          _currentDisassemblyDistance.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ],
