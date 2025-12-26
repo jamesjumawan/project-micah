@@ -1,0 +1,14 @@
+# Blender 4.5.2 LTS MTL File: 'None'
+# www.blender.org
+
+newmtl tripo_mat_36cdd4a4-d861-4834-acdf-ce8a7d82f620.007
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd scooter3dmodel_basecolor.JPEG
+map_Pr scooter3dmodel_roughness.JPEG
+map_Pm scooter3dmodel_metallic.JPEG
+map_Bump -bm 1.000000 scooter3dmodel_normal.JPEG
