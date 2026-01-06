@@ -26,6 +26,19 @@
             transform: translate(-50%, -50%);
             color: #333;
         }
+
+        #tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -37,6 +50,7 @@
 <body>
     <div id="container"></div>
     <div id="loading">Loading 3D models...</div>
+    <div id="tooltip"></div>
     <script>
         function queryParam(name) {
             const params = new URLSearchParams(window.location.search);
@@ -413,6 +427,160 @@
         // Raycaster for click detection
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
+        const tooltip = document.getElementById('tooltip');
+        let hoveredObject = null;
+        let originalMaterials = new Map(); // Store original materials for hover effect
+
+        // Map file paths to display names
+        const partDisplayNames = {
+            'blt150_02': 'Right Side Mirror',
+            'blt150_03': 'Left Side Mirror',
+            'blt150_04': 'Handle Bar',
+            'blt150_05': 'Front Frame',
+            'blt150_06': 'Back Frame',
+            'blt150_07': 'Front Wheel',
+            'blt150_08': 'Rear Fender',
+            'blt150_09': 'Exhaust Pipe',
+            'blt150_10': 'Rear Wheel',
+            'blt150_11': 'Rear Shock Absorber'
+        };
+
+        // Function to extract part name from path
+        function getPartNameFromPath(path) {
+            if (!path) return 'Unknown Part';
+            const fileName = path.split('/').pop();
+            const nameWithoutExt = fileName.replace(/\.(obj|glb|gltf)$/i, '');
+
+            // Check if we have a mapped display name
+            if (partDisplayNames[nameWithoutExt]) {
+                return partDisplayNames[nameWithoutExt];
+            }
+
+            // Fallback: Convert underscores/hyphens to spaces and capitalize
+            return nameWithoutExt
+                .replace(/[_-]/g, ' ')
+                .replace(/\b\w/g, char => char.toUpperCase());
+        }
+
+        // Highlight effect - store original material and apply emissive glow
+        function highlightObject(object) {
+            if (!object || hoveredObject === object) return;
+
+            // Remove previous highlight
+            if (hoveredObject) {
+                unhighlightObject(hoveredObject);
+            }
+
+            hoveredObject = object;
+
+            object.traverse(child => {
+                if (child.isMesh && child.material) {
+                    // Store original material properties
+                    if (!originalMaterials.has(child.uuid)) {
+                        originalMaterials.set(child.uuid, {
+                            emissive: child.material.emissive ? child.material.emissive.clone() : new THREE.Color(0x000000),
+                            emissiveIntensity: child.material.emissiveIntensity || 0
+                        });
+                    }
+
+                    // Apply highlight - primary blue glow
+                    child.material.emissive = new THREE.Color(0x399ADE);
+                    child.material.emissiveIntensity = 0.4;
+                    child.material.needsUpdate = true;
+                }
+            });
+        }
+
+        // Remove highlight effect
+        function unhighlightObject(object) {
+            if (!object) return;
+
+            object.traverse(child => {
+                if (child.isMesh && child.material) {
+                    const original = originalMaterials.get(child.uuid);
+                    if (original) {
+                        child.material.emissive = original.emissive.clone();
+                        child.material.emissiveIntensity = original.emissiveIntensity;
+                        child.material.needsUpdate = true;
+                    }
+                }
+            });
+
+            hoveredObject = null;
+        }
+
+        // Show tooltip
+        function showTooltip(x, y, text) {
+            tooltip.style.display = 'block';
+            tooltip.textContent = text;
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+        }
+
+        // Hide tooltip
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        // Mouse move handler for hover detection
+        function onPointerMove(event) {
+            // Only enable hover in disassemble mode
+            if (currentMode !== 'disassemble') {
+                hideTooltip();
+                if (hoveredObject) {
+                    unhighlightObject(hoveredObject);
+                }
+                renderer.domElement.style.cursor = 'default';
+                return;
+            }
+
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(disassemblyGroup.children, true);
+
+            if (intersects && intersects.length > 0) {
+                const topObject = intersects[0].object;
+
+                // Find the top-level parent in disassemblyGroup
+                let targetObject = topObject;
+                while (targetObject.parent && targetObject.parent !== disassemblyGroup) {
+                    targetObject = targetObject.parent;
+                }
+
+                const source = targetObject.userData?.source ||
+                    topObject.userData?.source ||
+                    topObject.parent?.userData?.source;
+
+                if (source) {
+                    // Show highlight and tooltip
+                    highlightObject(targetObject);
+                    showTooltip(event.clientX, event.clientY, getPartNameFromPath(source));
+                    renderer.domElement.style.cursor = 'pointer';
+
+                    // Notify Flutter of hover
+                    window.parent.postMessage({
+                        type: 'partHover',
+                        model: source,
+                        partName: getPartNameFromPath(source)
+                    }, '*');
+                } else {
+                    hideTooltip();
+                    if (hoveredObject) {
+                        unhighlightObject(hoveredObject);
+                    }
+                    renderer.domElement.style.cursor = 'default';
+                }
+            } else {
+                hideTooltip();
+                if (hoveredObject) {
+                    unhighlightObject(hoveredObject);
+                }
+                renderer.domElement.style.cursor = 'default';
+            }
+        }
 
         function onPointerDown(event) {
             const rect = renderer.domElement.getBoundingClientRect();
@@ -430,6 +598,7 @@
             }
         }
 
+        renderer.domElement.addEventListener('pointermove', onPointerMove);
         renderer.domElement.addEventListener('pointerdown', onPointerDown);
 
         // Animation loop

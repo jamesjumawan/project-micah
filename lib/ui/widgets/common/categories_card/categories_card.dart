@@ -29,16 +29,19 @@ class CategoriesCard extends StackedView<CategoriesCardModel> {
   ) {
     Widget imageWidget;
     if (imagePath != null && imagePath!.isNotEmpty) {
-      if (imagePath!.startsWith('assets/')) {
-        imageWidget = Image.asset(
-          imagePath!,
-          fit: BoxFit.contain,
-        );
-      } else {
+      if (imagePath!.startsWith('http')) {
         imageWidget = Image.network(
           imagePath!,
           fit: BoxFit.contain,
           errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+        );
+      } else {
+        imageWidget = Image.asset(
+          imagePath!,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.broken_image, color: Colors.red);
+          },
         );
       }
     } else {

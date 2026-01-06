@@ -1,0 +1,259 @@
+{
+    "motorcycles": [
+        {
+            "name": "BLT150",
+            "imageUrl": "images/sample_mcs/thumbnail-mc1.png",
+            "has3DModel": true,
+            "engineSpecs": [
+                "Cylinder Block & Cylinder Head",
+                "Camshaft & Valves",
+                "Right Crankcase Cover",
+                "Crankcase",
+                "Oil Pump & Oil Filter",
+                "Starting Motor",
+                "Magneto",
+                "Clutch",
+                "Crankshaft & Piston",
+                "Transmission Device",
+                "Gearshift Device"
+            ],
+            "accessoriesSpecs": [
+                "Headlight",
+                "Meter Assembly",
+                "Grip Switch & Cable",
+                "Steering Bar",
+                "Steering Stem Comp",
+                "Front Fender",
+                "Front Shock Absorber",
+                "Front Wheel Assy",
+                "Rear Brake",
+                "Rear Wheel Assy",
+                "Fuel Tank Assy"
+            ],
+            "parts": {
+                "Right Side Mirror": {
+                    "label": "RIGHT SIDE MIRROR",
+                    "displayName": "Right Side Mirror",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "SIDE MIRROR ASSEMBLY",
+                    "sku": "RSM2341982155",
+                    "category": "ACCESSORY",
+                    "groupNo": "A-02",
+                    "partNo": "1102R",
+                    "quantity": 1,
+                    "description": "High-visibility convex mirror providing wide-angle rear view for enhanced safety. Features adjustable mounting bracket with anti-vibration design. Durable glass lens with protective housing resistant to weather and road debris.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_02.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_02.mtl"
+                },
+                "Left Side Mirror": {
+                    "label": "LEFT SIDE MIRROR",
+                    "displayName": "Left Side Mirror",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "SIDE MIRROR ASSEMBLY",
+                    "sku": "LSM2341982156",
+                    "category": "ACCESSORY",
+                    "groupNo": "A-03",
+                    "partNo": "1103L",
+                    "quantity": 1,
+                    "description": "High-visibility convex mirror providing wide-angle rear view for enhanced safety. Features adjustable mounting bracket with anti-vibration design. Durable glass lens with protective housing resistant to weather and road debris.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_03.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_03.mtl"
+                },
+                "Handle Bar": {
+                    "label": "HANDLE BAR",
+                    "displayName": "Handle Bar",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "STEERING HANDLEBAR",
+                    "sku": "HB6541982341",
+                    "category": "STEERING",
+                    "groupNo": "S-04",
+                    "partNo": "2204H",
+                    "quantity": 1,
+                    "description": "Ergonomically designed handlebar providing optimal control and rider comfort. Made from high-strength steel tubing with chrome finish. Features pre-drilled mounting points for controls, grips, and accessories.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_04.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_04.mtl"
+                },
+                "Front Frame": {
+                    "label": "FRONT FRAME",
+                    "displayName": "Front Frame",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "MAIN FRAME ASSEMBLY",
+                    "sku": "FF9871982567",
+                    "category": "FRAME",
+                    "groupNo": "F-05",
+                    "partNo": "3305F",
+                    "quantity": 1,
+                    "description": "Heavy-duty steel frame providing structural integrity and mounting points for engine and components. Powder-coated finish for corrosion resistance.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_05.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_05.mtl"
+                },
+                "Back Frame": {
+                    "label": "BACK FRAME",
+                    "displayName": "Back Frame",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "REAR FRAME ASSEMBLY",
+                    "sku": "BF8761982678",
+                    "category": "FRAME",
+                    "groupNo": "F-06",
+                    "partNo": "3306B",
+                    "quantity": 1,
+                    "description": "Reinforced rear frame section supporting seat, rear suspension, and luggage rack. Designed for optimal load distribution.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_06.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_06.mtl"
+                },
+                "Front Wheel": {
+                    "label": "FRONT WHEEL",
+                    "displayName": "Front Wheel",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "FRONT WHEEL ASSEMBLY",
+                    "sku": "FW5431982789",
+                    "category": "WHEELS",
+                    "groupNo": "W-07",
+                    "partNo": "4407F",
+                    "quantity": 1,
+                    "description": "17-inch alloy wheel with tubeless tire compatibility. Features integrated disc brake mount and precision-balanced design for smooth operation.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_07.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_07.mtl"
+                },
+                "Rear Fender": {
+                    "label": "REAR FENDER",
+                    "displayName": "Rear Fender",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "REAR MUDGUARD",
+                    "sku": "RF3211982890",
+                    "category": "BODY",
+                    "groupNo": "B-08",
+                    "partNo": "5508R",
+                    "quantity": 1,
+                    "description": "Molded plastic fender protecting rider from road spray and debris. Includes integrated tail light and license plate mounting bracket.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_08.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_08.mtl"
+                },
+                "Exhaust Pipe": {
+                    "label": "EXHAUST PIPE",
+                    "displayName": "09",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "EXHAUST SYSTEM",
+                    "sku": "EP7651982901",
+                    "category": "ENGINE",
+                    "groupNo": "E-09",
+                    "partNo": "6609E",
+                    "quantity": 1,
+                    "description": "Stainless steel exhaust system with muffler. Optimized for performance and noise reduction while meeting emission standards.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_09.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_09.mtl"
+                },
+                "Rear Wheel": {
+                    "label": "REAR WHEEL",
+                    "displayName": "Rear Wheel",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "REAR WHEEL ASSEMBLY",
+                    "sku": "RW4321983012",
+                    "category": "WHEELS",
+                    "groupNo": "W-10",
+                    "partNo": "4410R",
+                    "quantity": 1,
+                    "description": "17-inch rear alloy wheel with reinforced spokes for power transfer. Compatible with chain drive sprocket and rear brake assembly.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_10.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_10.mtl"
+                },
+                "Rear Shock Absorber": {
+                    "label": "REAR SHOCK ABSORBER",
+                    "displayName": "Rear Shock Absorber",
+                    "imageUrl": "images/sample_parts/show-details-clutch.png",
+                    "name": "REAR SUSPENSION UNIT",
+                    "sku": "RSA2131983123",
+                    "category": "SUSPENSION",
+                    "groupNo": "SU-11",
+                    "partNo": "7711S",
+                    "quantity": 2,
+                    "description": "Hydraulic shock absorbers with adjustable preload settings. Provides smooth ride quality and stability under various load conditions.",
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_11.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_11.mtl"
+                }
+            }
+        },
+        {
+            "name": "Blink 124",
+            "imageUrl": "images/sample_mcs/thumbnail-mc2.png",
+            "has3DModel": false,
+            "engineSpecs": [
+                "Cylinder Block & Cylinder Head",
+                "Camshaft & Valves",
+                "Crankcase",
+                "Oil Pump & Oil Filter",
+                "Clutch",
+                "Crankshaft & Piston"
+            ],
+            "accessoriesSpecs": [
+                "Headlight",
+                "Meter Assembly",
+                "Steering Bar",
+                "Front Fender",
+                "Front Wheel Assy",
+                "Rear Brake"
+            ],
+            "parts": {}
+        },
+        {
+            "name": "Hero",
+            "imageUrl": "images/sample_mcs/thumbnail-mc2.png",
+            "has3DModel": false,
+            "engineSpecs": [
+                "Cylinder Block & Cylinder Head",
+                "Right Crankcase Cover",
+                "Starting Motor",
+                "Magneto",
+                "Clutch",
+                "Transmission Device"
+            ],
+            "accessoriesSpecs": [
+                "Headlight",
+                "Grip Switch & Cable",
+                "Steering Stem Comp",
+                "Front Shock Absorber",
+                "Rear Brake",
+                "Fuel Tank Assy"
+            ],
+            "parts": {}
+        },
+        {
+            "name": "King",
+            "imageUrl": "images/sample_mcs/thumbnail-mc3.png",
+            "has3DModel": false,
+            "engineSpecs": [
+                "Cylinder Block & Cylinder Head",
+                "Camshaft & Valves",
+                "Crankcase",
+                "Starting Motor",
+                "Clutch",
+                "Gearshift Device"
+            ],
+            "accessoriesSpecs": [
+                "Meter Assembly",
+                "Steering Bar",
+                "Front Fender",
+                "Front Wheel Assy",
+                "Rear Wheel Assy",
+                "Fuel Tank Assy"
+            ],
+            "parts": {}
+        },
+        {
+            "name": "Hero 2",
+            "imageUrl": "images/sample_mcs/thumbnail-mc3.png",
+            "has3DModel": false,
+            "engineSpecs": [],
+            "accessoriesSpecs": [],
+            "parts": {}
+        },
+        {
+            "name": "King 2",
+            "imageUrl": "images/sample_mcs/thumbnail-mc1.png",
+            "has3DModel": false,
+            "engineSpecs": [],
+            "accessoriesSpecs": [],
+            "parts": {}
+        }
+    ]
+}

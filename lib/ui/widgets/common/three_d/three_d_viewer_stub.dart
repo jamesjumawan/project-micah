@@ -8,6 +8,7 @@ class ThreeDViewer extends StatelessWidget {
   final String modelName;
   final double height;
   final bool isAssembleMode;
+  final double disassemblyDistance;
   final Function(bool)? onToggleMode;
   final void Function(String modelPath)? onPartSelected;
 
@@ -20,6 +21,7 @@ class ThreeDViewer extends StatelessWidget {
     required this.modelName,
     this.height = 420,
     this.isAssembleMode = true,
+    this.disassemblyDistance = 1.0,
     this.onToggleMode,
     this.onPartSelected,
   });

@@ -28,4 +28,10 @@ class DetailsView extends StackedView<DetailsViewModel> {
     BuildContext context,
   ) =>
       DetailsViewModel();
+
+  @override
+  void onViewModelReady(DetailsViewModel viewModel) {
+    viewModel.initialize();
+    super.onViewModelReady(viewModel);
+  }
 }

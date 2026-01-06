@@ -9,6 +9,7 @@ class TabletView extends StatelessWidget {
     this.scaffoldKey,
     this.endDrawer,
     this.isLoading = false,
+    this.isScrollable = true,
     this.padding = const EdgeInsets.symmetric(horizontal: 24),
     this.breadcrumbs,
     this.onCartTap,
@@ -18,6 +19,7 @@ class TabletView extends StatelessWidget {
   final Widget? endDrawer;
   final Key? scaffoldKey;
   final bool isLoading;
+  final bool isScrollable;
   final EdgeInsetsGeometry padding;
   final Widget? breadcrumbs;
   final VoidCallback? onCartTap;
@@ -32,25 +34,42 @@ class TabletView extends StatelessWidget {
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        if (breadcrumbs != null)
+                : isScrollable
+                    ? SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            if (breadcrumbs != null)
+                              Padding(
+                                padding: padding,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: breadcrumbs,
+                                ),
+                              ),
+                            Padding(
+                              padding: padding,
+                              child: body ?? const SizedBox(),
+                            ),
+                            const Footer(),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          if (breadcrumbs != null)
+                            Padding(
+                              padding: padding,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: breadcrumbs,
+                              ),
+                            ),
                           Padding(
                             padding: padding,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: breadcrumbs,
-                            ),
+                            child: body ?? const SizedBox(),
                           ),
-                        Padding(
-                          padding: padding,
-                          child: body ?? const SizedBox(),
-                        ),
-                        const Footer(),
-                      ],
-                    ),
-                  ),
+                        ],
+                      ),
           ),
         ],
       ),

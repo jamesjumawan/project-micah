@@ -45,15 +45,27 @@ class PartsCard extends StackedView<PartsCardModel> {
                   color: AppColors.surface,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.broken_image,
-                        size: 60,
-                        color: AppColors.textHint,
-                      ),
-                    ),
+                    child: imageUrl.startsWith('http')
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                              Icons.broken_image,
+                              size: 60,
+                              color: AppColors.textHint,
+                            ),
+                          )
+                        : Image.asset(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                              Icons.broken_image,
+                              size: 60,
+                              color: AppColors.textHint,
+                            ),
+                          ),
                   ),
                 ),
               ),

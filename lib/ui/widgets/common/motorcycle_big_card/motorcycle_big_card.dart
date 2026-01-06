@@ -84,36 +84,52 @@ class MotorcycleBigCard extends StackedView<MotorcycleBigCardModel> {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: imagePath != null
-                            ? Image.network(
-                                imagePath!,
-                                fit: BoxFit.contain,
-                                height: height * 0.9,
-                                // Show a subtle placeholder while loading
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return SizedBox(
+                            ? (imagePath!.startsWith('http')
+                                ? Image.network(
+                                    imagePath!,
+                                    fit: BoxFit.contain,
                                     height: height * 0.9,
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    ),
-                                  );
-                                },
-                                // Handle network failures gracefully
-                                errorBuilder: (context, error, stackTrace) {
-                                  return SizedBox(
+                                    loadingBuilder:
+                                        (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return SizedBox(
+                                        height: height * 0.9,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return SizedBox(
+                                        height: height * 0.9,
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            size: UIHelpers.iconXLarge,
+                                            color: AppColors.textHint,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Image.asset(
+                                    imagePath!,
+                                    fit: BoxFit.contain,
                                     height: height * 0.9,
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.broken_image,
-                                        size: UIHelpers.iconXLarge,
-                                        color: AppColors.textHint,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              )
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return SizedBox(
+                                        height: height * 0.9,
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            size: UIHelpers.iconXLarge,
+                                            color: AppColors.textHint,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ))
                             : const SizedBox.shrink(),
                       ),
                     ),

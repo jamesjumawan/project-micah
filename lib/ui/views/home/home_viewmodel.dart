@@ -16,64 +16,44 @@ class HomeViewModel extends BaseViewModel {
   List<CategoryModel> get categories => [
         CategoryModel(
           name: 'Brake',
-          imageUrl: 'https://via.placeholder.com/200',
+          imageUrl: 'images/sample_parts/home-categories-1.png',
         ),
         CategoryModel(
           name: 'Clutch',
-          imageUrl: 'https://via.placeholder.com/200',
+          imageUrl: 'images/sample_parts/home-categories-2.png',
         ),
         CategoryModel(
           name: 'Gearshift',
-          imageUrl: 'https://via.placeholder.com/200',
+          imageUrl: 'images/sample_parts/home-categories-3.png',
         ),
         CategoryModel(
           name: 'Magneto',
-          imageUrl: 'https://via.placeholder.com/200',
+          imageUrl: 'images/sample_parts/home-categories-4.png',
         ),
         CategoryModel(
           name: 'Oil Pump',
-          imageUrl: 'https://via.placeholder.com/200',
+          imageUrl: 'images/sample_parts/home-categories-5.png',
         ),
         CategoryModel(
           name: 'Transmission Device',
-          imageUrl: 'https://via.placeholder.com/200',
-        ),
-        CategoryModel(
-          name: 'Suspension',
-          imageUrl: 'https://via.placeholder.com/200',
+          imageUrl: 'images/sample_parts/home-categories-6.png',
         ),
       ];
   List<MotorcycleBigCard> get featuredMotorcycles => [
         MotorcycleBigCard(
-          title: '2024 Yamaha YZF-R1',
-          imagePath:
-              'https://images.piaggio.com/vespa/vehicles/nvh6000u03/nvh6q1tu03/nvh6q1tu03-01-m.png',
+          title: 'BLT150',
+          imagePath: 'images/sample_mcs/home-select-mc-1.png',
           onTap: () => _routerService.navigateToDetailsView(),
         ),
         MotorcycleBigCard(
-          title: '2024 Ducati Panigale V4',
-          // imagePath:
-          //     'https://images.ducati.com/ducati/vehicles/nvh6000u03/nvh6q1tu03/nvh6q1tu03-01-m.png',
+          title: 'Hero 2024',
+          imagePath: 'images/sample_mcs/home-select-mc-2.png',
+          onTap: () => _routerService.navigateToDetailsView(),
         ),
         MotorcycleBigCard(
-          title: '2024 Kawasaki Ninja H2',
-          // imagePath:
-          //     'https://images.kawasaki.com/vehicles/nvh6000u03/nvh6q1tu03/nvh6q1tu03-01-m.png',
-        ),
-        MotorcycleBigCard(
-          title: '2024 BMW S1000RR',
-          // imagePath:
-          //     'https://images.bmw-m.com/vehicles/nvh6000u03/nvh6q1tu03/nvh6q1tu03-01-m.png',
-        ),
-        MotorcycleBigCard(
-          title: '2024 Honda CBR1000RR-R',
-          // imagePath:
-          //     'https://images.honda.com/vehicles/nvh6000u03/nvh6q1tu03/nvh6q1tu03-01-m.png',
-        ),
-        MotorcycleBigCard(
-          title: '2024 Suzuki GSX-R1000',
-          // imagePath:
-          //     'https://images.suzuki.com/vehicles/nvh6000u03/nvh6q1tu03/nvh6q1tu03-01-m.png',
+          title: 'King Pro',
+          imagePath: 'images/sample_mcs/home-select-mc-3.png',
+          onTap: () => _routerService.navigateToDetailsView(),
         ),
       ];
 }

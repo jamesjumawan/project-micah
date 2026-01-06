@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'package:project_micah/models/category_model.dart';
 
@@ -11,447 +14,173 @@ class DetailsViewModel extends BaseViewModel {
   bool get isAssembleMode => _isAssembleMode;
 
   // Selected motorcycle from the categories list
-  String _selectedMotorcycle = 'Stallion';
+  String _selectedMotorcycle = 'BLT150';
   String get selectedMotorcycle => _selectedMotorcycle;
 
   // Selected part (when in disassemble mode)
   String? _selectedPart;
   String? get selectedPart => _selectedPart;
 
+  // Parts overlay state
+  bool _isPartsOverlayOpen = false;
+  bool get isPartsOverlayOpen => _isPartsOverlayOpen;
+
+  // Part distance (for display near toggle)
+  double _partDistance = 2;
+  double get partDistance => _partDistance;
+
+  // Right sidebar visibility
+  bool _isRightSidebarVisible = false;
+  bool get isRightSidebarVisible =>
+      _isAssembleMode ? false : _isRightSidebarVisible;
+
+  // Motorcycle showcase collapse state
+  bool _isMotorcycleShowcaseCollapsed = false;
+  bool get isMotorcycleShowcaseCollapsed => _isMotorcycleShowcaseCollapsed;
+
+  // Check if current motorcycle has 3D model
+  bool get has3DModel {
+    if (_motorcycles.isEmpty) return false;
+    final motorcycle = _motorcycles.firstWhere(
+      (m) => m.name == _selectedMotorcycle,
+      orElse: () => _motorcycles.first,
+    );
+    return motorcycle.has3DModel;
+  }
+
   // List of available motorcycles (displayed as categories)
-  final List<CategoryModel> _motorcycles = [
-    CategoryModel(
-      name: 'Blink 124',
-      imageUrl: 'assets/images/banner_decoration.png',
-    ),
-    CategoryModel(
-      name: 'Hero',
-      imageUrl: 'assets/images/banner_decoration.png',
-    ),
-    CategoryModel(
-      name: 'Stallion',
-      imageUrl: 'assets/images/banner_decoration.png',
-    ),
-    CategoryModel(
-      name: 'King',
-      imageUrl: 'assets/images/banner_decoration.png',
-    ),
-    CategoryModel(
-      name: 'Hero 2',
-      imageUrl: 'assets/images/banner_decoration.png',
-    ),
-    CategoryModel(
-      name: 'King 2',
-      imageUrl: 'assets/images/banner_decoration.png',
-    ),
-  ];
+  List<CategoryModel> _motorcycles = [];
+  Map<String, dynamic> _motorcycleData = {};
 
   List<CategoryModel> get motorcycles => _motorcycles;
+
+  // Initialize and load motorcycle data from JSON
+  Future<void> initialize() async {
+    try {
+      final String jsonString =
+          await rootBundle.loadString('assets/data/motorcycles_data.json');
+      final Map<String, dynamic> data = json.decode(jsonString);
+
+      _motorcycles = (data['motorcycles'] as List)
+          .map((m) => CategoryModel.fromMap(m as Map<String, dynamic>))
+          .toList();
+
+      _motorcycleData = data;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading motorcycle data: $e');
+    }
+  }
+
+  Map<String, dynamic> get _currentMotorcycleData {
+    final motorcycles = _motorcycleData['motorcycles'] as List? ?? [];
+    return motorcycles.firstWhere(
+      (m) => m['name'] == _selectedMotorcycle,
+      orElse: () => motorcycles.isNotEmpty ? motorcycles.first : {},
+    ) as Map<String, dynamic>;
+  }
 
   // Specifications data for the selected motorcycle
   // Engine specifications
   List<String> get engineSpecs {
-    final specs = {
-      'Stallion': [
-        'Cylinder Block & Cylinder Head',
-        'Camshaft & Valves',
-        'Right Crankcase Cover',
-        'Crankcase',
-        'Oil Pump & Oil Filter',
-        'Starting Motor',
-        'Magneto',
-        'Clutch',
-        'Crankshaft & Piston',
-        'Transmission Device',
-        'Gearshift Device',
-      ],
-      'Blink 124': [
-        'Cylinder Block & Cylinder Head',
-        'Camshaft & Valves',
-        'Crankcase',
-        'Oil Pump & Oil Filter',
-        'Clutch',
-        'Crankshaft & Piston',
-      ],
-      'Hero': [
-        'Cylinder Block & Cylinder Head',
-        'Right Crankcase Cover',
-        'Starting Motor',
-        'Magneto',
-        'Clutch',
-        'Transmission Device',
-      ],
-      'King': [
-        'Cylinder Block & Cylinder Head',
-        'Camshaft & Valves',
-        'Crankcase',
-        'Starting Motor',
-        'Clutch',
-        'Gearshift Device',
-      ],
-    };
-    return specs[_selectedMotorcycle] ?? specs['Stallion']!;
+    final specs = _currentMotorcycleData['engineSpecs'] as List?;
+    return specs?.cast<String>() ?? [];
   }
 
   // Accessories specifications
   List<String> get accessoriesSpecs {
-    final specs = {
-      'Stallion': [
-        'Headlight',
-        'Meter Assembly',
-        'Grip Switch & Cable',
-        'Steering Bar',
-        'Steering Stem Comp',
-        'Front Fender',
-        'Front Shock Absorber',
-        'Front Wheel Assy',
-        'Rear Brake',
-        'Rear Wheel Assy',
-        'Fuel Tank Assy',
-      ],
-      'Blink 124': [
-        'Headlight',
-        'Meter Assembly',
-        'Steering Bar',
-        'Front Fender',
-        'Front Wheel Assy',
-        'Rear Brake',
-      ],
-      'Hero': [
-        'Headlight',
-        'Grip Switch & Cable',
-        'Steering Stem Comp',
-        'Front Shock Absorber',
-        'Rear Brake',
-        'Fuel Tank Assy',
-      ],
-      'King': [
-        'Meter Assembly',
-        'Steering Bar',
-        'Front Fender',
-        'Front Wheel Assy',
-        'Rear Wheel Assy',
-        'Fuel Tank Assy',
-      ],
-    };
-    return specs[_selectedMotorcycle] ?? specs['Stallion']!;
+    final specs = _currentMotorcycleData['accessoriesSpecs'] as List?;
+    return specs?.cast<String>() ?? [];
   }
 
   // Parts data (displayed when a specific part is selected in disassemble mode)
   Map<String, dynamic> get currentPartData {
-    if (_selectedPart == null) {
-      // Default to first part (Right Side Mirror)
-      return _partsDatabase['Right Side Mirror']!;
+    final parts =
+        _currentMotorcycleData['parts'] as Map<String, dynamic>? ?? {};
+    if (_selectedPart != null && parts.containsKey(_selectedPart)) {
+      return parts[_selectedPart] as Map<String, dynamic>;
     }
-    return _partsDatabase[_selectedPart] ??
-        _partsDatabase['Right Side Mirror']!;
+    // Return first part or empty map
+    return parts.isNotEmpty ? parts.values.first as Map<String, dynamic> : {};
   }
 
-  // Simulated parts database
-  final Map<String, Map<String, dynamic>> _partsDatabase = {
-    'Right Side Mirror': {
-      'label': 'RIGHT SIDE MIRROR',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'SIDE MIRROR ASSEMBLY',
-      'sku': 'RSM2341982155',
-      'category': 'ACCESSORY',
-      'groupNo': 'A-02',
-      'partNo': '1102R',
-      'quantity': 1,
-      'description':
-          'High-visibility convex mirror providing wide-angle rear view for enhanced safety. Features adjustable mounting bracket with anti-vibration design. Durable glass lens with protective housing resistant to weather and road debris.',
-    },
-    'Left Side Mirror': {
-      'label': 'LEFT SIDE MIRROR',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'SIDE MIRROR ASSEMBLY',
-      'sku': 'LSM2341982156',
-      'category': 'ACCESSORY',
-      'groupNo': 'A-03',
-      'partNo': '1103L',
-      'quantity': 1,
-      'description':
-          'High-visibility convex mirror providing wide-angle rear view for enhanced safety. Features adjustable mounting bracket with anti-vibration design. Durable glass lens with protective housing resistant to weather and road debris.',
-    },
-    'Handle Bar': {
-      'label': 'HANDLE BAR',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'STEERING HANDLEBAR',
-      'sku': 'HB6541982341',
-      'category': 'STEERING',
-      'groupNo': 'S-04',
-      'partNo': '2204H',
-      'quantity': 1,
-      'description':
-          'Ergonomically designed handlebar providing optimal control and rider comfort. Made from high-strength steel tubing with chrome finish. Features pre-drilled mounting points for controls, grips, and accessories.',
-    },
-    'Front Frame': {
-      'label': 'FRONT FRAME',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'MAIN FRAME ASSEMBLY',
-      'sku': 'FF4412365478',
-      'category': 'FRAME',
-      'groupNo': 'F-05',
-      'partNo': '3305F',
-      'quantity': 1,
-      'description':
-          'Heavy-duty front frame structure providing structural integrity and component mounting. Engineered with reinforced welded joints for maximum strength and impact resistance. Powder-coated finish for corrosion protection.',
-    },
-    'Back Frame': {
-      'label': 'BACK FRAME',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'REAR FRAME ASSEMBLY',
-      'sku': 'BF8821445566',
-      'category': 'FRAME',
-      'groupNo': 'F-06',
-      'partNo': '3306B',
-      'quantity': 1,
-      'description':
-          'Rear frame assembly supporting seat, rear wheel, and suspension components. Features integrated mounting points for exhaust system and passenger footpegs. Robust construction ensures rider safety and load-bearing capacity.',
-    },
-    'Front Wheel': {
-      'label': 'FRONT WHEEL',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'FRONT WHEEL ASSEMBLY',
-      'sku': 'FW6541982341',
-      'category': 'WHEEL',
-      'groupNo': 'W-07',
-      'partNo': '4407W',
-      'quantity': 1,
-      'description':
-          'Complete front wheel assembly with tire, rim, and bearings. Precision-balanced for smooth rotation and reduced vibration. High-quality wheel bearings ensure minimal friction and long service life under various road conditions.',
-    },
-    'Rear Fender': {
-      'label': 'REAR FENDER',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'REAR MUDGUARD',
-      'sku': 'RF5119482155',
-      'category': 'BODY',
-      'groupNo': 'B-08',
-      'partNo': '5508R',
-      'quantity': 1,
-      'description':
-          'Protective rear fender preventing mud and water spray from rear wheel. Made from durable plastic composite material with UV-resistant finish. Includes integrated mounting brackets and tail light housing.',
-    },
-    'Exhaust Pipe': {
-      'label': 'EXHAUST PIPE',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'EXHAUST SYSTEM',
-      'sku': 'EP7721445566',
-      'category': 'ENGINE',
-      'groupNo': 'E-09',
-      'partNo': '6609E',
-      'quantity': 1,
-      'description':
-          'Complete exhaust system channeling engine gases away from the engine. Features heat-resistant chrome-plated steel construction with integrated muffler for noise reduction. Optimized for efficient exhaust flow and reduced emissions.',
-    },
-    'Rear Wheel': {
-      'label': 'REAR WHEEL',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'REAR WHEEL ASSEMBLY',
-      'sku': 'RW4412365478',
-      'category': 'WHEEL',
-      'groupNo': 'W-10',
-      'partNo': '4410R',
-      'quantity': 1,
-      'description':
-          'Rear wheel assembly with tire, rim, sprocket, and brake drum. Heavy-duty construction designed to handle torque transfer and braking forces. Precision-balanced with sealed bearings for smooth operation and extended durability.',
-    },
-    'Rear Shock Absorber': {
-      'label': 'REAR SHOCK ABSORBER',
-      'imageUrl': 'assets/images/banner_decoration.png',
-      'name': 'REAR SUSPENSION UNIT',
-      'sku': 'RSA8821445566',
-      'category': 'SUSPENSION',
-      'groupNo': 'S-11',
-      'partNo': '7711S',
-      'quantity': 2,
-      'description':
-          'Hydraulic shock absorber providing smooth ride quality and stability. Features adjustable spring preload for different load conditions. Oil-filled damper system absorbs road impacts and maintains tire contact for optimal handling.',
-    },
-  };
-
-  // Full assembly model paths
-
-  final String assembleModelPath =
-      '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_01.obj';
-  final String assembleMtlPath =
-      '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_01.mtl';
-
-  // ================================================================================================================
-
-  // final String assembleModelPath = 'assets/sample_3d_object/blt150_01.obj';
-  // final String assembleMtlPath = 'assets/sample_3d_object/blt150_01.mtl';
-
-  // ================================================================================================================
-
-  // final String assembleModelPath =
-  //     'assets/sample_3d_object/tripo_convert_36cdd4a4-d861-4834-acdf-ce8a7d82f620.obj';
-  // final String assembleMtlPath =
-  //     'assets/sample_3d_object/tripo_convert_36cdd4a4-d861-4834-acdf-ce8a7d82f620.mtl';
-
-  // Parts models mapping. Keys should match part names used in the UI
-  // Some parts may not have an associated .mtl (empty string)
-  final Map<String, Map<String, String>> partsModels = {
-    'Right Side Mirror': {
-      'displayName': 'Right Side Mirror',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_02.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_02.mtl',
-    },
-    'Left Side Mirror': {
-      'displayName': 'Left Side Mirror',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_03.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_03.mtl',
-    },
-    'Handle Bar': {
-      'displayName': 'Handle Bar',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_04.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_04.mtl',
-    },
-    'Front Frame': {
-      'displayName': 'Front Frame',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_05.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_05.mtl',
-    },
-    'Back Frame': {
-      'displayName': 'Back Frame',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_06.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_06.mtl',
-    },
-    'Front Wheel': {
-      'displayName': 'Front Wheel',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_07.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_07.mtl',
-    },
-    'Rear Fender': {
-      'displayName': 'Rear Fender',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_08.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_08.mtl',
-    },
-    'Exhaust Pipe': {
-      'displayName': '09',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_09.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_09.mtl',
-    },
-    'Rear Wheel': {
-      'displayName': 'Rear Wheel',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_10.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_10.mtl',
-    },
-    'Rear Shock Absorber': {
-      'displayName': 'Rear Shock Absorber',
-      'obj': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_11.obj',
-      'mtl': '$_assetsBaseUrl/sample_3d_object/manual_breaking/blt150_11.mtl',
-    },
-
-    // ================================================================================================================
-
-    // 'Rear Shock': {
-    //   'displayName': 'Rear Shock Absorber',
-    //   'obj': 'assets/sample_3d_object/shock_absorber_01.obj',
-    //   'mtl': 'assets/sample_3d_object/shock_absorber_01.mtl',
-    // },
-    // 'Rear Shock ': {
-    //   'displayName': 'Rear Shock Absorber',
-    //   'obj': 'assets/sample_3d_object/shock_absorber_02.obj',
-    //   'mtl': 'assets/sample_3d_object/shock_absorber_02.mtl',
-    // },
-    // 'Clutch': {
-    //   'displayName': 'Clutch Shoe',
-    //   'obj': 'assets/sample_3d_object/clutch shoe final_fixed.obj',
-    //   'mtl': '',
-    // },
-
-    // ================================================================================================================
-
-    // 'Rear Shock': {
-    //   'displayName': 'Rear Shock Absorber',
-    //   'obj': 'assets/sample_3d_object/blt150_rearShockAbsorber_final_00.obj',
-    //   'mtl': 'assets/sample_3d_object/blt150_rearShockAbsorber_final_00.mtl',
-    // },
-    // 'Clutch': {
-    //   'displayName': 'Clutch Shoe',
-    //   'obj': 'assets/sample_3d_object/clutch shoe final_fixed.obj',
-    //   'mtl': '',
-    // },
-    // Add more part -> model mappings here as needed
-  };
-
-  // Get the correct model path for the current view state
-  String get currentModelPath {
-    if (_isAssembleMode) return assembleModelPath;
-    if (_selectedPart != null && partsModels.containsKey(_selectedPart)) {
-      return partsModels[_selectedPart]!['obj']!;
-    }
-    // Default to the first parts model if none selected
-    return partsModels.values.first['obj']!;
+  // Parts models mapping from current motorcycle
+  Map<String, Map<String, String>> get partsModels {
+    final parts =
+        _currentMotorcycleData['parts'] as Map<String, dynamic>? ?? {};
+    return parts.map((key, value) {
+      final partData = value as Map<String, dynamic>;
+      return MapEntry(
+        key,
+        {
+          'displayName': partData['displayName'] as String? ?? key,
+          'obj': partData['obj'] as String? ?? '',
+          'mtl': partData['mtl'] as String? ?? '',
+        },
+      );
+    });
   }
 
-  // Get the corresponding mtl path if available
-  String? get currentMtlPath {
-    if (_isAssembleMode) return assembleMtlPath;
-    if (_selectedPart != null && partsModels.containsKey(_selectedPart)) {
-      final mtl = partsModels[_selectedPart]!['mtl'];
-      return (mtl != null && mtl.isNotEmpty) ? mtl : null;
-    }
-    final defaultMtl = partsModels.values.first['mtl'];
-    return (defaultMtl != null && defaultMtl.isNotEmpty) ? defaultMtl : null;
+  // Assembly model paths (for now, using all parts combined as assembly)
+  String get assembleModelPath {
+    if (!has3DModel) return '';
+    return '$_assetsBaseUrl/sample_3d_object/blt150_01.obj';
   }
 
-  // Get plural model paths (useful for disassemble to show multiple models)
-  List<String> get currentModelPaths {
-    if (_isAssembleMode) return [assembleModelPath];
-    // If a specific part is selected, return only that part
-    if (_selectedPart != null && partsModels.containsKey(_selectedPart)) {
-      return [partsModels[_selectedPart]!['obj']!];
-    }
-    // Otherwise return all available parts models
+  String? get assembleMtlPath {
+    if (!has3DModel) return null;
+    return '$_assetsBaseUrl/sample_3d_object/blt150_01.mtl';
+  }
+
+  // Get all assembly model paths (for preloading)
+  List<String> get allAssemblyModelPaths {
+    if (!has3DModel) return [];
+    return [assembleModelPath];
+  }
+
+  // Get all assembly MTL paths
+  List<String?> get allAssemblyMtlPaths {
+    if (!has3DModel) return [];
+    return [assembleMtlPath];
+  }
+
+  // Get all disassembly model paths (for preloading)
+  List<String> get allDisassemblyModelPaths {
+    if (!has3DModel) return [];
     return partsModels.values.map((m) => m['obj']!).toList(growable: false);
   }
 
-  // Get corresponding mtl paths aligned with currentModelPaths
-  List<String?> get currentMtlPaths {
-    if (_isAssembleMode) return [assembleMtlPath];
-    if (_selectedPart != null && partsModels.containsKey(_selectedPart)) {
-      final mtl = partsModels[_selectedPart]!['mtl'];
-      return [(mtl != null && mtl.isNotEmpty) ? mtl : null];
-    }
+  // Get all disassembly MTL paths
+  List<String?> get allDisassemblyMtlPaths {
+    if (!has3DModel) return [];
     return partsModels.values
         .map(
             (m) => (m['mtl'] != null && m['mtl']!.isNotEmpty) ? m['mtl'] : null)
         .toList(growable: false);
   }
 
-  // Get all assembly model paths (for preloading)
-  List<String> get allAssemblyModelPaths => [assembleModelPath];
-
-  // Get all assembly MTL paths
-  List<String?> get allAssemblyMtlPaths => [assembleMtlPath];
-
-  // Get all disassembly model paths (for preloading)
-  List<String> get allDisassemblyModelPaths =>
-      partsModels.values.map((m) => m['obj']!).toList(growable: false);
-
-  // Get all disassembly MTL paths
-  List<String?> get allDisassemblyMtlPaths => partsModels.values
-      .map((m) => (m['mtl'] != null && m['mtl']!.isNotEmpty) ? m['mtl'] : null)
-      .toList(growable: false);
-
   // Getters for current part details (used in UI)
-  String get partsLabel => currentPartData['label'] as String;
-  String get partsImageUrl => currentPartData['imageUrl'] as String;
-  String get partsName => currentPartData['name'] as String;
-  String get partsSku => currentPartData['sku'] as String;
-  String get partsCategory => currentPartData['category'] as String;
-  String get partsGroupNo => currentPartData['groupNo'] as String;
-  String get partsPartNo => currentPartData['partNo'] as String;
-  int get partsQuantity => currentPartData['quantity'] as int;
-  String get partsDescription => currentPartData['description'] as String;
+  String get partsLabel => currentPartData['label'] as String? ?? '';
+  String get partsImageUrl => currentPartData['imageUrl'] as String? ?? '';
+  String get partsName => currentPartData['name'] as String? ?? 'Unknown Part';
+  String get partsSku => currentPartData['sku'] as String? ?? '';
+  String get partsCategory => currentPartData['category'] as String? ?? '';
+  String get partsGroupNo => currentPartData['groupNo'] as String? ?? '';
+  String get partsPartNo => currentPartData['partNo'] as String? ?? '';
+  int get partsQuantity => currentPartData['quantity'] as int? ?? 0;
+  String get partsDescription =>
+      currentPartData['description'] as String? ?? '';
 
   // Toggle between assemble and disassemble modes
   Future<void> toggleMode(bool isAssemble) async {
     _isAssembleMode = isAssemble;
-    _selectedPart = null; // Reset selected part when toggling
+
+    // Clear selected part when switching to assemble mode
+    if (isAssemble) {
+      _selectedPart = null;
+      _isRightSidebarVisible = false;
+    }
+
     notifyListeners();
 
     // NO LONGER NEEDED: The 3D viewer now preloads both modes
@@ -465,6 +194,9 @@ class DetailsViewModel extends BaseViewModel {
 
     _selectedMotorcycle = motorcycleName;
     _selectedPart = null; // Reset selected part
+    _isRightSidebarVisible =
+        false; // Close right sidebar when selecting new motorcycle
+    _isAssembleMode = true; // Reset to assemble mode when switching motorcycles
     notifyListeners();
 
     // Simulate API call to fetch motorcycle details
@@ -478,11 +210,36 @@ class DetailsViewModel extends BaseViewModel {
     if (!_isAssembleMode && _selectedPart == partName) return;
 
     _selectedPart = partName;
+    _isPartsOverlayOpen = false; // Close overlay when part is selected
+    _isRightSidebarVisible = true; // Open right sidebar when part is selected
     notifyListeners();
 
     // Simulate API call to fetch part details
     setBusy(true);
     await Future.delayed(const Duration(milliseconds: 600));
     setBusy(false);
+  }
+
+  // Toggle parts overlay
+  void togglePartsOverlay() {
+    _isPartsOverlayOpen = !_isPartsOverlayOpen;
+    notifyListeners();
+  }
+
+  // Update part distance
+  void updatePartDistance(double distance) {
+    _partDistance = distance;
+    notifyListeners();
+  }
+
+  // Toggle right sidebar visibility
+  void toggleRightSidebar() {
+    _isRightSidebarVisible = !_isRightSidebarVisible;
+    notifyListeners();
+  }
+
+  void toggleMotorcycleShowcase() {
+    _isMotorcycleShowcaseCollapsed = !_isMotorcycleShowcaseCollapsed;
+    notifyListeners();
   }
 }

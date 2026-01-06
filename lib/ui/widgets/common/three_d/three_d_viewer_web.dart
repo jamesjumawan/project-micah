@@ -56,12 +56,10 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
   late String viewType;
   StreamSubscription<html.MessageEvent>? _messageSub;
   html.IFrameElement? _iframe;
-  late double _currentDisassemblyDistance;
 
   @override
   void initState() {
     super.initState();
-    _currentDisassemblyDistance = widget.disassemblyDistance;
     _registerViewer();
     // Listen for postMessage events from the iframe (Three.js viewer).
     _messageSub = html.window.onMessage.listen((html.MessageEvent event) {
@@ -208,163 +206,45 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
     return SizedBox(
       height: widget.height,
       width: double.infinity,
-      child: Column(
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          // Top control bar with toggle buttons
-          Container(
-            color: AppColors.surface,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.modelName,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    // Assemble/Disassemble toggle buttons
-                    if (widget.onToggleMode != null) ...[
-                      _ToggleButton(
-                        label: 'ASSEMBLE',
-                        isSelected: widget.isAssembleMode,
-                        onTap: () => widget.onToggleMode!(true),
-                      ),
-                      const SizedBox(width: 8),
-                      _ToggleButton(
-                        label: 'DISASSEMBLE',
-                        isSelected: !widget.isAssembleMode,
-                        onTap: () => widget.onToggleMode!(false),
-                      ),
-                    ],
-                  ],
-                ),
-                // Disassembly distance slider
-                if (!widget.isAssembleMode) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Text(
-                        'Part Distance:',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            activeTrackColor: AppColors.primary,
-                            inactiveTrackColor:
-                                AppColors.primary.withOpacity(0.3),
-                            thumbColor: AppColors.primary,
-                            overlayColor: AppColors.primary.withOpacity(0.2),
-                            trackHeight: 3,
-                            thumbShape: const RoundSliderThumbShape(
-                              enabledThumbRadius: 8,
-                            ),
-                          ),
-                          child: Slider(
-                            value: _currentDisassemblyDistance,
-                            min: 0.0,
-                            max: 20.0,
-                            divisions: 100,
-                            label:
-                                _currentDisassemblyDistance.toStringAsFixed(1),
-                            onChanged: (value) {
-                              setState(() {
-                                _currentDisassemblyDistance = value;
-                              });
-                              _sendDisassemblyDistanceMessage(value);
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 35,
-                        child: Text(
-                          _currentDisassemblyDistance.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
+          Container(color: AppColors.surface),
+
+          // overlay image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/overlay.jpg',
+              fit: BoxFit.fill,
             ),
           ),
 
-          // 3D Viewer
-          Expanded(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Container(color: AppColors.surface),
+          // content
+          Positioned.fill(
+            child: HtmlElementView(viewType: viewType),
+          ),
 
-                // overlay image
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/images/overlay.jpg',
-                    fit: BoxFit.fill,
-                  ),
+          // Title overlay at top left
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                widget.modelName,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-
-                // content
-                Positioned.fill(
-                  child: HtmlElementView(viewType: viewType),
-                ),
-              ],
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// Toggle button widget for Assemble/Disassemble
-class _ToggleButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ToggleButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          border: Border.all(
-            color: AppColors.primary,
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
-        ),
       ),
     );
   }

@@ -8,6 +8,7 @@ class DesktopView extends StatelessWidget {
     this.body,
     this.scaffoldKey,
     this.endDrawer,
+    this.isScrollable = true,
     this.isLoading = false,
     this.padding = const EdgeInsets.symmetric(horizontal: 24),
     this.breadcrumbs,
@@ -18,6 +19,7 @@ class DesktopView extends StatelessWidget {
   final Widget? endDrawer;
   final Key? scaffoldKey;
   final bool isLoading;
+  final bool isScrollable;
   final EdgeInsetsGeometry padding;
   final Widget? breadcrumbs;
   final VoidCallback? onCartTap;
@@ -34,25 +36,45 @@ class DesktopView extends StatelessWidget {
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        if (breadcrumbs != null)
-                          Padding(
-                            padding: padding,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: breadcrumbs,
+                : isScrollable
+                    ? SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            if (breadcrumbs != null)
+                              Padding(
+                                padding: padding,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: breadcrumbs,
+                                ),
+                              ),
+                            Padding(
+                              padding: padding,
+                              child: body ?? const SizedBox(),
+                            ),
+                            const Footer(),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          if (breadcrumbs != null)
+                            Padding(
+                              padding: padding,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: breadcrumbs,
+                              ),
+                            ),
+                          Expanded(
+                            child: Padding(
+                              padding: padding,
+                              child: body ?? const SizedBox(),
                             ),
                           ),
-                        Padding(
-                          padding: padding,
-                          child: body ?? const SizedBox(),
-                        ),
-                        const Footer(),
-                      ],
-                    ),
-                  ),
+                          const Footer(),
+                        ],
+                      ),
           ),
         ],
       ),

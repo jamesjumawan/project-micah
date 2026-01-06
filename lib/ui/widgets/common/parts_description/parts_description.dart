@@ -59,54 +59,58 @@ class PartsDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = UIHelpers.isDesktop(context);
-
-    return Padding(
-      padding: UIHelpers.pagePadding(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top label (like "CLUTCH")
-          Text(
-            label,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
-                ),
-          ),
-          UIHelpers.verticalSpace24,
-          Flex(
-            direction: isDesktop ? Axis.horizontal : Axis.vertical,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left: image area
-              Flexible(
-                flex: isDesktop ? 5 : 0,
-                child: Container(
+    // Always use vertical layout (tablet arrangement)
+    return SingleChildScrollView(
+      child: Padding(
+        padding: UIHelpers.pagePadding(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top label (like "CLUTCH")
+            Text(
+              label,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+            ),
+            UIHelpers.verticalSpace24,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top: image area
+                Container(
                   color: AppColors.surface,
                   padding: const EdgeInsets.all(24),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.contain,
-                    height: isDesktop ? 400 : 280,
-                    width: double.infinity,
-                    errorBuilder: (c, e, st) => const Icon(
-                      Icons.broken_image,
-                      size: 80,
-                      color: AppColors.textHint,
-                    ),
-                  ),
+                  child: imageUrl.startsWith('http')
+                      ? Image.network(
+                          imageUrl,
+                          fit: BoxFit.contain,
+                          height: 280,
+                          width: double.infinity,
+                          errorBuilder: (c, e, st) => const Icon(
+                            Icons.broken_image,
+                            size: 80,
+                            color: AppColors.textHint,
+                          ),
+                        )
+                      : Image.asset(
+                          imageUrl,
+                          fit: BoxFit.contain,
+                          height: 280,
+                          width: double.infinity,
+                          errorBuilder: (c, e, st) => const Icon(
+                            Icons.broken_image,
+                            size: 80,
+                            color: AppColors.textHint,
+                          ),
+                        ),
                 ),
-              ),
 
-              SizedBox(
-                  width: isDesktop ? UIHelpers.spacing48 : 0,
-                  height: isDesktop ? 0 : UIHelpers.spacing24),
+                UIHelpers.verticalSpace24,
 
-              // Right: metadata section
-              Flexible(
-                flex: isDesktop ? 5 : 0,
-                child: Column(
+                // Bottom: metadata section
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Parts name as title
@@ -151,10 +155,10 @@ class PartsDescription extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
