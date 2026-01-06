@@ -1,6 +1,26 @@
 {
     "routes": [
         {
+            "src": "/assets/(.*)",
+            "dest": "/assets/$1"
+        },
+        {
+            "src": "/fonts/(.*)",
+            "dest": "/fonts/$1"
+        },
+        {
+            "src": "/canvaskit/(.*)",
+            "dest": "/canvaskit/$1"
+        },
+        {
+            "src": "/(.*\\.(js|css|png|svg|jpg|jpeg|gif|webp|ico|json|woff|woff2|ttf|eot)$)",
+            "dest": "/$1"
+        },
+        {
+            "src": "/",
+            "dest": "/index.html"
+        },
+        {
             "src": "/(.*)",
             "dest": "/index.html"
         }
