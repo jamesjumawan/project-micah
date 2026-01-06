@@ -73,6 +73,15 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
         String? type;
         String? model;
         if (data is String) {
+          // Ignore known non-JSON string messages
+          final s = data.trim();
+
+          // Ignore non-JSON messages
+          if (!s.startsWith('{') && !s.startsWith('[')) {
+            debugPrint('Ignored non-JSON message: $s');
+            return;
+          }
+
           final parsed = json.decode(data);
           if (parsed is Map) {
             type = parsed['type']?.toString();
@@ -89,8 +98,7 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
           widget.onPartSelected!(model);
         }
       } catch (e) {
-        // Ignore malformed messages
-        debugPrint('three_d_viewer: failed to handle message: $e');
+        // Silently ignore malformed messages from browser extensions/dev tools
       }
     });
   }
