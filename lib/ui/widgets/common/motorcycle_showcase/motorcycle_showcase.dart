@@ -29,16 +29,6 @@ class MotorcycleShowcase extends StackedView<MotorcycleShowcaseModel> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: isCollapsed ? 80 : 200,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(2, 0),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

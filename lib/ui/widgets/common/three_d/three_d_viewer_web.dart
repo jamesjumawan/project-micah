@@ -162,7 +162,7 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
         widget.disassemblyModelPaths.map(Uri.encodeComponent).join(',');
 
     String src =
-        'three_viewer_obj.html?assemblyModels=$assemblyEncoded&disassemblyModels=$disassemblyEncoded';
+        '/three_viewer_obj.html?assemblyModels=$assemblyEncoded&disassemblyModels=$disassemblyEncoded';
 
     // Add assembly MTLs if provided
     if (widget.assemblyMtlPaths != null &&
