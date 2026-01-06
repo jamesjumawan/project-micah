@@ -35,6 +35,9 @@ class ThreeDViewer extends StatefulWidget {
   /// iframe (e.g. 'assets/sample_3d_object/blt150_rearShockAbsorber_final_00.obj').
   final void Function(String modelPath)? onPartSelected;
 
+  /// Called when R key is pressed to reset to assemble mode
+  final VoidCallback? onResetToAssemble;
+
   const ThreeDViewer({
     super.key,
     required this.assemblyModelPaths,
@@ -47,6 +50,7 @@ class ThreeDViewer extends StatefulWidget {
     this.onToggleMode,
     this.onPartSelected,
     this.disassemblyDistance = 1.0,
+    this.onResetToAssemble,
   });
 
   @override
@@ -220,6 +224,9 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
         if (event is KeyDownEvent &&
             (event.logicalKey == LogicalKeyboardKey.keyR)) {
           _sendResetCameraMessage();
+          if (widget.onResetToAssemble != null) {
+            widget.onResetToAssemble!();
+          }
           return KeyEventResult.handled;
         }
         return KeyEventResult.ignored;

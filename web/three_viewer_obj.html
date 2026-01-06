@@ -445,6 +445,11 @@
         let hoveredObject = null;
         let originalMaterials = new Map(); // Store original materials for hover effect
 
+        // Click vs drag detection
+        let pointerDownPos = { x: 0, y: 0 };
+        let isDragging = false;
+        const DRAG_THRESHOLD = 5; // pixels
+
         // Map file paths to display names
         const partDisplayNames = {
             'blt150_02': 'Right Side Mirror',
@@ -538,6 +543,15 @@
 
         // Mouse move handler for hover detection
         function onPointerMove(event) {
+            // Track dragging
+            if (pointerDownPos.x !== 0 || pointerDownPos.y !== 0) {
+                const dx = event.clientX - pointerDownPos.x;
+                const dy = event.clientY - pointerDownPos.y;
+                if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+                    isDragging = true;
+                }
+            }
+
             // Only enable hover in disassemble mode
             if (currentMode !== 'disassemble') {
                 hideTooltip();
@@ -597,23 +611,54 @@
         }
 
         function onPointerDown(event) {
+            // Record pointer down position to detect dragging
+            pointerDownPos.x = event.clientX;
+            pointerDownPos.y = event.clientY;
+            isDragging = false;
+        }
+
+        function onPointerUp(event) {
+            // Only register click if not dragging and in disassemble mode
+            if (isDragging || currentMode !== 'disassemble') {
+                pointerDownPos = { x: 0, y: 0 };
+                isDragging = false;
+                return;
+            }
+
             const rect = renderer.domElement.getBoundingClientRect();
             pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
             raycaster.setFromCamera(pointer, camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
-            if (intersects && intersects.length) {
-                const top = intersects[0].object;
-                const source = top.userData && top.userData.source ? top.userData.source :
-                    (top.parent && top.parent.userData ? top.parent.userData.source : null);
+            // Use disassemblyGroup for consistent click detection with hover
+            const intersects = raycaster.intersectObjects(disassemblyGroup.children, true);
+
+            if (intersects && intersects.length > 0) {
+                const topObject = intersects[0].object;
+
+                // Find the top-level parent in disassemblyGroup
+                let targetObject = topObject;
+                while (targetObject.parent && targetObject.parent !== disassemblyGroup) {
+                    targetObject = targetObject.parent;
+                }
+
+                const source = targetObject.userData?.source ||
+                    topObject.userData?.source ||
+                    topObject.parent?.userData?.source;
+
                 if (source) {
+                    console.log('three_viewer: Part clicked:', source);
                     window.parent.postMessage({ type: 'partClick', model: source }, '*');
                 }
             }
+
+            pointerDownPos = { x: 0, y: 0 };
+            isDragging = false;
         }
 
         renderer.domElement.addEventListener('pointermove', onPointerMove);
         renderer.domElement.addEventListener('pointerdown', onPointerDown);
+        renderer.domElement.addEventListener('pointerup', onPointerUp);
 
         // Animation loop
         let rafId = null;

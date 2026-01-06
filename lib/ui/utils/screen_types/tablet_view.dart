@@ -46,9 +46,11 @@ class TabletView extends StatelessWidget {
                                   child: breadcrumbs,
                                 ),
                               ),
-                            Padding(
-                              padding: padding,
-                              child: body ?? const SizedBox(),
+                            Expanded(
+                              child: Padding(
+                                padding: padding,
+                                child: body ?? const SizedBox(),
+                              ),
                             ),
                             const Footer(),
                           ],
@@ -64,10 +66,13 @@ class TabletView extends StatelessWidget {
                                 child: breadcrumbs,
                               ),
                             ),
-                          Padding(
-                            padding: padding,
-                            child: body ?? const SizedBox(),
+                          Expanded(
+                            child: Padding(
+                              padding: padding,
+                              child: body ?? const SizedBox(),
+                            ),
                           ),
+                          const Footer(),
                         ],
                       ),
           ),

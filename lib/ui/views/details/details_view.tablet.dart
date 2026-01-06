@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_micah/ui/utils/screen_types/tablet_view.dart';
 import 'package:project_micah/ui/widgets/common/motorcycle_showcase/motorcycle_showcase.dart';
 import 'package:project_micah/ui/widgets/common/parts_overlay/parts_overlay.dart';
 import 'package:project_micah/ui/widgets/common/parts_description/parts_description.dart';
@@ -20,7 +21,7 @@ class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
 
     // Show error if not in landscape mode
     if (!isLandscape) {
-      return Scaffold(
+      return TabletView(
         body: Padding(
           padding: const EdgeInsets.all(UIHelpers.spacing24),
           child: Center(
@@ -61,57 +62,6 @@ class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
         children: [
           Column(
             children: [
-              // Header with title and See All Parts button
-              Container(
-                padding: const EdgeInsets.all(UIHelpers.spacing24),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.border),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'INTERACTIVE 3D MOTORCYCLE VIEWER',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          UIHelpers.verticalSpace8,
-                          Text(
-                            'Zoom, rotate, and explore each part in full 3D detail.',
-                            style:
-                                Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: AppColors.primary,
-                                    ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // See All Parts button
-                    ElevatedButton.icon(
-                      onPressed: viewModel.togglePartsOverlay,
-                      icon: const Icon(Icons.view_module),
-                      label: const Text('SEE ALL PARTS'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: UIHelpers.spacing24,
-                          vertical: UIHelpers.spacing16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               // Main content area
               Expanded(
                 child: Row(
@@ -156,136 +106,159 @@ class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
                     Expanded(
                       child: Column(
                         children: [
-                          // 3D Model viewer
+                          // 3D Model viewer (hidden while parts overlay is open to allow overlay clicks)
                           Expanded(
-                            child: ThreeDViewer(
-                              assemblyModelPaths:
-                                  viewModel.allAssemblyModelPaths,
-                              assemblyMtlPaths: viewModel.allAssemblyMtlPaths,
-                              disassemblyModelPaths:
-                                  viewModel.allDisassemblyModelPaths,
-                              disassemblyMtlPaths:
-                                  viewModel.allDisassemblyMtlPaths,
-                              modelName: viewModel.isAssembleMode
-                                  ? '${viewModel.selectedMotorcycle} - Full Assembly'
-                                  : '${viewModel.selectedMotorcycle} - ${viewModel.selectedPart ?? "Parts View"}',
-                              height: double.infinity,
-                              isAssembleMode: viewModel.isAssembleMode,
-                              disassemblyDistance: viewModel.partDistance,
-                              onToggleMode: (mode) =>
-                                  viewModel.toggleMode(mode),
-                              onPartSelected: (modelPath) {
-                                String? matchedKey;
-                                viewModel.partsModels.forEach((k, v) {
-                                  if (v['obj'] == modelPath) {
-                                    matchedKey = k;
-                                  }
-                                });
-                                if (matchedKey != null) {
-                                  viewModel.selectPart(matchedKey!);
-                                }
-                              },
-                            ),
+                            child: viewModel.isPartsOverlayOpen
+                                ? const SizedBox.shrink()
+                                : ThreeDViewer(
+                                    assemblyModelPaths:
+                                        viewModel.allAssemblyModelPaths,
+                                    assemblyMtlPaths:
+                                        viewModel.allAssemblyMtlPaths,
+                                    disassemblyModelPaths:
+                                        viewModel.allDisassemblyModelPaths,
+                                    disassemblyMtlPaths:
+                                        viewModel.allDisassemblyMtlPaths,
+                                    modelName: viewModel.isAssembleMode
+                                        ? '${viewModel.selectedMotorcycle} - Full Assembly'
+                                        : '${viewModel.selectedMotorcycle} - ${viewModel.selectedPart ?? "Parts View"}',
+                                    height: double.infinity,
+                                    isAssembleMode: viewModel.isAssembleMode,
+                                    disassemblyDistance: viewModel.partDistance,
+                                    onToggleMode: (mode) =>
+                                        viewModel.toggleMode(mode),
+                                    onResetToAssemble:
+                                        viewModel.resetToAssembleMode,
+                                    onPartSelected: (modelPath) {
+                                      String? matchedKey;
+                                      viewModel.partsModels.forEach((k, v) {
+                                        if (v['obj'] == modelPath) {
+                                          matchedKey = k;
+                                        }
+                                      });
+                                      if (matchedKey != null) {
+                                        viewModel.selectPart(matchedKey!);
+                                      }
+                                    },
+                                  ),
                           ),
 
-                          // Bottom controls bar
-                          Container(
-                            padding: const EdgeInsets.all(UIHelpers.spacing12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border(
-                                top: BorderSide(color: AppColors.border),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, -2),
+                          // Bottom controls
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // See All Parts button container
+                              Container(
+                                padding: const EdgeInsets.fromLTRB(
+                                  UIHelpers.spacing12,
+                                  UIHelpers.spacing8,
+                                  UIHelpers.spacing12,
+                                  0,
                                 ),
-                              ],
-                            ),
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                return SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      minWidth: constraints.maxWidth,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        ToggleButton(
-                                          isAssembleMode:
-                                              viewModel.isAssembleMode,
-                                          isEnabled: viewModel.has3DModel,
-                                          onToggle: () => viewModel.toggleMode(
-                                              !viewModel.isAssembleMode),
-                                        ),
-                                        if (!viewModel.isAssembleMode) ...[
-                                          UIHelpers.horizontalSpace16,
-                                          Text(
-                                            'Parts Distance:',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(
-                                                  color:
-                                                      AppColors.textSecondary,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                          ),
-                                          UIHelpers.horizontalSpace8,
-                                          SizedBox(
-                                            width: 150,
-                                            child: Slider(
-                                              value: viewModel.partDistance,
-                                              min: 0.0,
-                                              max: 20.0,
-                                              divisions: 100,
-                                              label: viewModel.partDistance
-                                                  .toStringAsFixed(1),
-                                              onChanged: (value) => viewModel
-                                                  .updatePartDistance(value),
-                                            ),
-                                          ),
-                                          UIHelpers.horizontalSpace8,
-                                          Text(
-                                            viewModel.partDistance
-                                                .toStringAsFixed(1),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(
-                                                  color:
-                                                      AppColors.textSecondary,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                        ],
-                                        UIHelpers.horizontalSpace24,
-                                        ControlItem(
-                                          icon: Icons.mouse,
-                                          label: 'Drag',
-                                          action: 'Rotate',
-                                        ),
-                                        UIHelpers.horizontalSpace12,
-                                        ControlItem(
-                                          icon: Icons.zoom_in,
-                                          label: 'Scroll',
-                                          action: 'Zoom',
-                                        ),
-                                        UIHelpers.horizontalSpace12,
-                                        ControlItem(
-                                          icon: Icons.refresh,
-                                          label: 'R',
-                                          action: 'Reset',
-                                        ),
-                                      ],
-                                    ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border(
+                                    top: BorderSide(color: AppColors.border),
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: viewModel.togglePartsOverlay,
+                                      icon: const Icon(Icons.view_module),
+                                      label: const Text('SEE ALL PARTS'),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: UIHelpers.spacing16,
+                                          vertical: UIHelpers.spacing12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // 3D Controls container
+                              Container(
+                                padding: const EdgeInsets.fromLTRB(
+                                  UIHelpers.spacing12,
+                                  0,
+                                  UIHelpers.spacing12,
+                                  UIHelpers.spacing8,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ToggleButton(
+                                      isAssembleMode: viewModel.isAssembleMode,
+                                      isEnabled: viewModel.has3DModel,
+                                      onToggle: () => viewModel.toggleMode(
+                                          !viewModel.isAssembleMode),
+                                    ),
+                                    if (!viewModel.isAssembleMode) ...[
+                                      UIHelpers.horizontalSpace16,
+                                      Text(
+                                        'Parts Distance:',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.textSecondary,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                      UIHelpers.horizontalSpace8,
+                                      SizedBox(
+                                        width: 150,
+                                        child: Slider(
+                                          value: viewModel.partDistance,
+                                          min: 0.0,
+                                          max: 20.0,
+                                          divisions: 100,
+                                          label: viewModel.partDistance
+                                              .toStringAsFixed(1),
+                                          onChanged: (value) => viewModel
+                                              .updatePartDistance(value),
+                                        ),
+                                      ),
+                                      UIHelpers.horizontalSpace8,
+                                      SizedBox(
+                                        width: 30,
+                                        child: Text(
+                                          viewModel.partDistance
+                                              .toStringAsFixed(1),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: AppColors.textSecondary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                    UIHelpers.horizontalSpace24,
+                                    const ControlItem(
+                                      icon: Icons.mouse,
+                                      label: 'Drag',
+                                      action: 'Rotate',
+                                    ),
+                                    UIHelpers.horizontalSpace12,
+                                    const ControlItem(
+                                      icon: Icons.zoom_in,
+                                      label: 'Scroll',
+                                      action: 'Zoom',
+                                    ),
+                                    UIHelpers.horizontalSpace12,
+                                    const ControlItem(
+                                      icon: Icons.refresh,
+                                      label: 'R',
+                                      action: 'Reset',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -301,14 +274,6 @@ class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
                             width: 20,
                             decoration: BoxDecoration(
                               color: AppColors.border,
-                              boxShadow: [
-                                BoxShadow(
-                                  color:
-                                      AppColors.border.withValues(alpha: 0.3),
-                                  blurRadius: 4,
-                                  spreadRadius: 1,
-                                ),
-                              ],
                             ),
                             child: Center(
                               child: Icon(

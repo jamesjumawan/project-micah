@@ -30,26 +30,26 @@ class TAppTheme {
       ),
       // Headline styles
       headlineLarge: GoogleFonts.archivo(
-        fontSize: 32,
+        fontSize: 26,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
         letterSpacing: 0,
       ),
       headlineMedium: GoogleFonts.archivo(
-        fontSize: 28,
+        fontSize: 22,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
         letterSpacing: 0,
       ),
       headlineSmall: GoogleFonts.archivo(
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
         letterSpacing: 0,
       ),
       // Title styles
       titleLarge: GoogleFonts.archivo(
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
         letterSpacing: 0,
@@ -181,6 +181,18 @@ class TAppTheme {
     dividerTheme: const DividerThemeData(
       color: AppColors.divider,
       thickness: 1,
+    ),
+    sliderTheme: SliderThemeData(
+      activeTrackColor: AppColors.primary,
+      inactiveTrackColor: AppColors.textSecondary.withValues(alpha: 0.5),
+      thumbColor: AppColors.primary,
+      overlayColor: AppColors.primary.withValues(alpha: 0.2),
+      valueIndicatorColor: AppColors.primary,
+      valueIndicatorTextStyle: GoogleFonts.archivo(
+        color: AppColors.textWhite,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
     ),
   );
 

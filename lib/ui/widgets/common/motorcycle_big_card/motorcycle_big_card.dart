@@ -95,8 +95,9 @@ class MotorcycleBigCard extends StackedView<MotorcycleBigCardModel> {
                                       height: height * 0.9,
                                       loadingBuilder:
                                           (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
+                                        if (loadingProgress == null) {
                                           return child;
+                                        }
                                         return SizedBox(
                                           height: height * 0.9,
                                           child: const Center(

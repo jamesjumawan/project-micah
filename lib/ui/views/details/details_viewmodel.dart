@@ -242,4 +242,12 @@ class DetailsViewModel extends BaseViewModel {
     _isMotorcycleShowcaseCollapsed = !_isMotorcycleShowcaseCollapsed;
     notifyListeners();
   }
+
+  // Reset to assemble mode (called when R key is pressed)
+  void resetToAssembleMode() {
+    _isAssembleMode = true;
+    _selectedPart = null;
+    _isRightSidebarVisible = false;
+    notifyListeners();
+  }
 }

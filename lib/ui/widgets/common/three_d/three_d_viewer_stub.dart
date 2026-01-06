@@ -11,6 +11,7 @@ class ThreeDViewer extends StatelessWidget {
   final double disassemblyDistance;
   final Function(bool)? onToggleMode;
   final void Function(String modelPath)? onPartSelected;
+  final VoidCallback? onResetToAssemble;
 
   const ThreeDViewer({
     super.key,
@@ -24,6 +25,7 @@ class ThreeDViewer extends StatelessWidget {
     this.disassemblyDistance = 1.0,
     this.onToggleMode,
     this.onPartSelected,
+    this.onResetToAssemble,
   });
 
   @override

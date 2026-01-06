@@ -111,11 +111,11 @@ class _MotorcycleCardState extends State<_MotorcycleCard> {
             padding: const EdgeInsets.all(UIHelpers.spacing12),
             child: Column(
               children: [
-                // Thumbnail with border
+                // Thumbnail with border (larger when expanded)
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  height: widget.isCollapsed ? 40 : 80,
-                  width: widget.isCollapsed ? 40 : 80,
+                  height: widget.isCollapsed ? 40 : 100,
+                  width: widget.isCollapsed ? 40 : 100,
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(UIHelpers.radiusSmall),
@@ -132,7 +132,7 @@ class _MotorcycleCardState extends State<_MotorcycleCard> {
                           ? NetworkImage(widget.motorcycle.imageUrl)
                           : AssetImage(widget.motorcycle.imageUrl)
                               as ImageProvider,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
@@ -140,7 +140,7 @@ class _MotorcycleCardState extends State<_MotorcycleCard> {
                   UIHelpers.verticalSpace8,
                   Text(
                     widget.motorcycle.name,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: widget.isSelected
                               ? FontWeight.bold
                               : FontWeight.normal,
@@ -155,7 +155,6 @@ class _MotorcycleCardState extends State<_MotorcycleCard> {
                     Text(
                       '3D Model Coming Soon!',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: 9,
                             fontStyle: FontStyle.italic,
                             color: AppColors.warning,
                           ),

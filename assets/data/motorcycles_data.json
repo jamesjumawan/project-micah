@@ -5,30 +5,18 @@
             "imageUrl": "assets/images/sample_mcs/thumbnail-mc1.png",
             "has3DModel": true,
             "engineSpecs": [
-                "Cylinder Block & Cylinder Head",
-                "Camshaft & Valves",
-                "Right Crankcase Cover",
-                "Crankcase",
-                "Oil Pump & Oil Filter",
-                "Starting Motor",
-                "Magneto",
-                "Clutch",
-                "Crankshaft & Piston",
-                "Transmission Device",
-                "Gearshift Device"
+                "Exhaust Pipe"
             ],
             "accessoriesSpecs": [
-                "Headlight",
-                "Meter Assembly",
-                "Grip Switch & Cable",
-                "Steering Bar",
-                "Steering Stem Comp",
-                "Front Fender",
-                "Front Shock Absorber",
-                "Front Wheel Assy",
-                "Rear Brake",
-                "Rear Wheel Assy",
-                "Fuel Tank Assy"
+                "Right Side Mirror",
+                "Left Side Mirror",
+                "Handle Bar",
+                "Front Frame",
+                "Back Frame",
+                "Front Wheel",
+                "Rear Fender",
+                "Rear Wheel",
+                "Rear Shock Absorber"
             ],
             "parts": {
                 "Right Side Mirror": {
@@ -131,7 +119,7 @@
                 },
                 "Exhaust Pipe": {
                     "label": "EXHAUST PIPE",
-                    "displayName": "09",
+                    "displayName": "Exhaust Pipe",
                     "imageUrl": "assets/images/sample_parts/show-details-clutch.png",
                     "name": "EXHAUST SYSTEM",
                     "sku": "EP7651982901",
