@@ -164,7 +164,7 @@
         {
             "name": "Blink 124",
             "imageUrl": "assets/images/sample_mcs/thumbnail-mc2.png",
-            "has3DModel": false,
+            "has3DModel": true,
             "engineSpecs": [
                 "Cylinder Block & Cylinder Head",
                 "Camshaft & Valves",
@@ -184,9 +184,9 @@
             "parts": {}
         },
         {
-            "name": "Hero",
+            "name": "Wizard 125",
             "imageUrl": "assets/images/sample_mcs/thumbnail-mc2.png",
-            "has3DModel": false,
+            "has3DModel": true,
             "engineSpecs": [
                 "Cylinder Block & Cylinder Head",
                 "Right Crankcase Cover",
@@ -206,9 +206,9 @@
             "parts": {}
         },
         {
-            "name": "King",
+            "name": "King 150",
             "imageUrl": "assets/images/sample_mcs/thumbnail-mc3.png",
-            "has3DModel": false,
+            "has3DModel": true,
             "engineSpecs": [
                 "Cylinder Block & Cylinder Head",
                 "Camshaft & Valves",
@@ -225,22 +225,6 @@
                 "Rear Wheel Assy",
                 "Fuel Tank Assy"
             ],
-            "parts": {}
-        },
-        {
-            "name": "Hero 2",
-            "imageUrl": "assets/images/sample_mcs/thumbnail-mc3.png",
-            "has3DModel": false,
-            "engineSpecs": [],
-            "accessoriesSpecs": [],
-            "parts": {}
-        },
-        {
-            "name": "King 2",
-            "imageUrl": "assets/images/sample_mcs/thumbnail-mc1.png",
-            "has3DModel": false,
-            "engineSpecs": [],
-            "accessoriesSpecs": [],
             "parts": {}
         }
     ]

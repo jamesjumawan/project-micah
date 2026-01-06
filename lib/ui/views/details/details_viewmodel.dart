@@ -121,15 +121,41 @@ class DetailsViewModel extends BaseViewModel {
     });
   }
 
-  // Assembly model paths (for now, using all parts combined as assembly)
+  // Assembly model paths (dynamically determined by selected motorcycle)
   String get assembleModelPath {
     if (!has3DModel) return '';
-    return '$_assetsBaseUrl/sample_3d_object/blt150_01.obj';
+
+    // Map motorcycle names to their assembly model paths
+    switch (_selectedMotorcycle) {
+      case 'BLT150':
+        return '$_assetsBaseUrl/sample_3d_object/blt150_01.obj';
+      case 'Blink 124':
+        return '$_assetsBaseUrl/sample_3d_object/blink124.obj';
+      case 'Wizard 125':
+        return '$_assetsBaseUrl/sample_3d_object/wizard125.obj';
+      case 'King 150':
+        return '$_assetsBaseUrl/sample_3d_object/king150.obj';
+      default:
+        return '';
+    }
   }
 
   String? get assembleMtlPath {
     if (!has3DModel) return null;
-    return '$_assetsBaseUrl/sample_3d_object/blt150_01.mtl';
+
+    // Map motorcycle names to their assembly MTL paths
+    switch (_selectedMotorcycle) {
+      case 'BLT150':
+        return '$_assetsBaseUrl/sample_3d_object/blt150_01.mtl';
+      case 'Blink 124':
+        return '$_assetsBaseUrl/sample_3d_object/blink124.mtl';
+      case 'Wizard 125':
+        return '$_assetsBaseUrl/sample_3d_object/wizard125.mtl';
+      case 'King 150':
+        return '$_assetsBaseUrl/sample_3d_object/king150.mtl';
+      default:
+        return null;
+    }
   }
 
   // Get all assembly model paths (for preloading)
