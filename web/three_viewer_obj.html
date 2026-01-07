@@ -121,7 +121,8 @@
 
         // Store initial camera position and target for reset
         const initialCameraPosition = camera.position.clone();
-        const initialControlsTarget = new THREE.Vector3(0, 0, 0);
+        const initialControlsTarget = new THREE.Vector3(0, 0.5, 0); // Look slightly higher
+        controls.target.copy(initialControlsTarget);
 
         // Function to reset camera to initial position
         function resetCamera() {
@@ -292,6 +293,8 @@
 
                     if (group.name === 'assemblyGroup') {
                         group.rotation.y = -Math.PI * 70 / 180; // -70 degrees (clockwise from above)
+                        group.scale.multiplyScalar(1.8); // Zoom in by 80%
+                        group.position.y += 0.6; // Lift off the ground
                     }
 
                     console.log('three_viewer: Group', group.name, 'scaled to:', scale);
