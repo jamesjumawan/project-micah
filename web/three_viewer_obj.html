@@ -81,6 +81,7 @@
         console.log('three_viewer: assemblyModels=', assemblyModels);
         console.log('three_viewer: disassemblyModels=', disassemblyModels);
         console.log('three_viewer: initialMode=', initialMode);
+        console.log('three_viewer: disassemblyDistance=', disassemblyDistance);
 
         const loadingEl = document.getElementById('loading');
         function setLoadingText(msg) {
@@ -257,8 +258,17 @@
         // Load all models for both groups
         let totalModelsToLoad = assemblyModels.length + disassemblyModels.length;
         let loadedCount = 0;
+        const loadedPaths = new Set(); // Track which paths have been counted
 
-        function updateLoadingProgress() {
+        function updateLoadingProgress(path) {
+            // Prevent double-counting the same model
+            if (path && loadedPaths.has(path)) {
+                return;
+            }
+            if (path) {
+                loadedPaths.add(path);
+            }
+
             loadedCount++;
             setLoadingText(`Loading models... ${loadedCount}/${totalModelsToLoad}`);
 
@@ -292,9 +302,13 @@
 
 
                     if (group.name === 'assemblyGroup') {
-                        group.rotation.y = -Math.PI * 70 / 180; // -70 degrees (clockwise from above)
+                        group.rotation.y = THREE.MathUtils.degToRad(-70); // -70 degrees (clockwise from above)
                         group.scale.multiplyScalar(1.8); // Zoom in by 80%
                         group.position.y += 0.6; // Lift off the ground
+                    }
+                    else {
+                        group.scale.multiplyScalar(1.6); // Zoom in by 80%
+                        group.position.y += 0.6; // Lift off the ground 
                     }
 
                     console.log('three_viewer: Group', group.name, 'scaled to:', scale);
@@ -315,23 +329,30 @@
                     // Store original position (before any displacement)
                     originalPositions.set(child.uuid, child.position.clone());
 
-                    // Calculate displacement with per-axis multipliers
-                    const explosionMultiplierX = 1.5 * disassemblyDistance;
-                    const explosionMultiplierY = 0.5 * disassemblyDistance;
-                    const explosionMultiplierZ = 0.5 * disassemblyDistance;
-
-                    const displacement = new THREE.Vector3(
-                        center.x * explosionMultiplierX,
-                        center.y * explosionMultiplierY,
-                        center.z * explosionMultiplierZ
+                    // Calculate displacement: use normalized direction from origin
+                    // scaled by disassemblyDistance to get predictable separation
+                    const direction = new THREE.Vector3(
+                        center.x,
+                        center.y,
+                        center.z
                     );
+                    const length = direction.length();
+                    if (length > 0.001) {
+                        direction.normalize();
+                        // Apply per-axis bias for better visual separation
+                        direction.x *= 1.5;
+                        direction.y *= 0.5;
+                        direction.z *= 0.5;
+                        direction.normalize();
+                        direction.multiplyScalar(disassemblyDistance * 0.5); // Scale factor for visual tuning
+                    }
 
                     // Apply the displacement to the object's position
-                    child.position.add(displacement);
+                    child.position.add(direction);
 
                     console.log('three_viewer: Displaced', child.name || 'object',
                         'center at', center.length().toFixed(2),
-                        'by', displacement.length().toFixed(2), 'units');
+                        'by', direction.length().toFixed(2), 'units');
                 });
 
                 console.log('three_viewer: Applied exploded view to disassembly group with distance', disassemblyDistance);
@@ -353,17 +374,24 @@
                     const center = new THREE.Vector3();
                     box.getCenter(center);
 
-                    const explosionMultiplierX = 1.5 * disassemblyDistance;
-                    const explosionMultiplierY = 0.5 * disassemblyDistance;
-                    const explosionMultiplierZ = 0.5 * disassemblyDistance;
-
-                    const displacement = new THREE.Vector3(
-                        center.x * explosionMultiplierX,
-                        center.y * explosionMultiplierY,
-                        center.z * explosionMultiplierZ
+                    // Calculate displacement: use normalized direction from origin
+                    const direction = new THREE.Vector3(
+                        center.x,
+                        center.y,
+                        center.z
                     );
+                    const length = direction.length();
+                    if (length > 0.001) {
+                        direction.normalize();
+                        // Apply per-axis bias for better visual separation
+                        direction.x *= 1.5;
+                        direction.y *= 0.5;
+                        direction.z *= 0.5;
+                        direction.normalize();
+                        direction.multiplyScalar(disassemblyDistance * 0.5);
+                    }
 
-                    child.position.add(displacement);
+                    child.position.add(direction);
                 });
             };
 
@@ -409,7 +437,7 @@
                         }
                     });
                     targetGroup.add(obj);
-                    updateLoadingProgress();
+                    updateLoadingProgress(path);
                     loadSingleModel(idx + 1);
                 };
 
@@ -419,8 +447,9 @@
                         const obj = gltf.scene || gltf.scenes[0];
                         finalize(obj);
                     }, null, function (err) {
-                        console.error('GLTF load error for', encodedPath, err);
-                        updateLoadingProgress();
+                        const reason = (err && err.message) ? err.message : (err && err.toString ? err.toString() : err);
+                        console.error('GLTF load error for', encodedPath, reason);
+                        updateLoadingProgress(path);
                         loadSingleModel(idx + 1);
                     });
                 } else {
@@ -468,8 +497,9 @@
                         const objLoader = new THREE.OBJLoader();
                         if (materials) objLoader.setMaterials(materials);
                         objLoader.load(encodedPath, onObjLoaded, null, function (err) {
-                            console.error('OBJ load error for', encodedPath, err);
-                            updateLoadingProgress();
+                            const reason = (err && err.message) ? err.message : (err && err.toString ? err.toString() : err);
+                            console.error('OBJ load error for', encodedPath, reason);
+                            updateLoadingProgress(path);
                             loadSingleModel(idx + 1);
                         });
                     };

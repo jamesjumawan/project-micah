@@ -30,8 +30,8 @@
                     "partNo": "1102R",
                     "quantity": 1,
                     "description": "High-visibility convex mirror providing wide-angle rear view for enhanced safety. Features adjustable mounting bracket with anti-vibration design. Durable glass lens with protective housing resistant to weather and road debris.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_02.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_02.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_02.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_02.mtl"
                 },
                 "Left Side Mirror": {
                     "label": "LEFT SIDE MIRROR",
@@ -44,8 +44,8 @@
                     "partNo": "1103L",
                     "quantity": 1,
                     "description": "High-visibility convex mirror providing wide-angle rear view for enhanced safety. Features adjustable mounting bracket with anti-vibration design. Durable glass lens with protective housing resistant to weather and road debris.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_03.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_03.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_03.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_03.mtl"
                 },
                 "Handle Bar": {
                     "label": "HANDLE BAR",
@@ -58,8 +58,8 @@
                     "partNo": "2204H",
                     "quantity": 1,
                     "description": "Ergonomically designed handlebar providing optimal control and rider comfort. Made from high-strength steel tubing with chrome finish. Features pre-drilled mounting points for controls, grips, and accessories.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_04.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_04.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_04.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_04.mtl"
                 },
                 "Front Frame": {
                     "label": "FRONT FRAME",
@@ -72,8 +72,8 @@
                     "partNo": "3305F",
                     "quantity": 1,
                     "description": "Heavy-duty steel frame providing structural integrity and mounting points for engine and components. Powder-coated finish for corrosion resistance.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_05.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_05.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_05.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_05.mtl"
                 },
                 "Back Frame": {
                     "label": "BACK FRAME",
@@ -86,8 +86,8 @@
                     "partNo": "3306B",
                     "quantity": 1,
                     "description": "Reinforced rear frame section supporting seat, rear suspension, and luggage rack. Designed for optimal load distribution.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_06.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_06.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_06.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_06.mtl"
                 },
                 "Front Wheel": {
                     "label": "FRONT WHEEL",
@@ -100,8 +100,8 @@
                     "partNo": "4407F",
                     "quantity": 1,
                     "description": "17-inch alloy wheel with tubeless tire compatibility. Features integrated disc brake mount and precision-balanced design for smooth operation.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_07.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_07.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_07.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_07.mtl"
                 },
                 "Rear Fender": {
                     "label": "REAR FENDER",
@@ -114,8 +114,8 @@
                     "partNo": "5508R",
                     "quantity": 1,
                     "description": "Molded plastic fender protecting rider from road spray and debris. Includes integrated tail light and license plate mounting bracket.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_08.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_08.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_08.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_08.mtl"
                 },
                 "Exhaust Pipe": {
                     "label": "EXHAUST PIPE",
@@ -128,8 +128,8 @@
                     "partNo": "6609E",
                     "quantity": 1,
                     "description": "Stainless steel exhaust system with muffler. Optimized for performance and noise reduction while meeting emission standards.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_09.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_09.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_09.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_09.mtl"
                 },
                 "Rear Wheel": {
                     "label": "REAR WHEEL",
@@ -142,8 +142,8 @@
                     "partNo": "4410R",
                     "quantity": 1,
                     "description": "17-inch rear alloy wheel with reinforced spokes for power transfer. Compatible with chain drive sprocket and rear brake assembly.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_10.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_10.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_10.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_10.mtl"
                 },
                 "Rear Shock Absorber": {
                     "label": "REAR SHOCK ABSORBER",
@@ -156,8 +156,8 @@
                     "partNo": "7711S",
                     "quantity": 2,
                     "description": "Hydraulic shock absorbers with adjustable preload settings. Provides smooth ride quality and stability under various load conditions.",
-                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_11.obj",
-                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking/blt150_11.mtl"
+                    "obj": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_11.obj",
+                    "mtl": "https://micah-assets.s3.us-east-1.amazonaws.com/assets/sample_3d_object/manual_breaking_01/blt150_11.mtl"
                 }
             }
         },
