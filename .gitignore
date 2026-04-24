@@ -44,5 +44,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# 3D model assets (served from S3, not bundled with app)
+assets/sample_3d_object/
+
 # GitHub workflows and configurations
 .github/
