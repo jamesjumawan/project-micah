@@ -3,42 +3,76 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'package:project_micah/models/category_model.dart';
+import 'package:project_micah/models/hierarchy_load_command.dart';
+import 'package:project_micah/models/parts_hierarchy_model.dart';
 
 class DetailsViewModel extends BaseViewModel {
-  // AWS S3 base URL for assets
   static const String _assetsBaseUrl =
       'https://micah-assets.s3.us-east-1.amazonaws.com/assets';
 
-  // Mode: true = assemble (full motorcycle), false = disassemble (parts view)
   bool _isAssembleMode = true;
   bool get isAssembleMode => _isAssembleMode;
 
-  // Selected motorcycle from the categories list
   String _selectedMotorcycle = 'BLT150';
   String get selectedMotorcycle => _selectedMotorcycle;
 
-  // Selected part (when in disassemble mode)
   String? _selectedPart;
   String? get selectedPart => _selectedPart;
 
-  // Parts overlay state
   bool _isPartsOverlayOpen = false;
   bool get isPartsOverlayOpen => _isPartsOverlayOpen;
 
-  // Part distance (for display near toggle)
+  // Hierarchy dialog open state (used to disable iframe pointer-events)
+  bool _isHierarchyDialogOpen = false;
+  bool get isHierarchyDialogOpen => _isHierarchyDialogOpen;
+  void openHierarchyDialog() {
+    _isHierarchyDialogOpen = true;
+    notifyListeners();
+  }
+
+  void closeHierarchyDialog() {
+    _isHierarchyDialogOpen = false;
+    notifyListeners();
+  }
+
   double _partDistance = 2;
   double get partDistance => _partDistance;
 
-  // Right sidebar visibility
   bool _isRightSidebarVisible = false;
   bool get isRightSidebarVisible =>
       _isAssembleMode ? false : _isRightSidebarVisible;
 
-  // Motorcycle showcase collapse state
   bool _isMotorcycleShowcaseCollapsed = false;
   bool get isMotorcycleShowcaseCollapsed => _isMotorcycleShowcaseCollapsed;
 
-  // Check if current motorcycle has 3D model
+  // ── Phase 5: parts hierarchy ────────────────────────────────────────────
+  PartsHierarchy? _partsHierarchy;
+  PartsHierarchy? get partsHierarchy => _partsHierarchy;
+
+  /// Groups whose parts are expanded/visible in the tree
+  final Set<String> _expandedGroups = {};
+  Set<String> get expandedGroups => Set.unmodifiable(_expandedGroups);
+
+  /// Groups whose 3D parts have been requested to load in the viewer
+  final Set<String> _loadedGroups = {};
+  Set<String> get loadedGroups => Set.unmodifiable(_loadedGroups);
+
+  /// Groups currently loading (progress indicator)
+  final Set<String> _loadingGroups = {};
+  Set<String> get loadingGroups => Set.unmodifiable(_loadingGroups);
+
+  /// The most recent group-load command sent to the viewer.
+  HierarchyGroupLoadCommand? _groupLoadCommand;
+  HierarchyGroupLoadCommand? get groupLoadCommand => _groupLoadCommand;
+
+  /// The most recent single-part-load command sent to the viewer.
+  HierarchyPartLoadCommand? _partLoadCommand;
+  HierarchyPartLoadCommand? get partLoadCommand => _partLoadCommand;
+
+  /// Phase 5: the PartItem currently selected from the hierarchy tree.
+  PartItem? _selectedPartItem;
+  PartItem? get selectedPartItem => _selectedPartItem;
+
   bool get has3DModel {
     if (_motorcycles.isEmpty) return false;
     final motorcycle = _motorcycles.firstWhere(
@@ -48,13 +82,11 @@ class DetailsViewModel extends BaseViewModel {
     return motorcycle.has3DModel;
   }
 
-  // List of available motorcycles (displayed as categories)
   List<CategoryModel> _motorcycles = [];
   Map<String, dynamic> _motorcycleData = {};
 
   List<CategoryModel> get motorcycles => _motorcycles;
 
-  // Initialize and load motorcycle data from JSON
   Future<void> initialize() async {
     try {
       final String jsonString =
@@ -70,6 +102,24 @@ class DetailsViewModel extends BaseViewModel {
     } catch (e) {
       debugPrint('Error loading motorcycle data: $e');
     }
+
+    // Load Phase 5 parts hierarchy (fire-and-forget)
+    _loadPartsHierarchy();
+  }
+
+  Future<void> _loadPartsHierarchy() async {
+    try {
+      // TODO: Replace with API call when BE is ready.
+      // Expected endpoint: GET /api/parts/hierarchy?model=BLT150
+      // For now, load from bundled asset if present.
+      const assetPath = 'assets/data/parts_hierarchy.json';
+      final raw = await rootBundle.loadString(assetPath);
+      _partsHierarchy =
+          PartsHierarchy.fromMap(json.decode(raw) as Map<String, dynamic>);
+      notifyListeners();
+    } catch (_) {
+      // Asset not yet bundled — hierarchy will be null until BE provides it
+    }
   }
 
   Map<String, dynamic> get _currentMotorcycleData {
@@ -80,27 +130,34 @@ class DetailsViewModel extends BaseViewModel {
     ) as Map<String, dynamic>;
   }
 
-  // Specifications data for the selected motorcycle
-  // Engine specifications
   List<String> get engineSpecs {
     final specs = _currentMotorcycleData['engineSpecs'] as List?;
     return specs?.cast<String>() ?? [];
   }
 
-  // Accessories specifications
   List<String> get accessoriesSpecs {
     final specs = _currentMotorcycleData['accessoriesSpecs'] as List?;
     return specs?.cast<String>() ?? [];
   }
 
-  // Parts data (displayed when a specific part is selected in disassemble mode)
   Map<String, dynamic> get currentPartData {
     final parts =
         _currentMotorcycleData['parts'] as Map<String, dynamic>? ?? {};
-    if (_selectedPart != null && parts.containsKey(_selectedPart)) {
-      return parts[_selectedPart] as Map<String, dynamic>;
+    if (_selectedPart != null) {
+      // Phase 4: direct display-name key lookup
+      if (parts.containsKey(_selectedPart)) {
+        return parts[_selectedPart] as Map<String, dynamic>;
+      }
+      // Phase 5: _selectedPart is item_code/id — search by code
+      final code = _selectedPartItem?.modelCode ?? _selectedPart!;
+      for (final value in parts.values) {
+        final partData = value as Map<String, dynamic>;
+        if (partData['item_code'] == code ||
+            partData['internal_code'] == code) {
+          return partData;
+        }
+      }
     }
-    // Return first part or empty map
     return parts.isNotEmpty ? parts.values.first as Map<String, dynamic> : {};
   }
 
@@ -121,11 +178,9 @@ class DetailsViewModel extends BaseViewModel {
     });
   }
 
-  // Assembly model paths (dynamically determined by selected motorcycle)
   String get assembleModelPath {
     if (!has3DModel) return '';
 
-    // Map motorcycle names to their assembly model paths
     switch (_selectedMotorcycle) {
       case 'BLT150':
         return '$_assetsBaseUrl/sample_3d_object/blt150_01.obj';
@@ -143,7 +198,6 @@ class DetailsViewModel extends BaseViewModel {
   String? get assembleMtlPath {
     if (!has3DModel) return null;
 
-    // Map motorcycle names to their assembly MTL paths
     switch (_selectedMotorcycle) {
       case 'BLT150':
         return '$_assetsBaseUrl/sample_3d_object/blt150_01.mtl';
@@ -158,25 +212,21 @@ class DetailsViewModel extends BaseViewModel {
     }
   }
 
-  // Get all assembly model paths (for preloading)
   List<String> get allAssemblyModelPaths {
     if (!has3DModel) return [];
     return [assembleModelPath];
   }
 
-  // Get all assembly MTL paths
   List<String?> get allAssemblyMtlPaths {
     if (!has3DModel) return [];
     return [assembleMtlPath];
   }
 
-  // Get all disassembly model paths (for preloading)
   List<String> get allDisassemblyModelPaths {
     if (!has3DModel) return [];
     return partsModels.values.map((m) => m['obj']!).toList(growable: false);
   }
 
-  // Get all disassembly MTL paths
   List<String?> get allDisassemblyMtlPaths {
     if (!has3DModel) return [];
     return partsModels.values
@@ -185,83 +235,105 @@ class DetailsViewModel extends BaseViewModel {
         .toList(growable: false);
   }
 
-  // Getters for current part details (used in UI)
-  String get partsLabel => currentPartData['label'] as String? ?? '';
+  String get partsLabel =>
+      currentPartData['label'] as String? ?? _selectedPartItem?.partType ?? '';
   String get partsImageUrl => currentPartData['imageUrl'] as String? ?? '';
-  String get partsName => currentPartData['name'] as String? ?? 'Unknown Part';
-  String get partsSku => currentPartData['sku'] as String? ?? '';
-  String get partsCategory => currentPartData['category'] as String? ?? '';
-  String get partsGroupNo => currentPartData['groupNo'] as String? ?? '';
-  String get partsPartNo => currentPartData['partNo'] as String? ?? '';
-  int get partsQuantity => currentPartData['quantity'] as int? ?? 0;
-  String get partsDescription =>
-      currentPartData['description'] as String? ?? '';
+  String get partsName => currentPartData['name'] as String? ??
+      _selectedPartItem?.displayName ??
+      'Unknown Part';
+  String get partsSku => currentPartData['sku'] as String? ??
+      _selectedPartItem?.itemCode ??
+      '';
+  String get partsCategory => currentPartData['category'] as String? ??
+      _selectedPartItem?.partType ??
+      '';
+  String get partsGroupNo => currentPartData['groupNo'] as String? ??
+      _selectedPartItem?.subAssembly ??
+      '';
+  String get partsPartNo => currentPartData['partNo'] as String? ??
+      _selectedPartItem?.itemCode ??
+      _selectedPartItem?.internalCode ??
+      '';
+  int get partsQuantity =>
+      currentPartData['quantity'] as int? ?? _selectedPartItem?.quantity ?? 0;
+  String get partsDescription => currentPartData['description'] as String? ??
+      _selectedPartItem?.description ??
+      '';
 
-  // Toggle between assemble and disassemble modes
   Future<void> toggleMode(bool isAssemble) async {
     _isAssembleMode = isAssemble;
 
-    // Clear selected part when switching to assemble mode
     if (isAssemble) {
       _selectedPart = null;
+      _selectedPartItem = null;
       _isRightSidebarVisible = false;
     } else {
-      // Reset explosion distance to 2 when switching to disassemble mode
       _partDistance = 2;
     }
 
     notifyListeners();
-
-    // NO LONGER NEEDED: The 3D viewer now preloads both modes
-    // Models are already loaded, just toggling visibility
-    // No simulated API call needed anymore
   }
 
-  // Select a motorcycle from the categories list
   Future<void> selectMotorcycle(String motorcycleName) async {
     if (_selectedMotorcycle == motorcycleName) return;
 
     _selectedMotorcycle = motorcycleName;
-    _selectedPart = null; // Reset selected part
-    _isRightSidebarVisible =
-        false; // Close right sidebar when selecting new motorcycle
-    _isAssembleMode = true; // Reset to assemble mode when switching motorcycles
+    _selectedPart = null;
+    _selectedPartItem = null;
+    _isRightSidebarVisible = false;
+    _isAssembleMode = true;
+    _expandedGroups.clear();
+    _loadedGroups.clear();
+    _loadingGroups.clear();
+    _groupLoadCommand = null;
+    _partLoadCommand = null;
     notifyListeners();
 
-    // Simulate API call to fetch motorcycle details
     setBusy(true);
     await Future.delayed(const Duration(milliseconds: 1000));
     setBusy(false);
   }
 
-  // Select a part in disassemble mode (e.g., clicked on 3D part)
   Future<void> selectPart(String partName) async {
     if (!_isAssembleMode && _selectedPart == partName) return;
 
+    _isAssembleMode = false;
+
     _selectedPart = partName;
-    _isPartsOverlayOpen = false; // Close overlay when part is selected
-    _isRightSidebarVisible = true; // Open right sidebar when part is selected
+    _isPartsOverlayOpen = false;
+    _isRightSidebarVisible = true;
     notifyListeners();
 
-    // Simulate API call to fetch part details
     setBusy(true);
     await Future.delayed(const Duration(milliseconds: 600));
     setBusy(false);
   }
 
-  // Toggle parts overlay
   void togglePartsOverlay() {
     _isPartsOverlayOpen = !_isPartsOverlayOpen;
     notifyListeners();
   }
 
-  // Update part distance
+  /// Phase 5: select a leaf part from the hierarchy tree.
+  void selectPartItemFromTree(String partId, PartItem item) {
+    _selectedPart = partId;
+    _selectedPartItem = item;
+    _isRightSidebarVisible = true;
+    notifyListeners();
+  }
+
+  /// Phase 5: clear selected part (go back to tree view).
+  void clearSelectedPartItem() {
+    _selectedPart = null;
+    _selectedPartItem = null;
+    notifyListeners();
+  }
+
   void updatePartDistance(double distance) {
     _partDistance = distance;
     notifyListeners();
   }
 
-  // Toggle right sidebar visibility
   void toggleRightSidebar() {
     _isRightSidebarVisible = !_isRightSidebarVisible;
     notifyListeners();
@@ -272,7 +344,79 @@ class DetailsViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  // Reset to assemble mode (called when R key is pressed)
+  // ── Phase 5: hierarchy tree methods ─────────────────────────────────────
+
+  /// Expand a group in the tree. If not yet loaded, sends a load command to
+  /// the 3D viewer. Safe to call multiple times (idempotent after first load).
+  void expandGroup(String groupCode) {
+    _expandedGroups.add(groupCode);
+    notifyListeners();
+
+    if (!_loadedGroups.contains(groupCode) &&
+        !_loadingGroups.contains(groupCode)) {
+      _requestGroupLoad(groupCode);
+    }
+  }
+
+  void collapseGroup(String groupCode) {
+    _expandedGroups.remove(groupCode);
+    notifyListeners();
+  }
+
+  void _requestGroupLoad(String groupCode) {
+    final group =
+        _partsHierarchy?.groups.where((g) => g.group == groupCode).firstOrNull;
+    if (group == null) return;
+
+    _loadingGroups.add(groupCode);
+    notifyListeners();
+
+    final parts = group.loadableItems.map((item) {
+      final objUrl = _getPartObjUrl(item.modelCode!);
+      final mtlUrl = _getPartMtlUrl(item.modelCode!);
+      return HierarchyPartLoad(
+        partId: item.id ?? item.modelCode!,
+        objUrl: objUrl,
+        mtlUrl: mtlUrl,
+      );
+    }).toList();
+
+    _groupLoadCommand =
+        HierarchyGroupLoadCommand(groupCode: groupCode, parts: parts);
+    notifyListeners();
+  }
+
+  /// Called by the view when the viewer reports a group finished loading.
+  void onGroupLoaded(String groupCode) {
+    _loadingGroups.remove(groupCode);
+    _loadedGroups.add(groupCode);
+    notifyListeners();
+  }
+
+  /// Load a single part on demand (e.g., user taps a part in the tree).
+  void loadPartOnDemand(String partId, String modelCode) {
+    _partLoadCommand = HierarchyPartLoadCommand(
+      partId: partId,
+      objUrl: _getPartObjUrl(modelCode),
+      mtlUrl: _getPartMtlUrl(modelCode),
+    );
+    notifyListeners();
+  }
+
+  bool isGroupExpanded(String groupCode) => _expandedGroups.contains(groupCode);
+  bool isGroupLoaded(String groupCode) => _loadedGroups.contains(groupCode);
+  bool isGroupLoading(String groupCode) => _loadingGroups.contains(groupCode);
+
+  // ── URL helpers (swap these for real BE endpoints when ready) ────────────
+  String _getPartObjUrl(String modelCode) {
+    // TODO: Replace with real API endpoint when BE is ready.
+    return '$_assetsBaseUrl/parts/$modelCode.obj';
+  }
+
+  String? _getPartMtlUrl(String modelCode) {
+    return '$_assetsBaseUrl/parts/$modelCode.mtl';
+  }
+
   void resetToAssembleMode() {
     _isAssembleMode = true;
     _selectedPart = null;

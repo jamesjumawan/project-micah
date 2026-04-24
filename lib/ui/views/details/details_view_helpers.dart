@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project_micah/ui/utils/constants/ui_helpers.dart';
 import 'package:project_micah/ui/utils/constants/app_colors.dart';
+import 'package:project_micah/ui/views/details/details_viewmodel.dart';
+import 'package:project_micah/ui/widgets/common/parts_hierarchy/parts_hierarchy_tree.dart';
 
 class ToggleButton extends StatelessWidget {
   final bool isAssembleMode;
@@ -73,4 +75,73 @@ class ControlItem extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Shows the Phase 5 parts hierarchy in a dialog. Selecting a part closes
+/// the dialog and shows its description in the right panel.
+void showPartsHierarchyDialog(
+    BuildContext context, DetailsViewModel viewModel) {
+  final nav = Navigator.of(context);
+  viewModel.openHierarchyDialog();
+  showDialog(
+    context: context,
+    builder: (_) => Dialog(
+      child: SizedBox(
+        width: 480,
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: UIHelpers.spacing16,
+                vertical: UIHelpers.spacing12,
+              ),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: AppColors.border)),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    'ALL PARTS',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    onTap: nav.pop,
+                    child: const Icon(Icons.close, size: 18),
+                  ),
+                ],
+              ),
+            ),
+            // Tree (reactive)
+            Expanded(
+              child: ListenableBuilder(
+                listenable: viewModel,
+                builder: (_, __) => PartsHierarchyTree(
+                  hierarchy: viewModel.partsHierarchy!,
+                  expandedGroups: viewModel.expandedGroups,
+                  loadedGroups: viewModel.loadedGroups,
+                  loadingGroups: viewModel.loadingGroups,
+                  selectedPartId: viewModel.selectedPart,
+                  onExpandGroup: viewModel.expandGroup,
+                  onCollapseGroup: viewModel.collapseGroup,
+                  onPartTap: (partId, modelCode, item) {
+                    viewModel.loadPartOnDemand(partId, modelCode);
+                    viewModel.selectPartItemFromTree(partId, item);
+                    nav.pop();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ).then((_) => viewModel.closeHierarchyDialog());
 }

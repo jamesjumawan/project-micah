@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_micah/models/hierarchy_load_command.dart';
 
 class ThreeDViewer extends StatelessWidget {
   final List<String> assemblyModelPaths;
@@ -12,6 +13,13 @@ class ThreeDViewer extends StatelessWidget {
   final Function(bool)? onToggleMode;
   final void Function(String modelPath)? onPartSelected;
   final VoidCallback? onResetToAssemble;
+  // Phase 5
+  final bool hierarchyMode;
+  final HierarchyGroupLoadCommand? groupLoadCommand;
+  final HierarchyPartLoadCommand? partLoadCommand;
+  final void Function(String groupCode)? onGroupLoaded;
+  final void Function(String partId, {required bool fromCache})? onPartLoaded;
+  final bool pointerEventsDisabled;
 
   const ThreeDViewer({
     super.key,
@@ -26,12 +34,16 @@ class ThreeDViewer extends StatelessWidget {
     this.onToggleMode,
     this.onPartSelected,
     this.onResetToAssemble,
+    this.hierarchyMode = false,
+    this.groupLoadCommand,
+    this.partLoadCommand,
+    this.onGroupLoaded,
+    this.onPartLoaded,
+    this.pointerEventsDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final totalModels =
-        assemblyModelPaths.length + disassemblyModelPaths.length;
     return SizedBox(
       height: height,
       width: double.infinity,
@@ -41,8 +53,9 @@ class ThreeDViewer extends StatelessWidget {
           children: [
             Icon(Icons.threed_rotation, size: 48, color: Colors.grey[600]),
             const SizedBox(height: 8),
-            Text(
-                '$totalModels model(s) preloaded - 3D viewer is only available on web'),
+            Text(hierarchyMode
+                ? '3D viewer (Phase 5 hierarchy mode) — web only'
+                : '3D viewer — web only'),
           ],
         ),
       ),

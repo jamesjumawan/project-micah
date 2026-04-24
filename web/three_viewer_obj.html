@@ -21,10 +21,40 @@
 
         #loading {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #333;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #disassembly-loading {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(224, 224, 224, 0.88);
+            z-index: 20;
+            gap: 16px;
+        }
+
+        .spinner {
+            width: 52px;
+            height: 52px;
+            border: 5px solid #d0d0d0;
+            border-top-color: #399ADE;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         #tooltip {
@@ -50,6 +80,10 @@
 <body>
     <div id="container"></div>
     <div id="loading">Loading 3D models...</div>
+    <div id="disassembly-loading">
+        <div class="spinner"></div>
+        <div id="disassembly-loading-text" style="color:#444;font-size:14px;font-family:sans-serif">Preparing explosion view…</div>
+    </div>
     <div id="tooltip"></div>
     <script>
         function queryParam(name) {
@@ -84,10 +118,6 @@
         console.log('three_viewer: disassemblyDistance=', disassemblyDistance);
 
         const loadingEl = document.getElementById('loading');
-        function setLoadingText(msg) {
-            if (loadingEl) loadingEl.innerText = msg;
-            console.log(msg);
-        }
 
         const container = document.getElementById('container');
         const scene = new THREE.Scene();
@@ -216,12 +246,28 @@
         // Store original positions for each disassembly object to recalculate explosions
         const originalPositions = new Map();
 
+        // Flag: disassembly group is fully loaded, scaled and exploded
+        let disassemblyReady = false;
+
+        // Animation loop state — declared here to avoid TDZ when startLoop() is called below
+        let rafId = null;
+        let running = !document.hidden;
+
+        const disassemblyOverlay = document.getElementById('disassembly-loading');
+        const disassemblyOverlayText = document.getElementById('disassembly-loading-text');
+
         // Function to toggle between modes
         function setMode(mode) {
             currentMode = mode;
             assemblyGroup.visible = (mode === 'assemble');
-            disassemblyGroup.visible = (mode === 'disassemble');
-            console.log('three_viewer: switched to mode', mode);
+            // Disassembly group only shown once fully loaded & exploded
+            disassemblyGroup.visible = (mode === 'disassemble' && disassemblyReady);
+            // Show spinner overlay when switching to disassemble before ready
+            if (disassemblyOverlay) {
+                disassemblyOverlay.style.display =
+                    (mode === 'disassemble' && !disassemblyReady) ? 'flex' : 'none';
+            }
+            console.log('three_viewer: switched to mode', mode, '| disassemblyReady:', disassemblyReady);
         }
 
         // Listen for messages from Flutter to toggle mode
@@ -255,169 +301,112 @@
             }
         });
 
-        // Load all models for both groups
-        let totalModelsToLoad = assemblyModels.length + disassemblyModels.length;
-        let loadedCount = 0;
-        const loadedPaths = new Set(); // Track which paths have been counted
+        // ── Progressive loading tracking ──────────────────────────────────
+        const totalAssembly = assemblyModels.length;
+        const totalDisassembly = disassemblyModels.length;
+        const totalModels = totalAssembly + totalDisassembly;
+        let assemblyLoadedCount = 0;
+        let disassemblyLoadedCount = 0;
 
-        function updateLoadingProgress(path) {
-            // Prevent double-counting the same model
-            if (path && loadedPaths.has(path)) {
-                return;
+        function updateLoadingBadge() {
+            const done = assemblyLoadedCount + disassemblyLoadedCount;
+            if (done >= totalModels) {
+                loadingEl.style.display = 'none';
+            } else {
+                loadingEl.style.display = 'block';
+                loadingEl.innerText = `Loading ${done}/${totalModels}`;
             }
-            if (path) {
-                loadedPaths.add(path);
-            }
-
-            loadedCount++;
-            setLoadingText(`Loading models... ${loadedCount}/${totalModelsToLoad}`);
-
-            if (loadedCount === totalModelsToLoad) {
-                // All models loaded, finalize setup
-                finalizeSetup();
+            // Keep overlay progress text in sync
+            if (disassemblyOverlayText && totalDisassembly > 0) {
+                disassemblyOverlayText.textContent =
+                    `Loading parts ${disassemblyLoadedCount}\u202f/\u202f${totalDisassembly}…`;
             }
         }
 
-        function finalizeSetup() {
-            console.log('three_viewer: Finalizing setup...');
-            console.log('three_viewer: assemblyGroup has', assemblyGroup.children.length, 'children');
-            console.log('three_viewer: disassemblyGroup has', disassemblyGroup.children.length, 'children');
+        function scaleGroup(group, isAssembly) {
+            if (group.children.length === 0) return;
+            const box = new THREE.Box3().setFromObject(group);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = maxDim > 0 ? (1.5 / maxDim) : 1.0;
+            group.scale.setScalar(scale);
+            if (isAssembly) {
+                group.rotation.y = THREE.MathUtils.degToRad(-70);
+                group.scale.multiplyScalar(1.8);
+            } else {
+                group.scale.multiplyScalar(1.6);
+            }
+            group.position.y = 0.6;
+            console.log('three_viewer: Finalized', group.name, 'scale:', group.scale.x.toFixed(3));
+        }
 
-            // Scale each group to fit viewport, but preserve Blender origin
-            [assemblyGroup, disassemblyGroup].forEach(group => {
-                if (group.children.length > 0) {
-                    // Calculate bounding box for the entire group
-                    const box = new THREE.Box3().setFromObject(group);
-                    const size = box.getSize(new THREE.Vector3());
-                    const maxDim = Math.max(size.x, size.y, size.z);
+        function applyExplosionToChild(child) {
+            const box = new THREE.Box3().setFromObject(child);
+            const center = new THREE.Vector3();
+            box.getCenter(center);
+            originalPositions.set(child.uuid, child.position.clone());
+            const dir = new THREE.Vector3(center.x, center.y, center.z);
+            if (dir.length() > 0.001) {
+                dir.normalize();
+                dir.x *= 1.5; dir.y *= 0.5; dir.z *= 0.5;
+                dir.normalize();
+                dir.multiplyScalar(disassemblyDistance * 0.5);
+                child.position.add(dir);
+            }
+        }
 
-                    console.log('three_viewer: Group', group.name, 'bounding box size:', size, 'maxDim:', maxDim);
+        // Called when every model in the assembly group has loaded
+        function finalizeAssemblyGroup() {
+            scaleGroup(assemblyGroup, true);
+            console.log('three_viewer: Assembly group ready');
+        }
 
-                    // DON'T center the group - respect Blender's origin positioning
-                    // group.position.sub(center); // REMOVED - this was shifting everything
+        // Called when every model in the disassembly group has loaded
+        function finalizeDisassemblyGroup() {
+            scaleGroup(disassemblyGroup, false);
+            // Re-apply explosion so positions are relative to the now-scaled group
+            originalPositions.clear();
+            disassemblyGroup.children.forEach(applyExplosionToChild);
+            disassemblyReady = true;
+            // If the user is already in disassemble mode, reveal now
+            if (currentMode === 'disassemble') {
+                disassemblyGroup.visible = true;
+                if (disassemblyOverlay) disassemblyOverlay.style.display = 'none';
+            }
+            console.log('three_viewer: Disassembly group ready, explosion applied');
+        }
 
-                    // Only scale to fit viewport (1.5 units)
-                    const scale = maxDim > 0 ? (1.5 / maxDim) : 1.0;
-                    group.scale.setScalar(scale);
-
-
-                    if (group.name === 'assemblyGroup') {
-                        group.rotation.y = THREE.MathUtils.degToRad(-70); // -70 degrees (clockwise from above)
-                        group.scale.multiplyScalar(1.8); // Zoom in by 80%
-                        group.position.y += 0.6; // Lift off the ground
-                    }
-                    else {
-                        group.scale.multiplyScalar(1.6); // Zoom in by 80%
-                        group.position.y += 0.6; // Lift off the ground 
-                    }
-
-                    console.log('three_viewer: Group', group.name, 'scaled to:', scale);
-                    console.log('three_viewer: Group', group.name, 'position (preserved from Blender):', group.position);
-                    console.log('three_viewer: Group', group.name, 'children count:', group.children.length);
+        // Function to update disassembly positions based on slider
+        window.updateDisassemblyPositions = function () {
+            if (disassemblyGroup.children.length === 0) return;
+            disassemblyGroup.children.forEach(function (child) {
+                const original = originalPositions.get(child.uuid);
+                if (!original) return;
+                child.position.copy(original);
+                const box = new THREE.Box3().setFromObject(child);
+                const center = new THREE.Vector3();
+                box.getCenter(center);
+                const dir = new THREE.Vector3(center.x, center.y, center.z);
+                if (dir.length() > 0.001) {
+                    dir.normalize();
+                    dir.x *= 1.5; dir.y *= 0.5; dir.z *= 0.5;
+                    dir.normalize();
+                    dir.multiplyScalar(disassemblyDistance * 0.5);
                 }
+                child.position.add(dir);
             });
+        };
 
-            // Apply exploded view displacement to disassembly group
-            // Store original positions and calculate initial disassembly
-            if (disassemblyGroup.children.length > 0) {
-                disassemblyGroup.children.forEach(function (child) {
-                    // Calculate the center of this object's geometry
-                    const box = new THREE.Box3().setFromObject(child);
-                    const center = new THREE.Vector3();
-                    box.getCenter(center);
-
-                    // Store original position (before any displacement)
-                    originalPositions.set(child.uuid, child.position.clone());
-
-                    // Calculate displacement: use normalized direction from origin
-                    // scaled by disassemblyDistance to get predictable separation
-                    const direction = new THREE.Vector3(
-                        center.x,
-                        center.y,
-                        center.z
-                    );
-                    const length = direction.length();
-                    if (length > 0.001) {
-                        direction.normalize();
-                        // Apply per-axis bias for better visual separation
-                        direction.x *= 1.5;
-                        direction.y *= 0.5;
-                        direction.z *= 0.5;
-                        direction.normalize();
-                        direction.multiplyScalar(disassemblyDistance * 0.5); // Scale factor for visual tuning
-                    }
-
-                    // Apply the displacement to the object's position
-                    child.position.add(direction);
-
-                    console.log('three_viewer: Displaced', child.name || 'object',
-                        'center at', center.length().toFixed(2),
-                        'by', direction.length().toFixed(2), 'units');
-                });
-
-                console.log('three_viewer: Applied exploded view to disassembly group with distance', disassemblyDistance);
-            }
-
-            // Function to update disassembly positions based on slider
-            window.updateDisassemblyPositions = function () {
-                if (disassemblyGroup.children.length === 0) return;
-
-                disassemblyGroup.children.forEach(function (child) {
-                    // Reset to original position
-                    const original = originalPositions.get(child.uuid);
-                    if (!original) return;
-
-                    child.position.copy(original);
-
-                    // Recalculate displacement with new distance
-                    const box = new THREE.Box3().setFromObject(child);
-                    const center = new THREE.Vector3();
-                    box.getCenter(center);
-
-                    // Calculate displacement: use normalized direction from origin
-                    const direction = new THREE.Vector3(
-                        center.x,
-                        center.y,
-                        center.z
-                    );
-                    const length = direction.length();
-                    if (length > 0.001) {
-                        direction.normalize();
-                        // Apply per-axis bias for better visual separation
-                        direction.x *= 1.5;
-                        direction.y *= 0.5;
-                        direction.z *= 0.5;
-                        direction.normalize();
-                        direction.multiplyScalar(disassemblyDistance * 0.5);
-                    }
-
-                    child.position.add(direction);
-                });
-            };
-
-            // Add both groups to scene
-            scene.add(assemblyGroup);
-            scene.add(disassemblyGroup);
-
-            // Set initial visibility
-            setMode(currentMode);
-
-            loadingEl.style.display = 'none';
-            startLoop();
-            console.log('three_viewer: All models loaded and ready!');
-            console.log('three_viewer: Assembly group visible:', assemblyGroup.visible);
-            console.log('three_viewer: Disassembly group visible:', disassemblyGroup.visible);
-        }
-
-        function loadModelGroup(models, mtls, targetGroup) {
+        function loadModelGroup(models, mtls, targetGroup, onGroupDone) {
             if (models.length === 0) {
-                // No models to load for this group
+                if (onGroupDone) onGroupDone();
                 return;
             }
 
             function loadSingleModel(idx) {
                 if (idx >= models.length) {
-                    return; // Done with this group
+                    if (onGroupDone) onGroupDone();
+                    return;
                 }
 
                 const path = models[idx];
@@ -437,7 +426,9 @@
                         }
                     });
                     targetGroup.add(obj);
-                    updateLoadingProgress(path);
+                    assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
+                    disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
+                    updateLoadingBadge();
                     loadSingleModel(idx + 1);
                 };
 
@@ -449,7 +440,9 @@
                     }, null, function (err) {
                         const reason = (err && err.message) ? err.message : (err && err.toString ? err.toString() : err);
                         console.error('GLTF load error for', encodedPath, reason);
-                        updateLoadingProgress(path);
+                        assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
+                        disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
+                        updateLoadingBadge();
                         loadSingleModel(idx + 1);
                     });
                 } else {
@@ -499,7 +492,9 @@
                         objLoader.load(encodedPath, onObjLoaded, null, function (err) {
                             const reason = (err && err.message) ? err.message : (err && err.toString ? err.toString() : err);
                             console.error('OBJ load error for', encodedPath, reason);
-                            updateLoadingProgress(path);
+                            assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
+                            disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
+                            updateLoadingBadge();
                             loadSingleModel(idx + 1);
                         });
                     };
@@ -523,12 +518,18 @@
             loadSingleModel(0);
         }
 
-        // Start loading both groups
-        if (totalModelsToLoad === 0) {
-            setLoadingText('No models specified');
+        // Add groups to scene and start rendering immediately — parts will appear as they load
+        scene.add(assemblyGroup);
+        scene.add(disassemblyGroup);
+        setMode(currentMode);
+        startLoop();
+
+        if (totalModels === 0) {
+            loadingEl.style.display = 'none';
         } else {
-            loadModelGroup(assemblyModels, assemblyMtls, assemblyGroup);
-            loadModelGroup(disassemblyModels, disassemblyMtls, disassemblyGroup);
+            updateLoadingBadge();
+            loadModelGroup(assemblyModels, assemblyMtls, assemblyGroup, finalizeAssemblyGroup);
+            loadModelGroup(disassemblyModels, disassemblyMtls, disassemblyGroup, finalizeDisassemblyGroup);
         }
 
         // Raycaster for click detection
@@ -682,11 +683,11 @@
                     renderer.domElement.style.cursor = 'pointer';
 
                     // Notify Flutter of hover
-                    window.parent.postMessage({
+                    window.parent.postMessage(JSON.stringify({
                         type: 'partHover',
                         model: source,
                         partName: getPartNameFromPath(source)
-                    }, '*');
+                    }), '*');
                 } else {
                     hideTooltip();
                     if (hoveredObject) {
@@ -741,7 +742,7 @@
 
                 if (source) {
                     console.log('three_viewer: Part clicked:', source);
-                    window.parent.postMessage({ type: 'partClick', model: source }, '*');
+                    window.parent.postMessage(JSON.stringify({ type: 'partClick', model: source }), '*');
                 }
             }
 
@@ -754,8 +755,6 @@
         renderer.domElement.addEventListener('pointerup', onPointerUp);
 
         // Animation loop
-        let rafId = null;
-        let running = !document.hidden;
         function startLoop() {
             function animate() {
                 if (!running) return;

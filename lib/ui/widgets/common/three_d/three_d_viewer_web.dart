@@ -7,19 +7,21 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project_micah/models/hierarchy_load_command.dart';
 import 'package:project_micah/ui/utils/constants/app_colors.dart';
 
 class ThreeDViewer extends StatefulWidget {
+  // ── Phase 4 (eager load) params ─────────────────────────────────────────
   /// Assembly model paths (for assemble mode)
   final List<String> assemblyModelPaths;
 
   /// Assembly MTL paths aligned with assemblyModelPaths
   final List<String?>? assemblyMtlPaths;
 
-  /// Disassembly model paths (for disassemble mode)
+  /// Disassembly model paths (for disassemble mode) — Phase 4 only
   final List<String> disassemblyModelPaths;
 
-  /// Disassembly MTL paths aligned with disassemblyModelPaths
+  /// Disassembly MTL paths aligned with disassemblyModelPaths — Phase 4 only
   final List<String?>? disassemblyMtlPaths;
 
   final String modelName;
@@ -27,16 +29,34 @@ class ThreeDViewer extends StatefulWidget {
   final bool isAssembleMode;
   final Function(bool)? onToggleMode;
 
-  /// Distance multiplier for disassembled parts (0.0 to 3.0)
+  /// Distance multiplier for disassembled parts
   final double disassemblyDistance;
 
-  /// Called when the embedded web viewer posts a `partClick` message with
-  /// the model path. Receives the model path string as provided by the
-  /// iframe (e.g. 'assets/sample_3d_object/blt150_rearShockAbsorber_final_00.obj').
+  /// Called when a part is clicked in the viewer
   final void Function(String modelPath)? onPartSelected;
 
-  /// Called when R key is pressed to reset to assemble mode
+  /// Called when R key resets to assemble mode
   final VoidCallback? onResetToAssemble;
+
+  // ── Phase 5 (lazy load + IndexedDB) params ──────────────────────────────
+  /// When true, uses three_viewer_v5.html with IndexedDB + lazy loading.
+  final bool hierarchyMode;
+
+  /// Send this command to trigger loading a group's parts in the v5 viewer.
+  /// A new object identity each time triggers a send (use a fresh instance).
+  final HierarchyGroupLoadCommand? groupLoadCommand;
+
+  /// Send this command to load a single part on demand in the v5 viewer.
+  final HierarchyPartLoadCommand? partLoadCommand;
+
+  /// Called when v5 viewer finishes loading a group.
+  final void Function(String groupCode)? onGroupLoaded;
+
+  /// Called when v5 viewer loads a part (fromCache = true means IndexedDB hit).
+  final void Function(String partId, {required bool fromCache})? onPartLoaded;
+
+  /// When true, the iframe ignores all pointer events (use during dialogs/overlays).
+  final bool pointerEventsDisabled;
 
   const ThreeDViewer({
     super.key,
@@ -51,6 +71,13 @@ class ThreeDViewer extends StatefulWidget {
     this.onPartSelected,
     this.disassemblyDistance = 1.0,
     this.onResetToAssemble,
+    // Phase 5
+    this.hierarchyMode = false,
+    this.groupLoadCommand,
+    this.partLoadCommand,
+    this.onGroupLoaded,
+    this.onPartLoaded,
+    this.pointerEventsDisabled = false,
   });
 
   @override
@@ -66,136 +93,158 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
   void initState() {
     super.initState();
     _registerViewer();
-    // Listen for postMessage events from the iframe (Three.js viewer).
-    _messageSub = html.window.onMessage.listen((html.MessageEvent event) {
-      try {
-        final dynamic data = event.data;
-        String? type;
-        String? model;
-        if (data is String) {
-          // Ignore known non-JSON string messages
-          final s = data.trim();
+    _messageSub = html.window.onMessage.listen(_onIframeMessage);
+  }
 
-          // Ignore non-JSON messages
-          if (!s.startsWith('{') && !s.startsWith('[')) {
-            debugPrint('Ignored non-JSON message: $s');
-            return;
-          }
+  void _onIframeMessage(html.MessageEvent event) {
+    try {
+      final dynamic raw = event.data;
+      Map<String, dynamic>? data;
 
-          final parsed = json.decode(data);
-          if (parsed is Map) {
-            type = parsed['type']?.toString();
-            model = parsed['model']?.toString();
-          }
-        } else if (data is Map) {
-          type = data['type']?.toString();
-          model = data['model']?.toString();
-        }
-
-        if (type == 'partClick' &&
-            model != null &&
-            widget.onPartSelected != null) {
-          widget.onPartSelected!(model);
-        }
-      } catch (e) {
-        // Silently ignore malformed messages from browser extensions/dev tools
+      if (raw is String) {
+        final s = raw.trim();
+        if (!s.startsWith('{') && !s.startsWith('[')) return;
+        final parsed = json.decode(s);
+        if (parsed is Map<String, dynamic>) data = parsed;
+      } else if (raw is Map) {
+        data = Map<String, dynamic>.from(raw);
       }
-    });
+
+      if (data == null) return;
+      final type = data['type']?.toString();
+      final model = data['model']?.toString();
+
+      switch (type) {
+        case 'partClick':
+          if (model != null) widget.onPartSelected?.call(model);
+          break;
+        case 'groupLoaded':
+          final groupCode = data['groupCode']?.toString();
+          if (groupCode != null) widget.onGroupLoaded?.call(groupCode);
+          break;
+        case 'partLoaded':
+          final partId = data['partId']?.toString();
+          final fromCache = data['fromCache'] as bool? ?? false;
+          if (partId != null)
+            widget.onPartLoaded?.call(partId, fromCache: fromCache);
+          break;
+      }
+    } catch (_) {
+      // Silently ignore malformed messages
+    }
   }
 
   @override
   void didUpdateWidget(ThreeDViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // If mode changed, send toggle message instead of recreating iframe
     if (oldWidget.isAssembleMode != widget.isAssembleMode) {
       _sendToggleModeMessage();
     }
 
-    // If disassembly distance changed, send update message
     if (oldWidget.disassemblyDistance != widget.disassemblyDistance) {
       _sendDisassemblyDistanceMessage(widget.disassemblyDistance);
     }
 
-    // Only re-register if model paths actually changed (e.g., motorcycle changed)
+    if (oldWidget.pointerEventsDisabled != widget.pointerEventsDisabled) {
+      _iframe?.style.pointerEvents =
+          widget.pointerEventsDisabled ? 'none' : 'auto';
+    }
+
+    // Phase 5: send group load command when it changes to a new instance
+    if (widget.hierarchyMode &&
+        widget.groupLoadCommand != null &&
+        !identical(oldWidget.groupLoadCommand, widget.groupLoadCommand)) {
+      _postMessage(widget.groupLoadCommand!.toJson());
+    }
+
+    // Phase 5: send part load command when it changes to a new instance
+    if (widget.hierarchyMode &&
+        widget.partLoadCommand != null &&
+        !identical(oldWidget.partLoadCommand, widget.partLoadCommand)) {
+      _postMessage(widget.partLoadCommand!.toJson());
+    }
+
+    // Re-register if assembly path changes (both modes) or disassembly changes (Phase 4)
     final oldAssembly = oldWidget.assemblyModelPaths.join('|');
     final newAssembly = widget.assemblyModelPaths.join('|');
     final oldDisassembly = oldWidget.disassemblyModelPaths.join('|');
     final newDisassembly = widget.disassemblyModelPaths.join('|');
 
-    if (oldAssembly != newAssembly || oldDisassembly != newDisassembly) {
-      debugPrint('🎨 Model paths changed! Re-registering viewer...');
+    if (oldAssembly != newAssembly ||
+        (!widget.hierarchyMode && oldDisassembly != newDisassembly)) {
+      debugPrint('ThreeDViewer: model paths changed — re-registering');
       _registerViewer();
     }
   }
 
-  void _sendToggleModeMessage() {
-    final mode = widget.isAssembleMode ? 'assemble' : 'disassemble';
-    final message = {'type': 'toggleMode', 'mode': mode};
+  void _postMessage(Map<String, dynamic> message) {
+    _iframe?.contentWindow?.postMessage(message, '*');
+  }
 
-    // Send message to iframe
-    if (_iframe != null) {
-      _iframe!.contentWindow?.postMessage(message, '*');
-      debugPrint('three_d_viewer: Sent toggle message: $mode');
-    }
+  void _sendToggleModeMessage() {
+    _postMessage({
+      'type': 'toggleMode',
+      'mode': widget.isAssembleMode ? 'assemble' : 'disassemble'
+    });
   }
 
   void _sendDisassemblyDistanceMessage(double distance) {
-    final message = {'type': 'updateDisassemblyDistance', 'distance': distance};
-
-    // Send message to iframe
-    if (_iframe != null) {
-      _iframe!.contentWindow?.postMessage(message, '*');
-      debugPrint('three_d_viewer: Sent disassembly distance: $distance');
-    }
+    _postMessage({'type': 'updateDisassemblyDistance', 'distance': distance});
   }
 
   void _sendResetCameraMessage() {
-    final message = {'type': 'resetCamera'};
-
-    // Send message to iframe
-    if (_iframe != null) {
-      _iframe!.contentWindow?.postMessage(message, '*');
-      debugPrint('three_d_viewer: Sent reset camera command');
-    }
+    _postMessage({'type': 'resetCamera'});
   }
 
   void _registerViewer() {
     viewType = 'three-d-viewer-${DateTime.now().microsecondsSinceEpoch}';
 
-    // Build query params for both assembly and disassembly models
-    final assemblyEncoded =
-        widget.assemblyModelPaths.map(Uri.encodeComponent).join(',');
-    final disassemblyEncoded =
-        widget.disassemblyModelPaths.map(Uri.encodeComponent).join(',');
+    final String src;
 
-    String src =
-        '/three_viewer_obj.html?assemblyModels=$assemblyEncoded&disassemblyModels=$disassemblyEncoded';
+    if (widget.hierarchyMode) {
+      // ── Phase 5: v5 viewer, assembly model only in query params ──────────
+      final assemblyModel = widget.assemblyModelPaths.isNotEmpty
+          ? Uri.encodeComponent(widget.assemblyModelPaths.first)
+          : '';
+      final assemblyMtl = (widget.assemblyMtlPaths?.isNotEmpty == true &&
+              widget.assemblyMtlPaths!.first != null)
+          ? Uri.encodeComponent(widget.assemblyMtlPaths!.first!)
+          : '';
+      final initialMode = widget.isAssembleMode ? 'assemble' : 'disassemble';
+      src = '/three_viewer_v5.html'
+          '?assemblyModel=$assemblyModel'
+          '&assemblyMtl=$assemblyMtl'
+          '&mode=$initialMode'
+          '&disassemblyDistance=${widget.disassemblyDistance}';
+    } else {
+      // ── Phase 4: original viewer, all disassembly paths in query params ──
+      final assemblyEncoded =
+          widget.assemblyModelPaths.map(Uri.encodeComponent).join(',');
+      final disassemblyEncoded =
+          widget.disassemblyModelPaths.map(Uri.encodeComponent).join(',');
+      var p4src =
+          '/three_viewer_obj.html?assemblyModels=$assemblyEncoded&disassemblyModels=$disassemblyEncoded';
 
-    // Add assembly MTLs if provided
-    if (widget.assemblyMtlPaths != null &&
-        widget.assemblyMtlPaths!.isNotEmpty) {
-      final assemblyMtlsEncoded = widget.assemblyMtlPaths!
-          .map((m) => m != null && m.isNotEmpty ? Uri.encodeComponent(m) : '')
-          .join(',');
-      src = '$src&assemblyMtls=$assemblyMtlsEncoded';
+      if (widget.assemblyMtlPaths != null &&
+          widget.assemblyMtlPaths!.isNotEmpty) {
+        final enc = widget.assemblyMtlPaths!
+            .map((m) => m != null && m.isNotEmpty ? Uri.encodeComponent(m) : '')
+            .join(',');
+        p4src = '$p4src&assemblyMtls=$enc';
+      }
+      if (widget.disassemblyMtlPaths != null &&
+          widget.disassemblyMtlPaths!.isNotEmpty) {
+        final enc = widget.disassemblyMtlPaths!
+            .map((m) => m != null && m.isNotEmpty ? Uri.encodeComponent(m) : '')
+            .join(',');
+        p4src = '$p4src&disassemblyMtls=$enc';
+      }
+      p4src =
+          '$p4src&mode=${widget.isAssembleMode ? 'assemble' : 'disassemble'}';
+      p4src = '$p4src&disassemblyDistance=${widget.disassemblyDistance}';
+      src = p4src;
     }
-
-    // Add disassembly MTLs if provided
-    if (widget.disassemblyMtlPaths != null &&
-        widget.disassemblyMtlPaths!.isNotEmpty) {
-      final disassemblyMtlsEncoded = widget.disassemblyMtlPaths!
-          .map((m) => m != null && m.isNotEmpty ? Uri.encodeComponent(m) : '')
-          .join(',');
-      src = '$src&disassemblyMtls=$disassemblyMtlsEncoded';
-    }
-
-    // Set initial mode
-    final initialMode = widget.isAssembleMode ? 'assemble' : 'disassemble';
-    src = '$src&mode=$initialMode';
-
-    // Set disassembly distance
-    src = '$src&disassemblyDistance=${widget.disassemblyDistance}';
 
     ui_web.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
       final element = html.DivElement()
@@ -208,7 +257,7 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
         ..style.height = '100%'
         ..style.border = 'none'
         ..style.backgroundColor = 'transparent'
-        ..style.pointerEvents = 'auto' // Allow interaction with 3D model
+        ..style.pointerEvents = widget.pointerEventsDisabled ? 'none' : 'auto'
         ..src = src;
       _iframe!.setAttribute('allowTransparency', 'true');
 

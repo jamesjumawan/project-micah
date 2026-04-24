@@ -23,7 +23,6 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
         children: [
           Column(
             children: [
-              // Main content area
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -38,8 +37,7 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                           onMotorcycleSelected: (name) =>
                               viewModel.selectMotorcycle(name),
                         ),
-                        // Collapse/Expand button
-                        Positioned(
+                          Positioned(
                           top: 8,
                           right: 8,
                           child: IconButton(
@@ -68,7 +66,6 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                     Expanded(
                       child: Column(
                         children: [
-                          // 3D Model viewer (hidden while parts overlay is open to allow overlay clicks)
                           Expanded(
                             child: viewModel.isPartsOverlayOpen
                                 ? const SizedBox.shrink()
@@ -77,10 +74,15 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                                         viewModel.allAssemblyModelPaths,
                                     assemblyMtlPaths:
                                         viewModel.allAssemblyMtlPaths,
+                                    // Phase 4: pass all disassembly paths; Phase 5: empty (lazy)
                                     disassemblyModelPaths:
-                                        viewModel.allDisassemblyModelPaths,
+                                        viewModel.partsHierarchy == null
+                                            ? viewModel.allDisassemblyModelPaths
+                                            : const [],
                                     disassemblyMtlPaths:
-                                        viewModel.allDisassemblyMtlPaths,
+                                        viewModel.partsHierarchy == null
+                                            ? viewModel.allDisassemblyMtlPaths
+                                            : const [],
                                     modelName: viewModel.isAssembleMode
                                         ? '${viewModel.selectedMotorcycle} - Full Assembly'
                                         : '${viewModel.selectedMotorcycle} - ${viewModel.selectedPart ?? "Parts View"}',
@@ -91,7 +93,15 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                                         viewModel.toggleMode(mode),
                                     onResetToAssemble:
                                         viewModel.resetToAssembleMode,
+                                    // Phase 5 params
+                                    hierarchyMode:
+                                        viewModel.partsHierarchy != null,
+                                    groupLoadCommand:
+                                        viewModel.groupLoadCommand,
+                                    partLoadCommand: viewModel.partLoadCommand,
+                                    onGroupLoaded: viewModel.onGroupLoaded,
                                     onPartSelected: (modelPath) {
+                                      // Both Phase 4 and 5: match obj URL → display name key
                                       String? matchedKey;
                                       viewModel.partsModels.forEach((k, v) {
                                         if (v['obj'] == modelPath) {
@@ -102,44 +112,51 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                                         viewModel.selectPart(matchedKey!);
                                       }
                                     },
+                                    pointerEventsDisabled:
+                                        viewModel.isPartsOverlayOpen ||
+                                            viewModel.isHierarchyDialogOpen,
                                   ),
                           ),
 
-                          // Bottom controls
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // See All Parts button container
                               Container(
-                                padding: const EdgeInsets.fromLTRB(
-                                    UIHelpers.spacing12,
-                                    UIHelpers.spacing8,
-                                    UIHelpers.spacing12,
-                                    0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border(
-                                    top: BorderSide(color: AppColors.border),
+                                  padding: const EdgeInsets.fromLTRB(
+                                      UIHelpers.spacing12,
+                                      UIHelpers.spacing8,
+                                      UIHelpers.spacing12,
+                                      0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border(
+                                      top: BorderSide(color: AppColors.border),
+                                    ),
                                   ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    ElevatedButton.icon(
-                                      onPressed: viewModel.togglePartsOverlay,
-                                      icon: const Icon(Icons.view_module),
-                                      label: const Text('SEE ALL PARTS'),
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: UIHelpers.spacing16,
-                                          vertical: UIHelpers.spacing12,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          if (viewModel.partsHierarchy !=
+                                              null) {
+                                            showPartsHierarchyDialog(
+                                                context, viewModel);
+                                          } else {
+                                            viewModel.togglePartsOverlay();
+                                          }
+                                        },
+                                        icon: const Icon(Icons.view_module),
+                                        label: const Text('SEE ALL PARTS'),
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: UIHelpers.spacing16,
+                                            vertical: UIHelpers.spacing12,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // 3D Controls container (scrollable)
+                                    ],
+                                  )),
                               Container(
                                 padding: const EdgeInsets.fromLTRB(
                                   UIHelpers.spacing12,
@@ -226,7 +243,6 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                       ),
                     ),
 
-                    // Sidebar toggle bar (narrow blue vertical strip) - only show when part is selected
                     if (viewModel.selectedPart != null)
                       GestureDetector(
                         onTap: viewModel.toggleRightSidebar,
@@ -234,9 +250,7 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                           cursor: SystemMouseCursors.click,
                           child: Container(
                             width: 20,
-                            decoration: BoxDecoration(
-                              color: AppColors.border,
-                            ),
+                            decoration: BoxDecoration(color: AppColors.border),
                             child: Center(
                               child: Icon(
                                 viewModel.isRightSidebarVisible
@@ -250,33 +264,30 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                         ),
                       ),
 
-                    // Right sidebar - Details (conditionally visible)
-                    if (viewModel.isRightSidebarVisible)
+                    if (!viewModel.isAssembleMode &&
+                        viewModel.selectedPart != null)
                       SizedBox(
-                        width: 400,
+                        width: 300,
                         child: Container(
                           decoration: const BoxDecoration(
                             color: AppColors.surface,
                             border: Border(
-                              left: BorderSide(color: AppColors.border),
-                            ),
+                                left: BorderSide(color: AppColors.border)),
                           ),
                           child: viewModel.isBusy
-                              ? const Center(child: CircularProgressIndicator())
-                              : (!viewModel.isAssembleMode &&
-                                      viewModel.selectedPart != null)
-                                  ? PartsDescription(
-                                      imageUrl: viewModel.partsImageUrl,
-                                      partsName: viewModel.partsName,
-                                      sku: viewModel.partsSku,
-                                      category: viewModel.partsCategory,
-                                      description: viewModel.partsDescription,
-                                      partNo: viewModel.partsPartNo,
-                                      quantity: viewModel.partsQuantity,
-                                      groupNo: viewModel.partsGroupNo,
-                                      label: 'PART DETAILS',
-                                    )
-                                  : const SizedBox.shrink(),
+                              ? const Center(
+                                  child: CircularProgressIndicator())
+                              : PartsDescription(
+                                  imageUrl: viewModel.partsImageUrl,
+                                  partsName: viewModel.partsName,
+                                  sku: viewModel.partsSku,
+                                  category: viewModel.partsCategory,
+                                  description: viewModel.partsDescription,
+                                  partNo: viewModel.partsPartNo,
+                                  quantity: viewModel.partsQuantity,
+                                  groupNo: viewModel.partsGroupNo,
+                                  label: 'PART DETAILS',
+                                ),
                         ),
                       ),
                   ],
@@ -285,8 +296,7 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
             ],
           ),
 
-          // Parts overlay (full screen) - positioned on top
-          if (viewModel.isPartsOverlayOpen)
+          if (viewModel.isPartsOverlayOpen && viewModel.partsHierarchy == null)
             Positioned.fill(
               child: PartsOverlay(
                 engineParts: viewModel.engineSpecs,

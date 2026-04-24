@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Three.js Viewer v5 – Lazy Load + IndexedDB</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: transparent;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-family: sans-serif;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        #tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+            font-family: sans-serif;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+
+<body>
+    <div id="container"></div>
+    <div id="loading">Loading…</div>
+    <div id="tooltip"></div>
+
+    <script>
+        // ─────────────────────────────────────────────
+        //  Query helpers
+        // ─────────────────────────────────────────────
+        function qp(name) {
+            return new URLSearchParams(window.location.search).get(name);
+        }
+
+        const assemblyModelUrl = qp('assemblyModel') ? decodeURIComponent(qp('assemblyModel')) : null;
+        const assemblyMtlUrl = qp('assemblyMtl') ? decodeURIComponent(qp('assemblyMtl')) : null;
+        const initialMode = qp('mode') || 'assemble';
+        let disassemblyDistance = parseFloat(qp('disassemblyDistance') || '2');
+
+        // ─────────────────────────────────────────────
+        //  IndexedDB Cache
+        // ─────────────────────────────────────────────
+        const IDB_NAME = 'micah-3d-v5';
+        const IDB_VERSION = 1;
+        const IDB_STORE = 'assets';
+
+        let _db = null;
+
+        function openDB() {
+            if (_db) return Promise.resolve(_db);
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+                req.onupgradeneeded = e => {
+                    e.target.result.createObjectStore(IDB_STORE);
+                };
+                req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+                req.onerror = e => reject(e.target.error);
+            });
+        }
+
+        function idbGet(db, key) {
+            return new Promise((resolve, reject) => {
+                const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
+                req.onsuccess = e => resolve(e.target.result);
+                req.onerror = e => reject(e.target.error);
+            });
+        }
+
+        function idbPut(db, key, value) {
+            return new Promise((resolve, reject) => {
+                const req = db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).put(value, key);
+                req.onsuccess = () => resolve();
+                req.onerror = e => reject(e.target.error);
+            });
+        }
+
+        /**
+         * Fetch a URL, caching the raw ArrayBuffer in IndexedDB.
+         * Returns { buffer: ArrayBuffer, fromCache: boolean }.
+         */
+        async function fetchWithCache(url) {
+            const db = await openDB();
+            const cached = await idbGet(db, url);
+            if (cached) {
+                console.log('[IDB HIT]', url);
+                return { buffer: cached, fromCache: true };
+            }
+            console.log('[IDB MISS]', url);
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error(`Fetch failed: ${url} → ${resp.status}`);
+            const buffer = await resp.arrayBuffer();
+            // Fire-and-forget write — don't block the caller
+            idbPut(db, url, buffer).catch(err => console.warn('[IDB write error]', err));
+            return { buffer, fromCache: false };
+        }
+
+        async function fetchText(url) {
+            const { buffer, fromCache } = await fetchWithCache(url);
+            const text = new TextDecoder().decode(buffer);
+            return { text, fromCache };
+        }
+
+        // ─────────────────────────────────────────────
+        //  Three.js Scene Setup
+        // ─────────────────────────────────────────────
+        const loadingEl = document.getElementById('loading');
+        const tooltipEl = document.getElementById('tooltip');
+        const container = document.getElementById('container');
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xe0e0e0);
+
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+        camera.position.set(3, 1, 2.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+
+        function resizeRenderer() {
+            camera.aspect = container.clientWidth / container.clientHeight || 1;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        new ResizeObserver(resizeRenderer).observe(container);
+        setTimeout(resizeRenderer, 80);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        const initCamPos = camera.position.clone();
+        const initCamTarget = new THREE.Vector3(0, 0.5, 0);
+        controls.target.copy(initCamTarget);
+        controls.minPolarAngle = Math.PI * 0.15;
+        controls.maxPolarAngle = Math.PI * 0.85;
+
+        function resetCamera() {
+            camera.position.copy(initCamPos);
+            controls.target.copy(initCamTarget);
+            controls.update();
+        }
+
+        // Lights
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.6));
+        const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+        sun.position.set(5, 10, 7);
+        sun.castShadow = true;
+        sun.shadow.mapSize.set(2048, 2048);
+        ['near', 'far', 'left', 'right', 'top', 'bottom'].forEach((k, i) => {
+            sun.shadow.camera[k] = [0.5, 50, -10, 10, 10, -10][i];
+        });
+        scene.add(sun);
+        const fill = new THREE.DirectionalLight(0xffffff, 0.4);
+        fill.position.set(-5, 5, -5);
+        scene.add(fill);
+        const rim = new THREE.PointLight(0xffffff, 0.5);
+        rim.position.set(-3, 3, -8);
+        scene.add(rim);
+
+        // Ground
+        const ground = new THREE.Mesh(
+            new THREE.PlaneGeometry(20, 20),
+            new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.8;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        const grid = new THREE.GridHelper(20, 40, 0x888888, 0xcccccc);
+        grid.position.y = -0.79;
+        grid.material.opacity = 0.2;
+        grid.material.transparent = true;
+        scene.add(grid);
+
+        // ─────────────────────────────────────────────
+        //  Mode groups
+        // ─────────────────────────────────────────────
+        const assemblyGroup = new THREE.Group(); assemblyGroup.name = 'assembly';
+        const disassemblyGroup = new THREE.Group(); disassemblyGroup.name = 'disassembly';
+        scene.add(assemblyGroup, disassemblyGroup);
+
+        let currentMode = initialMode;
+
+        function setMode(mode) {
+            currentMode = mode;
+            assemblyGroup.visible = mode === 'assemble';
+            disassemblyGroup.visible = mode === 'disassemble';
+            postToFlutter({ type: 'modeChanged', mode });
+        }
+
+        // ─────────────────────────────────────────────
+        //  Original-position store for explosion
+        // ─────────────────────────────────────────────
+        const originalPositions = new Map();
+
+        function storeAndExplode(obj) {
+            if (originalPositions.has(obj.uuid)) return; // already processed
+            const box = new THREE.Box3().setFromObject(obj);
+            const center = new THREE.Vector3();
+            box.getCenter(center);
+            originalPositions.set(obj.uuid, obj.position.clone());
+            _applyExplosionOffset(obj, center, disassemblyDistance);
+        }
+
+        function _applyExplosionOffset(obj, center, distance) {
+            const dir = new THREE.Vector3(center.x, center.y, center.z);
+            if (dir.length() > 0.001) {
+                dir.normalize();
+                dir.x *= 1.5; dir.y *= 0.5; dir.z *= 0.5;
+                dir.normalize();
+                dir.multiplyScalar(distance * 0.5);
+                obj.position.add(dir);
+            }
+        }
+
+        function updateAllExplosionPositions() {
+            disassemblyGroup.children.forEach(obj => {
+                const orig = originalPositions.get(obj.uuid);
+                if (!orig) return;
+                obj.position.copy(orig);
+                const box = new THREE.Box3().setFromObject(obj);
+                const center = new THREE.Vector3();
+                box.getCenter(center);
+                _applyExplosionOffset(obj, center, disassemblyDistance);
+            });
+        }
+
+        // ─────────────────────────────────────────────
+        //  Material helpers
+        // ─────────────────────────────────────────────
+        function toStandard(mat) {
+            if (mat instanceof THREE.MeshStandardMaterial) return mat;
+            const std = new THREE.MeshStandardMaterial({
+                color: mat.color ? mat.color.clone() : new THREE.Color(0xcccccc),
+                side: THREE.DoubleSide, metalness: 0.1, roughness: 0.8,
+            });
+            if (mat.map) std.map = mat.map;
+            if (mat.normalMap) std.normalMap = mat.normalMap;
+            if (mat.bumpMap) std.normalMap = mat.bumpMap;
+            std.opacity = mat.opacity ?? 1;
+            std.transparent = !!mat.transparent;
+            return std;
+        }
+
+        function finalizeMesh(obj) {
+            obj.traverse(child => {
+                if (!child.isMesh) return;
+                child.castShadow = child.receiveShadow = true;
+                child.material = toStandard(child.material);
+            });
+        }
+
+        // Scale a group to fit ~1.5 scene units
+        function scaleGroup(group, extra) {
+            if (!group.children.length) return;
+            const box = new THREE.Box3().setFromObject(group);
+            const size = box.getSize(new THREE.Vector3());
+            const max = Math.max(size.x, size.y, size.z);
+            const s = (max > 0 ? 1.5 / max : 1) * extra;
+            group.scale.setScalar(s);
+            group.position.y += 0.6;
+        }
+
+        // ─────────────────────────────────────────────
+        //  OBJ / MTL / GLB loader helpers (cache-aware)
+        // ─────────────────────────────────────────────
+        async function loadObjMtl(objUrl, mtlUrl) {
+            let materials = null;
+            if (mtlUrl) {
+                try {
+                    const { text: mtlText } = await fetchText(mtlUrl);
+                    const mtlLoader = new THREE.MTLLoader();
+                    // MTLLoader.parse needs a base path for texture resolution
+                    const basePath = mtlUrl.substring(0, mtlUrl.lastIndexOf('/') + 1);
+                    materials = mtlLoader.parse(mtlText, basePath);
+                    materials.preload();
+                } catch (e) {
+                    console.warn('[mtl skip]', mtlUrl, e.message);
+                }
+            }
+            const { text: objText, fromCache } = await fetchText(objUrl);
+            const objLoader = new THREE.OBJLoader();
+            if (materials) objLoader.setMaterials(materials);
+            const obj = objLoader.parse(objText);
+            return { obj, fromCache };
+        }
+
+        async function loadGlb(glbUrl) {
+            const { buffer, fromCache } = await fetchWithCache(glbUrl);
+            const scene3d = await new Promise((resolve, reject) => {
+                new THREE.GLTFLoader().parse(buffer, '', gltf => resolve(gltf.scene), reject);
+            });
+            return { obj: scene3d, fromCache };
+        }
+
+        async function loadAny(objUrl, mtlUrl) {
+            const lower = objUrl.toLowerCase();
+            if (lower.endsWith('.glb') || lower.endsWith('.gltf')) {
+                return loadGlb(objUrl);
+            }
+            return loadObjMtl(objUrl, mtlUrl);
+        }
+
+        // ─────────────────────────────────────────────
+        //  Assembly model (full motorcycle)
+        // ─────────────────────────────────────────────
+        let assemblyScaled = false;
+
+        async function loadAssemblyModel(objUrl, mtlUrl) {
+            if (!objUrl) return;
+            setLoading('Loading assembly…');
+            try {
+                const { obj } = await loadAny(objUrl, mtlUrl);
+                obj.userData.source = objUrl;
+                finalizeMesh(obj);
+                assemblyGroup.add(obj);
+                if (!assemblyScaled) {
+                    assemblyGroup.rotation.y = THREE.MathUtils.degToRad(-70);
+                    scaleGroup(assemblyGroup, 1.8);
+                    assemblyScaled = true;
+                }
+                setMode(currentMode);
+                hideLoading();
+                postToFlutter({ type: 'assemblyLoaded', fromCache: false });
+            } catch (e) {
+                console.error('[assembly load error]', e);
+                hideLoading();
+            }
+        }
+
+        // ─────────────────────────────────────────────
+        //  Disassembly: lazy group / part loading
+        // ─────────────────────────────────────────────
+
+        // loadedParts: partId → THREE.Object3D
+        const loadedParts = new Map();
+        // pendingGroups: groupCode → [{partId, objUrl, mtlUrl}]
+        const loadingGroups = new Set();
+
+        /**
+         * Load a batch of parts for one group.
+         * items: [{ partId, objUrl, mtlUrl? }]
+         */
+        async function loadGroup(groupCode, items) {
+            if (loadingGroups.has(groupCode)) return;
+            loadingGroups.add(groupCode);
+
+            const total = items.length;
+            let done = 0;
+
+            postToFlutter({ type: 'groupLoadStart', groupCode, total });
+            setLoading(`Loading ${groupCode}… 0 / ${total}`);
+
+            for (const item of items) {
+                try {
+                    await loadPartInternal(item.partId, item.objUrl, item.mtlUrl);
+                } catch (e) {
+                    console.warn('[part load fail]', item.partId, e.message);
+                }
+                done++;
+                setLoading(`Loading ${groupCode}… ${done} / ${total}`);
+                postToFlutter({ type: 'groupLoadProgress', groupCode, loaded: done, total });
+            }
+
+            loadingGroups.delete(groupCode);
+            hideLoading();
+            postToFlutter({ type: 'groupLoaded', groupCode });
+
+            // Re-scale disassembly group lazily after first batch
+            if (!disassemblyScaled && disassemblyGroup.children.length > 0) {
+                scaleGroup(disassemblyGroup, 1.6);
+                // Re-apply explosion offsets now that we have a scale
+                disassemblyGroup.children.forEach(storeAndExplode);
+                disassemblyScaled = true;
+            } else if (disassemblyScaled) {
+                // New parts added after first scale — apply explosion directly
+                disassemblyGroup.children.forEach(child => {
+                    if (!originalPositions.has(child.uuid)) storeAndExplode(child);
+                });
+            }
+        }
+
+        let disassemblyScaled = false;
+
+        /** Load a single part by demand (e.g., user selected it from the tree). */
+        async function loadPartOnDemand(partId, objUrl, mtlUrl) {
+            if (loadedParts.has(partId)) {
+                highlightPart(partId);
+                return;
+            }
+            setLoading(`Loading part…`);
+            try {
+                await loadPartInternal(partId, objUrl, mtlUrl);
+                if (disassemblyScaled) {
+                    // Apply explosion to the newly added child
+                    const obj = loadedParts.get(partId);
+                    if (obj && !originalPositions.has(obj.uuid)) storeAndExplode(obj);
+                }
+            } catch (e) {
+                console.error('[loadPartOnDemand]', partId, e);
+            }
+            hideLoading();
+            postToFlutter({ type: 'partLoaded', partId });
+        }
+
+        async function loadPartInternal(partId, objUrl, mtlUrl) {
+            if (loadedParts.has(partId)) return;
+            const { obj, fromCache } = await loadAny(objUrl, mtlUrl || null);
+            obj.userData.source = objUrl;
+            obj.userData.partId = partId;
+            obj.traverse(child => {
+                if (!child.isMesh) return;
+                child.castShadow = child.receiveShadow = true;
+                child.material = toStandard(child.material);
+                child.userData.source = objUrl;
+                child.userData.partId = partId;
+            });
+            disassemblyGroup.add(obj);
+            loadedParts.set(partId, obj);
+            postToFlutter({ type: 'partLoaded', partId, fromCache });
+        }
+
+        // ─────────────────────────────────────────────
+        //  Highlight / hover
+        // ─────────────────────────────────────────────
+        const originalMaterials = new Map();
+        let hoveredObject = null;
+
+        function highlightPart(partId) {
+            const obj = loadedParts.get(partId);
+            if (obj) highlightObject(obj);
+        }
+
+        function highlightObject(object) {
+            if (!object || hoveredObject === object) return;
+            if (hoveredObject) unhighlightObject(hoveredObject);
+            hoveredObject = object;
+            object.traverse(child => {
+                if (!child.isMesh || !child.material) return;
+                if (!originalMaterials.has(child.uuid)) {
+                    originalMaterials.set(child.uuid, {
+                        emissive: child.material.emissive ? child.material.emissive.clone() : new THREE.Color(0),
+                        emissiveIntensity: child.material.emissiveIntensity || 0,
+                    });
+                }
+                child.material.emissive = new THREE.Color(0x399ADE);
+                child.material.emissiveIntensity = 0.4;
+                child.material.needsUpdate = true;
+            });
+        }
+
+        function unhighlightObject(object) {
+            if (!object) return;
+            object.traverse(child => {
+                if (!child.isMesh || !child.material) return;
+                const orig = originalMaterials.get(child.uuid);
+                if (orig) {
+                    child.material.emissive = orig.emissive.clone();
+                    child.material.emissiveIntensity = orig.emissiveIntensity;
+                    child.material.needsUpdate = true;
+                }
+            });
+            hoveredObject = null;
+        }
+
+        function getPartName(source) {
+            if (!source) return 'Unknown Part';
+            const base = source.split('/').pop().replace(/\.(obj|glb|gltf)$/i, '');
+            return base.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        // Raycaster
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        let pointerDown = { x: 0, y: 0 };
+        let isDragging = false;
+        const DRAG_THRESHOLD = 5;
+
+        function onPointerMove(e) {
+            if (pointerDown.x || pointerDown.y) {
+                const dx = e.clientX - pointerDown.x, dy = e.clientY - pointerDown.y;
+                if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) isDragging = true;
+            }
+            if (currentMode !== 'disassemble') {
+                tooltipEl.style.display = 'none';
+                if (hoveredObject) unhighlightObject(hoveredObject);
+                renderer.domElement.style.cursor = 'default';
+                return;
+            }
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const hits = raycaster.intersectObjects(disassemblyGroup.children, true);
+            if (hits.length) {
+                let t = hits[0].object;
+                while (t.parent && t.parent !== disassemblyGroup) t = t.parent;
+                const src = t.userData?.source || hits[0].object.userData?.source;
+                if (src) {
+                    highlightObject(t);
+                    tooltipEl.style.display = 'block';
+                    tooltipEl.textContent = getPartName(src);
+                    tooltipEl.style.left = (e.clientX + 15) + 'px';
+                    tooltipEl.style.top = (e.clientY + 15) + 'px';
+                    renderer.domElement.style.cursor = 'pointer';
+                    postToFlutter({ type: 'partHover', model: src });
+                    return;
+                }
+            }
+            tooltipEl.style.display = 'none';
+            if (hoveredObject) unhighlightObject(hoveredObject);
+            renderer.domElement.style.cursor = 'default';
+        }
+
+        function onPointerDown(e) { pointerDown = { x: e.clientX, y: e.clientY }; isDragging = false; }
+
+        function onPointerUp(e) {
+            if (isDragging || currentMode !== 'disassemble') {
+                pointerDown = { x: 0, y: 0 }; isDragging = false; return;
+            }
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const hits = raycaster.intersectObjects(disassemblyGroup.children, true);
+            if (hits.length) {
+                let t = hits[0].object;
+                while (t.parent && t.parent !== disassemblyGroup) t = t.parent;
+                const src = t.userData?.source || hits[0].object.userData?.source;
+                if (src) postToFlutter({ type: 'partClick', model: src });
+            }
+            pointerDown = { x: 0, y: 0 }; isDragging = false;
+        }
+
+        renderer.domElement.addEventListener('pointermove', onPointerMove);
+        renderer.domElement.addEventListener('pointerdown', onPointerDown);
+        renderer.domElement.addEventListener('pointerup', onPointerUp);
+
+        // ─────────────────────────────────────────────
+        //  postMessage bridge (Flutter ↔ JS)
+        // ─────────────────────────────────────────────
+        function postToFlutter(msg) {
+            window.parent.postMessage(JSON.stringify(msg), '*');
+        }
+
+        window.addEventListener('message', async function (event) {
+            try {
+                const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                if (!data || !data.type) return;
+
+                switch (data.type) {
+                    case 'toggleMode':
+                        setMode(data.mode);
+                        break;
+
+                    case 'updateDisassemblyDistance':
+                        disassemblyDistance = data.distance;
+                        updateAllExplosionPositions();
+                        break;
+
+                    case 'resetCamera':
+                        resetCamera();
+                        break;
+
+                    case 'loadGroup':
+                        // data.groupCode: string, data.parts: [{partId, objUrl, mtlUrl?}]
+                        await loadGroup(data.groupCode, data.parts || []);
+                        break;
+
+                    case 'loadPart':
+                        // data.partId: string, data.objUrl: string, data.mtlUrl?: string
+                        await loadPartOnDemand(data.partId, data.objUrl, data.mtlUrl || null);
+                        break;
+
+                    case 'highlightPart':
+                        highlightPart(data.partId);
+                        break;
+
+                    case 'loadAssembly':
+                        await loadAssemblyModel(data.objUrl, data.mtlUrl || null);
+                        break;
+                }
+            } catch (e) {
+                // Ignore malformed messages
+            }
+        });
+
+        // ─────────────────────────────────────────────
+        //  Loading indicator
+        // ─────────────────────────────────────────────
+        function setLoading(msg) {
+            loadingEl.textContent = msg;
+            loadingEl.style.display = 'block';
+        }
+        function hideLoading() {
+            loadingEl.style.display = 'none';
+        }
+
+        // ─────────────────────────────────────────────
+        //  Render loop
+        // ─────────────────────────────────────────────
+        let rafId = null;
+        let running = !document.hidden;
+
+        function startLoop() {
+            (function animate() {
+                if (!running) return;
+                rafId = requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            })();
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            running = !document.hidden;
+            if (running && !rafId) startLoop();
+            if (!running && rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        });
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'r' || e.key === 'R') resetCamera();
+        });
+
+        // ─────────────────────────────────────────────
+        //  Bootstrap
+        // ─────────────────────────────────────────────
+        setMode(currentMode);
+        startLoop();
+
+        // Load assembly model if provided via query param (Phase 5 always passes it)
+        if (assemblyModelUrl) {
+            loadAssemblyModel(assemblyModelUrl, assemblyMtlUrl);
+        }
+
+        postToFlutter({ type: 'viewerReady' });
+        console.log('[viewer v5] ready — IndexedDB + lazy load enabled');
+    </script>
+</body>
+
+</html>

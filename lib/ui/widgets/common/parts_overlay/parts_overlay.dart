@@ -143,8 +143,7 @@ class _PartItemState extends State<_PartItem> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
-        //TODO: Fix gesture detector conflict
-        //onTap: widget.onTap,
+        onTap: widget.onTap,
         child: Container(
           color: widget.isSelected
               ? AppColors.primary.withValues(alpha: 0.1)
