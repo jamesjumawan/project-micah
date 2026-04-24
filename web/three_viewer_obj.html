@@ -23,7 +23,7 @@
             position: absolute;
             bottom: 12px;
             right: 12px;
-            background: rgba(0,0,0,0.55);
+            background: rgba(0, 0, 0, 0.55);
             color: #fff;
             font-size: 12px;
             padding: 5px 10px;
@@ -54,7 +54,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         #tooltip {
@@ -82,7 +84,8 @@
     <div id="loading">Loading 3D models...</div>
     <div id="disassembly-loading">
         <div class="spinner"></div>
-        <div id="disassembly-loading-text" style="color:#444;font-size:14px;font-family:sans-serif">Preparing explosion view…</div>
+        <div id="disassembly-loading-text" style="color:#444;font-size:14px;font-family:sans-serif">Preparing explosion
+            view…</div>
     </div>
     <div id="tooltip"></div>
     <script>

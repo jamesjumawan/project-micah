@@ -57,8 +57,7 @@ class PartsHierarchyDetail extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (item.partType != null)
-                  _chip(context, item.partType!),
+                if (item.partType != null) _chip(context, item.partType!),
                 UIHelpers.verticalSpace12,
                 if (item.itemCode != null)
                   _row(context, 'Item Code', item.itemCode!),

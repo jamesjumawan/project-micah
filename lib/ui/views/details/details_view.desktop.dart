@@ -37,7 +37,7 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                           onMotorcycleSelected: (name) =>
                               viewModel.selectMotorcycle(name),
                         ),
-                          Positioned(
+                        Positioned(
                           top: 8,
                           right: 8,
                           child: IconButton(
@@ -117,7 +117,6 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                                             viewModel.isHierarchyDialogOpen,
                                   ),
                           ),
-
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -275,8 +274,7 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
                                 left: BorderSide(color: AppColors.border)),
                           ),
                           child: viewModel.isBusy
-                              ? const Center(
-                                  child: CircularProgressIndicator())
+                              ? const Center(child: CircularProgressIndicator())
                               : PartsDescription(
                                   imageUrl: viewModel.partsImageUrl,
                                   partsName: viewModel.partsName,
@@ -295,7 +293,6 @@ class DetailsViewDesktop extends ViewModelWidget<DetailsViewModel> {
               ),
             ],
           ),
-
           if (viewModel.isPartsOverlayOpen && viewModel.partsHierarchy == null)
             Positioned.fill(
               child: PartsOverlay(

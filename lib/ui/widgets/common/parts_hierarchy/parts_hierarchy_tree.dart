@@ -253,8 +253,8 @@ class _SubAssemblyHeader extends StatelessWidget {
             AnimatedRotation(
               turns: isCollapsed ? 0 : 0.25,
               duration: const Duration(milliseconds: 150),
-              child: Icon(Icons.chevron_right,
-                  size: 14, color: AppColors.primary),
+              child:
+                  Icon(Icons.chevron_right, size: 14, color: AppColors.primary),
             ),
             UIHelpers.horizontalSpace4,
             Text(

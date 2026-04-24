@@ -238,25 +238,29 @@ class DetailsViewModel extends BaseViewModel {
   String get partsLabel =>
       currentPartData['label'] as String? ?? _selectedPartItem?.partType ?? '';
   String get partsImageUrl => currentPartData['imageUrl'] as String? ?? '';
-  String get partsName => currentPartData['name'] as String? ??
+  String get partsName =>
+      currentPartData['name'] as String? ??
       _selectedPartItem?.displayName ??
       'Unknown Part';
-  String get partsSku => currentPartData['sku'] as String? ??
-      _selectedPartItem?.itemCode ??
-      '';
-  String get partsCategory => currentPartData['category'] as String? ??
+  String get partsSku =>
+      currentPartData['sku'] as String? ?? _selectedPartItem?.itemCode ?? '';
+  String get partsCategory =>
+      currentPartData['category'] as String? ??
       _selectedPartItem?.partType ??
       '';
-  String get partsGroupNo => currentPartData['groupNo'] as String? ??
+  String get partsGroupNo =>
+      currentPartData['groupNo'] as String? ??
       _selectedPartItem?.subAssembly ??
       '';
-  String get partsPartNo => currentPartData['partNo'] as String? ??
+  String get partsPartNo =>
+      currentPartData['partNo'] as String? ??
       _selectedPartItem?.itemCode ??
       _selectedPartItem?.internalCode ??
       '';
   int get partsQuantity =>
       currentPartData['quantity'] as int? ?? _selectedPartItem?.quantity ?? 0;
-  String get partsDescription => currentPartData['description'] as String? ??
+  String get partsDescription =>
+      currentPartData['description'] as String? ??
       _selectedPartItem?.description ??
       '';
 
