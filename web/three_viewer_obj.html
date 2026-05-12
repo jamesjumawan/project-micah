@@ -86,57 +86,6 @@
             margin-bottom: 4px;
         }
 
-        .progress-track {
-            width: 110px;
-            height: 4px;
-            background: #d0d0d0;
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #399ADE;
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.25s ease;
-        }
-
-        .progress-fill.fake-anim {
-            animation: fake-fill 10s ease-out forwards;
-        }
-
-        @keyframes fake-fill {
-            0% {
-                width: 0%;
-            }
-
-            20% {
-                width: 35%;
-            }
-
-            50% {
-                width: 62%;
-            }
-
-            80% {
-                width: 82%;
-            }
-
-            100% {
-                width: 91%;
-            }
-        }
-
-        .loading-percent {
-            font-size: 12px;
-            font-weight: 600;
-            color: #555;
-            font-family: sans-serif;
-            margin-top: 5px;
-        }
-
         #coming-soon {
             position: absolute;
             inset: 0;
@@ -235,19 +184,13 @@
     <!-- Centered initial-load overlay — visible until assembly is ready -->
     <div id="initial-loading">
         <div class="spinner"></div>
-        <div class="progress-track">
-            <div id="initial-progress-fill" class="progress-fill fake-anim"></div>
-        </div>
-        <div id="initial-loading-percent" class="loading-percent">0%</div>
+        <div class="overlay-sub" style="margin-top:12px;">Loading, please wait…</div>
     </div>
 
     <!-- Disassembly overlay — shown when user switches before parts are ready -->
     <div id="disassembly-loading">
         <div class="spinner"></div>
-        <div class="progress-track">
-            <div id="disassembly-progress-fill" class="progress-fill fake-anim"></div>
-        </div>
-        <div id="disassembly-loading-percent" class="loading-percent">0%</div>
+        <div class="overlay-sub" style="margin-top:12px;">Preparing parts, hang tight…</div>
     </div>
     <!-- Coming Soon overlay — shown when disassembly is toggled but no models are loaded -->
     <div id="coming-soon">
@@ -548,24 +491,6 @@
 
         function updateLoadingBadge() {
             loadingEl.style.display = 'none';
-
-            // Assembly progress bar + percent
-            if (totalAssembly > 0) {
-                const pct = Math.round((assemblyLoadedCount / totalAssembly) * 100);
-                const fill = document.getElementById('initial-progress-fill');
-                const label = document.getElementById('initial-loading-percent');
-                if (fill) { fill.classList.remove('fake-anim'); fill.style.width = pct + '%'; }
-                if (label) label.textContent = pct + '%';
-            }
-
-            // Disassembly progress bar + percent
-            if (totalDisassembly > 0) {
-                const pct = Math.round((disassemblyLoadedCount / totalDisassembly) * 100);
-                const fill = document.getElementById('disassembly-progress-fill');
-                const label = document.getElementById('disassembly-loading-percent');
-                if (fill) { fill.classList.remove('fake-anim'); fill.style.width = pct + '%'; }
-                if (label) label.textContent = pct + '%';
-            }
         }
 
         function scaleGroup(group, isAssembly) {
