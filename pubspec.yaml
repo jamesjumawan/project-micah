@@ -38,6 +38,7 @@ flutter:
     - assets/images/sample_parts/
     - assets/images/Others/
     - assets/data/
+    - assets/Objects/
     - assets/models/
     - web/manifest.json
     - web/three_viewer_obj.html
