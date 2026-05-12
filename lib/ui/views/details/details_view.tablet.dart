@@ -3,6 +3,7 @@ import 'package:project_micah/ui/utils/screen_types/tablet_view.dart';
 import 'package:project_micah/ui/widgets/common/motorcycle_showcase/motorcycle_showcase.dart';
 import 'package:project_micah/ui/widgets/common/parts_overlay/parts_overlay.dart';
 import 'package:project_micah/ui/widgets/common/parts_description/parts_description.dart';
+import 'package:project_micah/ui/widgets/common/loading/cog_loader.dart';
 import 'package:stacked/stacked.dart';
 
 import 'details_viewmodel.dart';
@@ -10,6 +11,7 @@ import 'details_view_helpers.dart';
 import 'package:project_micah/ui/widgets/common/three_d/three_d_viewer.dart';
 import 'package:project_micah/ui/utils/constants/ui_helpers.dart';
 import 'package:project_micah/ui/utils/constants/app_colors.dart';
+import 'package:project_micah/ui/utils/constants/text_strings.dart';
 
 class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
   const DetailsViewTablet({super.key});
@@ -105,55 +107,94 @@ class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
                       child: Column(
                         children: [
                           Expanded(
-                            child: viewModel.isPartsOverlayOpen
-                                ? const SizedBox.shrink()
-                                : ThreeDViewer(
-                                    assemblyModelPaths:
-                                        viewModel.allAssemblyModelPaths,
-                                    assemblyMtlPaths:
-                                        viewModel.allAssemblyMtlPaths,
-                                    // Phase 4: pass all disassembly paths; Phase 5: empty (lazy)
-                                    disassemblyModelPaths:
-                                        viewModel.partsHierarchy == null
+                            child: viewModel.isSubAssemblyFocused
+                                ? _SubAssemblyFocusOverlay(
+                                    saCode: viewModel.focusedSubAssembly ?? '',
+                                    objPath:
+                                        viewModel.focusedSubAssemblyObjPath,
+                                    mtlPath:
+                                        viewModel.focusedSubAssemblyMtlPath,
+                                    onBack: viewModel.clearSubAssemblyFocus,
+                                  )
+                                : viewModel.isPartsOverlayOpen
+                                    ? const SizedBox.shrink()
+                                    : ThreeDViewer(
+                                        assemblyModelPaths:
+                                            viewModel.allAssemblyModelPaths,
+                                        assemblyMtlPaths:
+                                            viewModel.allAssemblyMtlPaths,
+                                        // BLT150: always pass Blender explosion OBJs.
+                                        // Other motorcycles: Phase 4 eager or Phase 5 lazy.
+                                        disassemblyModelPaths: (viewModel
+                                                        .partsHierarchy ==
+                                                    null ||
+                                                viewModel.hasExplosionModels)
                                             ? viewModel.allDisassemblyModelPaths
                                             : const [],
-                                    disassemblyMtlPaths:
-                                        viewModel.partsHierarchy == null
+                                        disassemblyMtlPaths: (viewModel
+                                                        .partsHierarchy ==
+                                                    null ||
+                                                viewModel.hasExplosionModels)
                                             ? viewModel.allDisassemblyMtlPaths
                                             : const [],
-                                    modelName: viewModel.isAssembleMode
-                                        ? '${viewModel.selectedMotorcycle} - Full Assembly'
-                                        : '${viewModel.selectedMotorcycle} - ${viewModel.selectedPart ?? "Parts View"}',
-                                    height: double.infinity,
-                                    isAssembleMode: viewModel.isAssembleMode,
-                                    disassemblyDistance: viewModel.partDistance,
-                                    onToggleMode: (mode) =>
-                                        viewModel.toggleMode(mode),
-                                    onResetToAssemble:
-                                        viewModel.resetToAssembleMode,
-                                    // Phase 5 params
-                                    hierarchyMode:
-                                        viewModel.partsHierarchy != null,
-                                    groupLoadCommand:
-                                        viewModel.groupLoadCommand,
-                                    partLoadCommand: viewModel.partLoadCommand,
-                                    onGroupLoaded: viewModel.onGroupLoaded,
-                                    onPartSelected: (modelPath) {
-                                      // Both Phase 4 and 5: match obj URL → display name key
-                                      String? matchedKey;
-                                      viewModel.partsModels.forEach((k, v) {
-                                        if (v['obj'] == modelPath) {
-                                          matchedKey = k;
-                                        }
-                                      });
-                                      if (matchedKey != null) {
-                                        viewModel.selectPart(matchedKey!);
-                                      }
-                                    },
-                                    pointerEventsDisabled:
-                                        viewModel.isPartsOverlayOpen ||
-                                            viewModel.isHierarchyDialogOpen,
-                                  ),
+                                        modelName: viewModel.isAssembleMode
+                                            ? '${viewModel.selectedMotorcycle} - Full Assembly'
+                                            : '${viewModel.selectedMotorcycle} - ${viewModel.selectedPart ?? "Parts View"}',
+                                        height: double.infinity,
+                                        isAssembleMode:
+                                            viewModel.isAssembleMode,
+                                        disassemblyDistance:
+                                            viewModel.partDistance,
+                                        partsMeta: viewModel.partsMeta,
+                                        onToggleMode: (mode) =>
+                                            viewModel.toggleMode(mode),
+                                        onResetToAssemble:
+                                            viewModel.resetToAssembleMode,
+                                        // Phase 5 params
+                                        hierarchyMode:
+                                            viewModel.partsHierarchy != null &&
+                                                !viewModel.hasExplosionModels,
+                                        groupLoadCommand:
+                                            viewModel.groupLoadCommand,
+                                        partLoadCommand:
+                                            viewModel.partLoadCommand,
+                                        onGroupLoaded: viewModel.onGroupLoaded,
+                                        onPartSelected: (payload) {
+                                          final parts = payload.split('|||');
+                                          final itemCode = parts[0];
+                                          final meshName = parts.length > 1
+                                              ? parts[1]
+                                              : null;
+                                          String? displayName;
+                                          if (meshName != null &&
+                                              meshName.contains('_\u2014_')) {
+                                            displayName = meshName
+                                                .split('_\u2014_')
+                                                .skip(1)
+                                                .join(' \u2014 ')
+                                                .replaceAll('_', ' ');
+                                          }
+                                          String? matchedKey;
+                                          viewModel.partsModels.forEach((k, v) {
+                                            if (v['obj'] == itemCode ||
+                                                (v['item_code']?.isNotEmpty ==
+                                                        true &&
+                                                    v['item_code'] ==
+                                                        itemCode)) {
+                                              matchedKey = k;
+                                            }
+                                          });
+                                          if (matchedKey != null) {
+                                            viewModel.selectPart(matchedKey!);
+                                          } else {
+                                            viewModel.selectPartByCode(itemCode,
+                                                displayName: displayName);
+                                          }
+                                        },
+                                        pointerEventsDisabled:
+                                            viewModel.isPartsOverlayOpen ||
+                                                viewModel.isHierarchyDialogOpen,
+                                      ),
                           ),
                           Column(
                             mainAxisSize: MainAxisSize.min,
@@ -285,7 +326,8 @@ class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
                       ),
                     ),
 
-                    if (viewModel.selectedPart != null)
+                    if (viewModel.selectedPart != null &&
+                        !viewModel.isSubAssemblyFocused)
                       GestureDetector(
                         onTap: viewModel.toggleRightSidebar,
                         child: MouseRegion(
@@ -307,30 +349,54 @@ class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
                       ),
 
                     if (!viewModel.isAssembleMode &&
-                        viewModel.selectedPart != null)
-                      SizedBox(
-                        width: 260,
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            color: AppColors.surface,
-                            border: Border(
-                                left: BorderSide(color: AppColors.border)),
+                        viewModel.selectedPart != null &&
+                        !viewModel.isSubAssemblyFocused &&
+                        viewModel.isRightSidebarVisible)
+                      LayoutBuilder(builder: (context, _) {
+                        final sidebarWidth =
+                            MediaQuery.of(context).size.width * 0.35;
+                        return SizedBox(
+                          width: sidebarWidth,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: AppColors.surface,
+                              border: Border(
+                                  left: BorderSide(color: AppColors.border)),
+                            ),
+                            child: viewModel.isBusy
+                                ? const Center(child: CogLoader())
+                                : PartsDescription(
+                                    imageUrl: viewModel.partsImageUrl,
+                                    partsName: viewModel.partsName,
+                                    sku: viewModel.partsSku,
+                                    category: viewModel.partsCategory,
+                                    description: viewModel.partsDescription,
+                                    partNo: viewModel.partsPartNo,
+                                    quantity: viewModel.partsQuantity,
+                                    groupNo: viewModel.partsGroupNo,
+                                    label: TTexts.partDetails,
+                                    previewWidget: viewModel
+                                            .selectedPartSingleObjPath
+                                            .isNotEmpty
+                                        ? ThreeDViewer(
+                                            assemblyModelPaths: [
+                                              viewModel
+                                                  .selectedPartSingleObjPath
+                                            ],
+                                            assemblyMtlPaths: [
+                                              viewModel
+                                                  .selectedPartSingleMtlPath
+                                            ],
+                                            disassemblyModelPaths: const [],
+                                            modelName: viewModel.partsName,
+                                            height: 280,
+                                            isAssembleMode: true,
+                                          )
+                                        : null,
+                                  ),
                           ),
-                          child: viewModel.isBusy
-                              ? const Center(child: CircularProgressIndicator())
-                              : PartsDescription(
-                                  imageUrl: viewModel.partsImageUrl,
-                                  partsName: viewModel.partsName,
-                                  sku: viewModel.partsSku,
-                                  category: viewModel.partsCategory,
-                                  description: viewModel.partsDescription,
-                                  partNo: viewModel.partsPartNo,
-                                  quantity: viewModel.partsQuantity,
-                                  groupNo: viewModel.partsGroupNo,
-                                  label: 'PART DETAILS',
-                                ),
-                        ),
-                      ),
+                        );
+                      }),
                   ],
                 ),
               ),
@@ -346,6 +412,106 @@ class DetailsViewTablet extends ViewModelWidget<DetailsViewModel> {
                 onClose: viewModel.togglePartsOverlay,
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-area overlay shown when a sub-assembly is clicked in disassembly mode.
+class _SubAssemblyFocusOverlay extends StatelessWidget {
+  final String saCode;
+  final String objPath;
+  final String? mtlPath;
+  final VoidCallback onBack;
+
+  const _SubAssemblyFocusOverlay({
+    required this.saCode,
+    required this.objPath,
+    required this.onBack,
+    this.mtlPath,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.background,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: UIHelpers.spacing16,
+              vertical: UIHelpers.spacing12,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border(bottom: BorderSide(color: AppColors.border)),
+            ),
+            child: Row(
+              children: [
+                TextButton.icon(
+                  onPressed: onBack,
+                  icon: const Icon(Icons.arrow_back_ios, size: 14),
+                  label: Text(TTexts.back),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: UIHelpers.spacing8,
+                      vertical: 4,
+                    ),
+                  ),
+                ),
+                UIHelpers.horizontalSpace12,
+                Text(
+                  saCode,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: objPath.isNotEmpty
+                ? ThreeDViewer(
+                    assemblyModelPaths: [objPath],
+                    assemblyMtlPaths: [mtlPath],
+                    disassemblyModelPaths: const [],
+                    disassemblyMtlPaths: const [],
+                    modelName: saCode,
+                    height: double.infinity,
+                    isAssembleMode: true,
+                  )
+                : Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.construction_outlined,
+                            size: 48, color: AppColors.textHint),
+                        UIHelpers.verticalSpace16,
+                        Text(
+                          TTexts.comingSoon,
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textSecondary,
+                                  ),
+                        ),
+                        UIHelpers.verticalSpace8,
+                        Text(
+                          TTexts.comingSoonSubtitle,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textHint),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
         ],
       ),
     );

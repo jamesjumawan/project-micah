@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:project_micah/ui/widgets/common/loading/cog_loader.dart';
 
 import 'startup_viewmodel.dart';
 
@@ -18,7 +19,7 @@ class StartupViewMobile extends ViewModelWidget<StartupViewModel> {
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
-            CircularProgressIndicator(),
+            const CogLoader(),
           ],
         ),
       ),

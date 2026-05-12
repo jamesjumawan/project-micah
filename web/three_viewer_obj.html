@@ -32,6 +32,18 @@
             z-index: 10;
         }
 
+        #initial-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(224, 224, 224, 0.95);
+            z-index: 30;
+            gap: 16px;
+        }
+
         #disassembly-loading {
             position: absolute;
             inset: 0;
@@ -39,9 +51,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: rgba(224, 224, 224, 0.88);
+            background: rgba(224, 224, 224, 0.92);
             z-index: 20;
-            gap: 16px;
+            gap: 12px;
         }
 
         .spinner {
@@ -53,6 +65,90 @@
             animation: spin 0.75s linear infinite;
         }
 
+        .overlay-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            font-family: sans-serif;
+        }
+
+        .overlay-sub {
+            font-size: 12px;
+            color: #888;
+            font-family: sans-serif;
+            text-align: center;
+            max-width: 220px;
+            line-height: 1.5;
+        }
+
+        .coming-soon-icon {
+            font-size: 40px;
+            margin-bottom: 4px;
+        }
+
+        .progress-track {
+            width: 110px;
+            height: 4px;
+            background: #d0d0d0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #399ADE;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.25s ease;
+        }
+
+        .progress-fill.fake-anim {
+            animation: fake-fill 10s ease-out forwards;
+        }
+
+        @keyframes fake-fill {
+            0% {
+                width: 0%;
+            }
+
+            20% {
+                width: 35%;
+            }
+
+            50% {
+                width: 62%;
+            }
+
+            80% {
+                width: 82%;
+            }
+
+            100% {
+                width: 91%;
+            }
+        }
+
+        .loading-percent {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            font-family: sans-serif;
+            margin-top: 5px;
+        }
+
+        #coming-soon {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(224, 224, 224, 0.95);
+            z-index: 20;
+            gap: 10px;
+        }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -62,14 +158,18 @@
         #tooltip {
             position: absolute;
             display: none;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(20, 20, 20, 0.92);
             color: white;
             padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: sans-serif;
+            line-height: 1.4;
             pointer-events: none;
             z-index: 1000;
-            white-space: nowrap;
+            max-width: 220px;
+            white-space: normal;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -77,15 +177,83 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+        // ── IndexedDB cache for remote (S3) assets ─────────────────────────
+        const IDB_NAME = 'micah-3d-v4';
+        const IDB_STORE = 'assets';
+        let _db = null;
+
+        function openDB() {
+            if (_db) return Promise.resolve(_db);
+            return new Promise((res, rej) => {
+                const req = indexedDB.open(IDB_NAME, 1);
+                req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+                req.onsuccess = e => { _db = e.target.result; res(_db); };
+                req.onerror = e => rej(e.target.error);
+            });
+        }
+
+        function idbGet(key) {
+            return openDB().then(db => new Promise((res, rej) => {
+                const req = db.transaction(IDB_STORE).objectStore(IDB_STORE).get(key);
+                req.onsuccess = e => res(e.target.result || null);
+                req.onerror = e => rej(e.target.error);
+            }));
+        }
+
+        function idbPut(key, value) {
+            return openDB().then(db => new Promise((res, rej) => {
+                const tx = db.transaction(IDB_STORE, 'readwrite');
+                tx.objectStore(IDB_STORE).put(value, key);
+                tx.oncomplete = res;
+                tx.onerror = e => rej(e.target.error);
+            }));
+        }
+
+        // Returns { resolved, fromCache } for remote URLs, or { resolved: url, fromCache: false } for local.
+        async function resolveUrl(url) {
+            if (!url.startsWith('http')) return { resolved: url, fromCache: false };
+            const cached = await idbGet(url).catch(() => null);
+            if (cached) {
+                console.log('[viewer] 💾 IDB cache HIT:', url.split('/').pop());
+                return { resolved: URL.createObjectURL(new Blob([cached], { type: 'text/plain' })), fromCache: true };
+            }
+            console.log('[viewer] 🌐 Fetching from network:', url.split('/').pop());
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status + ' for ' + url);
+            const text = await resp.text();
+            try { await idbPut(url, text); } catch (_) { }
+            return { resolved: URL.createObjectURL(new Blob([text], { type: 'text/plain' })), fromCache: false };
+        }
+    </script>
 </head>
 
 <body>
     <div id="container"></div>
     <div id="loading">Loading 3D models...</div>
+
+    <!-- Centered initial-load overlay — visible until assembly is ready -->
+    <div id="initial-loading">
+        <div class="spinner"></div>
+        <div class="progress-track">
+            <div id="initial-progress-fill" class="progress-fill fake-anim"></div>
+        </div>
+        <div id="initial-loading-percent" class="loading-percent">0%</div>
+    </div>
+
+    <!-- Disassembly overlay — shown when user switches before parts are ready -->
     <div id="disassembly-loading">
         <div class="spinner"></div>
-        <div id="disassembly-loading-text" style="color:#444;font-size:14px;font-family:sans-serif">Preparing explosion
-            view…</div>
+        <div class="progress-track">
+            <div id="disassembly-progress-fill" class="progress-fill fake-anim"></div>
+        </div>
+        <div id="disassembly-loading-percent" class="loading-percent">0%</div>
+    </div>
+    <!-- Coming Soon overlay — shown when disassembly is toggled but no models are loaded -->
+    <div id="coming-soon">
+        <div class="coming-soon-icon">🔧</div>
+        <div class="overlay-title">Explosion View Coming Soon</div>
+        <div class="overlay-sub">3D parts are being prepared.<br>Check back later!</div>
     </div>
     <div id="tooltip"></div>
     <script>
@@ -115,19 +283,68 @@
         const disassemblyMtls = disassemblyMtlsParam ? disassemblyMtlsParam.split(',').map(decodeURIComponent).filter(Boolean) : [];
         let disassemblyDistance = disassemblyDistanceParam ? parseFloat(disassemblyDistanceParam) : 1.0;
 
-        console.log('three_viewer: assemblyModels=', assemblyModels);
-        console.log('three_viewer: disassemblyModels=', disassemblyModels);
-        console.log('three_viewer: initialMode=', initialMode);
-        console.log('three_viewer: disassemblyDistance=', disassemblyDistance);
+        // Parts metadata: { [objFilenameNoExt]: { item_code, description, displayName } }
+        const partsMetaParam = queryParam('partsMeta');
+        const partsMeta = partsMetaParam ? JSON.parse(decodeURIComponent(partsMetaParam)) : {};
+
+        // Reverse lookup: item_code → meta (for matching assembled OBJ mesh names like SPD-33100X-B_—_...)
+        const partsMetaByCode = {};
+        for (const [key, meta] of Object.entries(partsMeta)) {
+            if (meta.item_code) partsMetaByCode[meta.item_code] = meta;
+        }
+
+        // Extract item_code from OBJ mesh name.
+        // "[SA]_SA-F05-01"          → "SA-F05-01"
+        // "SPD-33100X-B_—_Headlight" → "SPD-33100X-B"
+        function getItemCode(meshName) {
+            if (!meshName) return '';
+            // Sub-assembly mesh names use [SA]_ prefix — strip it to expose the SA- code
+            if (meshName.startsWith('[SA]_')) return meshName.slice(5);
+            return meshName.includes('_\u2014_') ? meshName.split('_\u2014_')[0]
+                : meshName.includes('_\u2014') ? meshName.split('_\u2014')[0]
+                    : meshName;
+        }
+        // Human-readable display from mesh name
+        function getDisplayLabel(meshName) {
+            if (!meshName) return '';
+            const sep = meshName.includes('_\u2014_') ? '_\u2014_' : '_\u2014';
+            const parts = meshName.split(sep);
+            return parts.length > 1 ? parts.slice(1).join(' \u2014 ').replace(/_/g, ' ') : meshName.replace(/_/g, ' ');
+        }
+
+        console.log('[viewer] three_viewer init v2-debug');
+        console.log('[viewer] assemblyModels (' + assemblyModels.length + '):', assemblyModels);
+        console.log('[viewer] disassemblyModels (' + disassemblyModels.length + '):', disassemblyModels);
+        console.log('[viewer] initialMode:', initialMode);
+        console.log('[viewer] disassemblyDistance:', disassemblyDistance);
+        if (disassemblyModels.length === 0) {
+            console.warn('[viewer] WARNING: disassemblyModels is EMPTY — explosion view will be blank!');
+            console.warn('[viewer] Check that disassemblyModelPaths is passed correctly from Flutter.');
+        }
+        disassemblyModels.forEach(function (p, i) {
+            const src = p.startsWith('https://') ? '🌐 S3' : '📂 local assets';
+            console.log('[viewer] disassembly[' + i + '] ' + src + ':', p);
+        });
+        assemblyModels.forEach(function (p, i) {
+            const src = p.startsWith('https://') ? '🌐 S3' : '📂 local assets';
+            console.log('[viewer] assembly[' + i + '] ' + src + ':', p);
+        });
 
         const loadingEl = document.getElementById('loading');
+        const initialOverlay = document.getElementById('initial-loading');
+        const initialOverlayText = document.getElementById('initial-loading-text');
 
         const container = document.getElementById('container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xe0e0e0); // Light gray background
 
         const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-        camera.position.set(3, 1, 2.5); // Front-right angle, lower height to match reference image
+        // Assembled: original close-up angle; disassemble: zoomed out to fit explosion
+        if (initialMode === 'disassemble') {
+            camera.position.set(4, 1.5, 3.5);
+        } else {
+            camera.position.set(3, 1, 2.5);
+        }
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         const dpr = Math.min(window.devicePixelRatio ? window.devicePixelRatio : 1, 2);
@@ -136,9 +353,11 @@
         container.appendChild(renderer.domElement);
 
         function resizeRenderer() {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            const w = container.clientWidth || window.innerWidth;
+            const h = container.clientHeight || window.innerHeight;
+            camera.aspect = w / h;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(w, h);
         }
 
         const resizeObserver = new ResizeObserver(() => {
@@ -155,7 +374,7 @@
 
         // Store initial camera position and target for reset
         const initialCameraPosition = camera.position.clone();
-        const initialControlsTarget = new THREE.Vector3(0, 0.5, 0); // Look slightly higher
+        const initialControlsTarget = new THREE.Vector3(0, 0.6, 0); // Match scaleGroup y-offset
         controls.target.copy(initialControlsTarget);
 
         // Function to reset camera to initial position
@@ -258,19 +477,30 @@
 
         const disassemblyOverlay = document.getElementById('disassembly-loading');
         const disassemblyOverlayText = document.getElementById('disassembly-loading-text');
+        const comingSoonOverlay = document.getElementById('coming-soon');
 
         // Function to toggle between modes
         function setMode(mode) {
+            if (!mode) return; // guard against undefined/empty from bad postMessage
             currentMode = mode;
             assemblyGroup.visible = (mode === 'assemble');
-            // Disassembly group only shown once fully loaded & exploded
-            disassemblyGroup.visible = (mode === 'disassemble' && disassemblyReady);
-            // Show spinner overlay when switching to disassemble before ready
-            if (disassemblyOverlay) {
-                disassemblyOverlay.style.display =
-                    (mode === 'disassemble' && !disassemblyReady) ? 'flex' : 'none';
+            // Hide coming-soon when going back to assemble
+            if (comingSoonOverlay) comingSoonOverlay.style.display = 'none';
+            if (mode === 'disassemble' && totalDisassembly === 0) {
+                // No explosion models available — show coming soon
+                if (comingSoonOverlay) comingSoonOverlay.style.display = 'flex';
+                disassemblyGroup.visible = false;
+                if (disassemblyOverlay) disassemblyOverlay.style.display = 'none';
+            } else {
+                // Disassembly group only shown once fully loaded & exploded
+                disassemblyGroup.visible = (mode === 'disassemble' && disassemblyReady);
+                // Show spinner overlay when switching to disassemble before ready
+                if (disassemblyOverlay) {
+                    disassemblyOverlay.style.display =
+                        (mode === 'disassemble' && !disassemblyReady) ? 'flex' : 'none';
+                }
             }
-            console.log('three_viewer: switched to mode', mode, '| disassemblyReady:', disassemblyReady);
+            console.log('[viewer] setMode →', mode, '| disassemblyReady:', disassemblyReady, '| disassembly parts loaded:', disassemblyLoadedCount + '/' + totalDisassembly);
         }
 
         // Listen for messages from Flutter to toggle mode
@@ -298,6 +528,11 @@
                     console.log('three_viewer: Updated disassembly distance to', distance);
                 } else if (type === 'resetCamera') {
                     resetCamera();
+                } else if (type === 'isolateParts') {
+                    // Show only parts whose item_code is in the provided list.
+                    // Pass null/empty to restore all parts.
+                    const codes = parsed ? parsed.itemCodes : data.itemCodes;
+                    isolateParts(codes || null);
                 }
             } catch (e) {
                 // Ignore malformed messages
@@ -312,23 +547,33 @@
         let disassemblyLoadedCount = 0;
 
         function updateLoadingBadge() {
-            const done = assemblyLoadedCount + disassemblyLoadedCount;
-            if (done >= totalModels) {
-                loadingEl.style.display = 'none';
-            } else {
-                loadingEl.style.display = 'block';
-                loadingEl.innerText = `Loading ${done}/${totalModels}`;
+            loadingEl.style.display = 'none';
+
+            // Assembly progress bar + percent
+            if (totalAssembly > 0) {
+                const pct = Math.round((assemblyLoadedCount / totalAssembly) * 100);
+                const fill = document.getElementById('initial-progress-fill');
+                const label = document.getElementById('initial-loading-percent');
+                if (fill) { fill.classList.remove('fake-anim'); fill.style.width = pct + '%'; }
+                if (label) label.textContent = pct + '%';
             }
-            // Keep overlay progress text in sync
-            if (disassemblyOverlayText && totalDisassembly > 0) {
-                disassemblyOverlayText.textContent =
-                    `Loading parts ${disassemblyLoadedCount}\u202f/\u202f${totalDisassembly}…`;
+
+            // Disassembly progress bar + percent
+            if (totalDisassembly > 0) {
+                const pct = Math.round((disassemblyLoadedCount / totalDisassembly) * 100);
+                const fill = document.getElementById('disassembly-progress-fill');
+                const label = document.getElementById('disassembly-loading-percent');
+                if (fill) { fill.classList.remove('fake-anim'); fill.style.width = pct + '%'; }
+                if (label) label.textContent = pct + '%';
             }
         }
 
         function scaleGroup(group, isAssembly) {
             if (group.children.length === 0) return;
+            // Compute bounding box of raw geometry (before any scale changes)
             const box = new THREE.Box3().setFromObject(group);
+            const center = new THREE.Vector3();
+            box.getCenter(center);
             const size = box.getSize(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
             const scale = maxDim > 0 ? (1.5 / maxDim) : 1.0;
@@ -339,8 +584,14 @@
             } else {
                 group.scale.multiplyScalar(1.6);
             }
-            group.position.y = 0.6;
-            console.log('three_viewer: Finalized', group.name, 'scale:', group.scale.x.toFixed(3));
+            // Center the group so the geometry's midpoint sits at the world origin,
+            // then lift slightly so it sits above the ground plane.
+            const s = group.scale.x;
+            group.position.set(-center.x * s, -center.y * s + 0.6, -center.z * s);
+            console.log('[viewer] scaleGroup', group.name,
+                '| rawSize:', size.x.toFixed(2), size.y.toFixed(2), size.z.toFixed(2),
+                '| scale:', s.toFixed(3),
+                '| center offset:', (-center.x * s).toFixed(2), (-center.y * s + 0.6).toFixed(2), (-center.z * s).toFixed(2));
         }
 
         function applyExplosionToChild(child) {
@@ -348,7 +599,10 @@
             const center = new THREE.Vector3();
             box.getCenter(center);
             originalPositions.set(child.uuid, child.position.clone());
-            const dir = new THREE.Vector3(center.x, center.y, center.z);
+            // Explosion direction = from group origin (world 0,0,0) toward child center in world space.
+            // Convert world center to group-local space for the direction vector.
+            const localCenter = disassemblyGroup.worldToLocal(center.clone());
+            const dir = localCenter.clone();
             if (dir.length() > 0.001) {
                 dir.normalize();
                 dir.x *= 1.5; dir.y *= 0.5; dir.z *= 0.5;
@@ -358,10 +612,34 @@
             }
         }
 
+        // Fit camera to frame a group's bounding box, preserving view direction.
+        function autoFitCamera(group) {
+            const box = new THREE.Box3().setFromObject(group);
+            if (box.isEmpty()) return;
+            const center = new THREE.Vector3();
+            const size = new THREE.Vector3();
+            box.getCenter(center);
+            box.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const fov = camera.fov * (Math.PI / 180);
+            const aspect = camera.aspect || 1;
+            // Use the narrower field-of-view axis so the model fits in both dimensions
+            const effFov = aspect >= 1 ? fov : fov * aspect;
+            const dist = (maxDim / 2) / Math.tan(effFov / 2) * 1.8;
+            const dir = new THREE.Vector3().subVectors(camera.position, controls.target).normalize();
+            camera.position.copy(center).addScaledVector(dir, dist);
+            controls.target.copy(center);
+            controls.update();
+            console.log('[viewer] autoFitCamera | center:', center.toArray().map(v => v.toFixed(2)), '| dist:', dist.toFixed(2));
+        }
+
         // Called when every model in the assembly group has loaded
         function finalizeAssemblyGroup() {
             scaleGroup(assemblyGroup, true);
-            console.log('three_viewer: Assembly group ready');
+            autoFitCamera(assemblyGroup);
+            // Hide the initial loading overlay
+            if (initialOverlay) initialOverlay.style.display = 'none';
+            console.log('[viewer] Assembly group ready (' + assemblyGroup.children.length + ' objects)');
         }
 
         // Called when every model in the disassembly group has loaded
@@ -376,7 +654,7 @@
                 disassemblyGroup.visible = true;
                 if (disassemblyOverlay) disassemblyOverlay.style.display = 'none';
             }
-            console.log('three_viewer: Disassembly group ready, explosion applied');
+            console.log('[viewer] Disassembly group ready (' + disassemblyGroup.children.length + ' objects), explosion applied');
         }
 
         // Function to update disassembly positions based on slider
@@ -400,122 +678,199 @@
             });
         };
 
+        // Show only parts whose item_code is in itemCodes array.
+        // Pass null to restore all parts.
+        window.isolateParts = function (itemCodes) {
+            const showAll = !itemCodes || itemCodes.length === 0;
+            disassemblyGroup.children.forEach(function (child) {
+                if (showAll) {
+                    child.visible = true;
+                    return;
+                }
+                const code = child.userData.source
+                    ? child.userData.source.split('/').pop().replace(/\.obj$/i, '')
+                    : (child.name ? child.name.split('_\u2014_')[0] : '');
+                child.visible = itemCodes.includes(code);
+            });
+            console.log('[viewer] isolateParts:', showAll ? 'all visible' : itemCodes);
+        };
+
         function loadModelGroup(models, mtls, targetGroup, onGroupDone) {
             if (models.length === 0) {
+                console.warn('[viewer] loadModelGroup called with 0 models for', targetGroup.name, '— skipping');
                 if (onGroupDone) onGroupDone();
                 return;
             }
+            console.log('[viewer] Starting load of', models.length, 'models into', targetGroup.name);
 
             function loadSingleModel(idx) {
                 if (idx >= models.length) {
+                    console.log('[viewer] All', models.length, 'models loaded for', targetGroup.name);
                     if (onGroupDone) onGroupDone();
                     return;
                 }
 
                 const path = models[idx];
+                const mtlPath = mtls[idx] || null;
+                const src = path.startsWith('https://') ? '🌐 S3' : '📂 local';
+                console.log('[viewer] ⏳ Loading [' + (idx + 1) + '/' + models.length + '] ' + src + ':', path.split('/').pop());
                 const lower = path.toLowerCase();
-                const encodedPath = encodeURI(path);
 
-                const finalize = function (obj) {
-                    obj.userData = obj.userData || {};
-                    obj.userData.source = path;
-                    obj.traverse(function (child) {
-                        if (child.isMesh) {
-                            child.userData = child.userData || {};
-                            child.userData.source = path;
-                            // Enable shadow casting and receiving for all meshes
-                            child.castShadow = true;
-                            child.receiveShadow = true;
+                // Resolve through IDB cache for remote URLs
+                Promise.all([resolveUrl(path), mtlPath ? resolveUrl(mtlPath) : Promise.resolve({ resolved: null, fromCache: false })])
+                    .then(function ([{ resolved: resolvedPath, fromCache: pathFromCache }, { resolved: resolvedMtl }]) {
+                        const encodedPath = encodeURI(resolvedPath);
+
+                        const finalize = function (obj) {
+                            obj.userData = obj.userData || {};
+                            obj.userData.source = path;
+                            const src = path.startsWith('https://') ? (pathFromCache ? '💾 IDB' : '🌐 S3') : '📂 local';
+                            const label = targetGroup === assemblyGroup ? 'assembly' : 'disassembly';
+
+                            // Tag all meshes with shadow settings and source
+                            obj.traverse(function (child) {
+                                if (child.isMesh) {
+                                    child.userData = child.userData || {};
+                                    child.userData.source = path;
+                                    child.castShadow = true;
+                                    child.receiveShadow = true;
+                                }
+                            });
+
+                            if (targetGroup === disassemblyGroup) {
+                                // ── Flatten for part-level explosion ─────────────────
+                                // Each `o` in the OBJ becomes a separate child of the
+                                // loaded Group. Add them individually to disassemblyGroup
+                                // so applyExplosionToChild can explode each part apart.
+                                const meshChildren = obj.children.slice(); // snapshot before reparenting
+                                let addedCount = 0;
+                                meshChildren.forEach(function (child) {
+                                    if (child.isMesh || child.isGroup || child.isObject3D) {
+                                        // Apply parent world transform so parts sit in the right place
+                                        obj.updateWorldMatrix(true, false);
+                                        child.applyMatrix4(obj.matrixWorld);
+                                        targetGroup.add(child);
+                                        addedCount++;
+                                    }
+                                });
+                                // If nothing to flatten (single-mesh OBJ), add the group itself
+                                if (addedCount === 0) {
+                                    targetGroup.add(obj);
+                                    addedCount = 1;
+                                }
+                                console.log('[viewer] ✅ Loaded ' + src + ' [' + label + '] ' + path.split('/').pop() + ' (' + addedCount + ' parts flattened)');
+                            } else {
+                                // Assembly: keep as a single group
+                                let meshCount = 0;
+                                obj.traverse(function (c) { if (c.isMesh) meshCount++; });
+                                if (meshCount === 0) {
+                                    console.warn('[viewer] ⚠️ ' + path.split('/').pop() + ' loaded but has 0 meshes — file may be too large for browser to parse (>100MB)');
+                                } else {
+                                    console.log('[viewer] ✅ Loaded ' + src + ' [' + label + '] ' + path.split('/').pop() + ' (' + meshCount + ' meshes)');
+                                }
+                                targetGroup.add(obj);
+                            }
+
+                            assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
+                            disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
+                            updateLoadingBadge();
+                            loadSingleModel(idx + 1);
+                        };
+
+                        if (lower.endsWith('.glb') || lower.endsWith('.gltf')) {
+                            const gltfLoader = new THREE.GLTFLoader();
+                            gltfLoader.load(encodedPath, function (gltf) {
+                                const obj = gltf.scene || gltf.scenes[0];
+                                finalize(obj);
+                            }, null, function (err) {
+                                const reason = (err && err.message) ? err.message : (err && err.toString ? err.toString() : err);
+                                console.error('[viewer] ❌ GLTF load error:', encodedPath, reason);
+                                assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
+                                disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
+                                updateLoadingBadge();
+                                loadSingleModel(idx + 1);
+                            });
+                        } else {
+                            const mtlToUse = resolvedMtl || null;
+                            const onObjLoaded = function (obj) {
+                                obj.traverse(function (child) {
+                                    if (!child.isMesh || !child.material) return;
+                                    const mat = child.material;
+
+                                    // If already a standard material, just update it
+                                    if (mat.type === 'MeshStandardMaterial') {
+                                        mat.needsUpdate = true;
+                                        return;
+                                    }
+
+                                    // Convert to MeshStandardMaterial with proper PBR values
+                                    const std = new THREE.MeshStandardMaterial({
+                                        color: mat.color ? mat.color.clone() : new THREE.Color(0xcccccc),
+                                        side: THREE.DoubleSide,
+                                        metalness: 0.1,
+                                        roughness: 0.8,
+                                    });
+
+                                    // Copy textures from MTL material
+                                    if (mat.map) std.map = mat.map;
+                                    if (mat.bumpMap) std.normalMap = mat.bumpMap;
+                                    if (mat.normalMap) std.normalMap = mat.normalMap;
+                                    if (mat.specularMap) std.roughnessMap = mat.specularMap;
+                                    if (mat.envMap) std.metalnessMap = mat.envMap;
+                                    if (mat.metalnessMap) std.metalnessMap = mat.metalnessMap;
+
+                                    if (std.metalnessMap) std.metalness = 0.5;
+                                    if (std.roughnessMap) std.roughness = 0.9;
+                                    if (std.normalMap) std.normalScale = mat.normalScale || new THREE.Vector2(1, 1);
+
+                                    std.opacity = mat.opacity !== undefined ? mat.opacity : 1.0;
+                                    std.transparent = !!mat.transparent;
+                                    std.needsUpdate = true;
+                                    child.material = std;
+                                });
+                                finalize(obj);
+                            };
+
+                            const loadObjWithMaterials = function (materials) {
+                                const objLoader = new THREE.OBJLoader();
+                                if (materials) objLoader.setMaterials(materials);
+                                objLoader.load(encodedPath, onObjLoaded, null, function (err) {
+                                    const reason = (err && err.message) ? err.message : (err && err.toString ? err.toString() : err);
+                                    console.error('[viewer] ❌ OBJ load error:', encodedPath, reason);
+                                    assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
+                                    disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
+                                    updateLoadingBadge();
+                                    loadSingleModel(idx + 1);
+                                });
+                            };
+
+                            if (mtlToUse) {
+                                const encodedMtl = encodeURI(mtlToUse);
+                                const mtlLoader = new THREE.MTLLoader();
+                                // If loading from a blob URL, textures are relative to the original
+                                // remote URL — set resourcePath so MTLLoader can resolve them.
+                                if (mtlPath && mtlPath.startsWith('http')) {
+                                    const basePath = mtlPath.substring(0, mtlPath.lastIndexOf('/') + 1);
+                                    mtlLoader.setResourcePath(basePath);
+                                }
+                                mtlLoader.load(encodedMtl, function (materials) {
+                                    materials.preload();
+                                    loadObjWithMaterials(materials);
+                                }, null, function (err) {
+                                    console.warn('[viewer] MTL load failed (will use fallback material):', encodedMtl, err);
+                                    loadObjWithMaterials(null);
+                                });
+                            } else {
+                                loadObjWithMaterials(null);
+                            }
                         }
-                    });
-                    targetGroup.add(obj);
-                    assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
-                    disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
-                    updateLoadingBadge();
-                    loadSingleModel(idx + 1);
-                };
-
-                if (lower.endsWith('.glb') || lower.endsWith('.gltf')) {
-                    const gltfLoader = new THREE.GLTFLoader();
-                    gltfLoader.load(encodedPath, function (gltf) {
-                        const obj = gltf.scene || gltf.scenes[0];
-                        finalize(obj);
-                    }, null, function (err) {
-                        const reason = (err && err.message) ? err.message : (err && err.toString ? err.toString() : err);
-                        console.error('GLTF load error for', encodedPath, reason);
+                    }).catch(function (err) {
+                        console.error('[viewer] ❌ resolveUrl error for', path, err);
                         assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
                         disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
                         updateLoadingBadge();
                         loadSingleModel(idx + 1);
                     });
-                } else {
-                    const mtlToUse = mtls[idx] || null;
-                    const onObjLoaded = function (obj) {
-                        obj.traverse(function (child) {
-                            if (!child.isMesh || !child.material) return;
-                            const mat = child.material;
-
-                            // If already a standard material, just update it
-                            if (mat.type === 'MeshStandardMaterial') {
-                                mat.needsUpdate = true;
-                                return;
-                            }
-
-                            // Convert to MeshStandardMaterial with proper PBR values
-                            const std = new THREE.MeshStandardMaterial({
-                                color: mat.color ? mat.color.clone() : new THREE.Color(0xcccccc),
-                                side: THREE.DoubleSide,
-                                metalness: 0.1,
-                                roughness: 0.8,
-                            });
-
-                            // Copy textures from MTL material
-                            if (mat.map) std.map = mat.map;
-                            if (mat.bumpMap) std.normalMap = mat.bumpMap;
-                            if (mat.normalMap) std.normalMap = mat.normalMap;
-                            if (mat.specularMap) std.roughnessMap = mat.specularMap;
-                            if (mat.envMap) std.metalnessMap = mat.envMap;
-                            if (mat.metalnessMap) std.metalnessMap = mat.metalnessMap;
-
-                            if (std.metalnessMap) std.metalness = 0.5;
-                            if (std.roughnessMap) std.roughness = 0.9;
-                            if (std.normalMap) std.normalScale = mat.normalScale || new THREE.Vector2(1, 1);
-
-                            std.opacity = mat.opacity !== undefined ? mat.opacity : 1.0;
-                            std.transparent = !!mat.transparent;
-                            std.needsUpdate = true;
-                            child.material = std;
-                        });
-                        finalize(obj);
-                    };
-
-                    const loadObjWithMaterials = function (materials) {
-                        const objLoader = new THREE.OBJLoader();
-                        if (materials) objLoader.setMaterials(materials);
-                        objLoader.load(encodedPath, onObjLoaded, null, function (err) {
-                            const reason = (err && err.message) ? err.message : (err && err.toString ? err.toString() : err);
-                            console.error('OBJ load error for', encodedPath, reason);
-                            assemblyLoadedCount += (targetGroup === assemblyGroup ? 1 : 0);
-                            disassemblyLoadedCount += (targetGroup === disassemblyGroup ? 1 : 0);
-                            updateLoadingBadge();
-                            loadSingleModel(idx + 1);
-                        });
-                    };
-
-                    if (mtlToUse) {
-                        const encodedMtl = encodeURI(mtlToUse);
-                        const mtlLoader = new THREE.MTLLoader();
-                        mtlLoader.load(encodedMtl, function (materials) {
-                            materials.preload();
-                            loadObjWithMaterials(materials);
-                        }, null, function (err) {
-                            console.warn('MTL load failed for', encodedMtl, err);
-                            loadObjWithMaterials(null);
-                        });
-                    } else {
-                        loadObjWithMaterials(null);
-                    }
-                }
             }
 
             loadSingleModel(0);
@@ -529,7 +884,10 @@
 
         if (totalModels === 0) {
             loadingEl.style.display = 'none';
+            if (initialOverlay) initialOverlay.style.display = 'none';
+            console.warn('[viewer] No models to load — viewer is empty.');
         } else {
+            if (initialOverlayText) initialOverlayText.textContent = 'Loading 0\u202f/\u202f' + totalAssembly + ' assembly parts\u2026';
             updateLoadingBadge();
             loadModelGroup(assemblyModels, assemblyMtls, assemblyGroup, finalizeAssemblyGroup);
             loadModelGroup(disassemblyModels, disassemblyMtls, disassemblyGroup, finalizeDisassemblyGroup);
@@ -547,19 +905,8 @@
         let isDragging = false;
         const DRAG_THRESHOLD = 5; // pixels
 
-        // Map file paths to display names
-        const partDisplayNames = {
-            'blt150_02': 'Right Side Mirror',
-            'blt150_03': 'Left Side Mirror',
-            'blt150_04': 'Handle Bar',
-            'blt150_05': 'Front Frame',
-            'blt150_06': 'Back Frame',
-            'blt150_07': 'Front Wheel',
-            'blt150_08': 'Rear Fender',
-            'blt150_09': 'Exhaust Pipe',
-            'blt150_10': 'Rear Wheel',
-            'blt150_11': 'Rear Shock Absorber'
-        };
+        // Map file paths to display names (populated from partsMeta passed by Flutter)
+        const partDisplayNames = {};
 
         // Function to extract part name from path
         function getPartNameFromPath(path) {
@@ -625,10 +972,10 @@
             hoveredObject = null;
         }
 
-        // Show tooltip
-        function showTooltip(x, y, text) {
+        // Show tooltip with optional rich HTML content
+        function showTooltip(x, y, html) {
             tooltip.style.display = 'block';
-            tooltip.textContent = text;
+            tooltip.innerHTML = html;
             tooltip.style.left = (x + 15) + 'px';
             tooltip.style.top = (y + 15) + 'px';
         }
@@ -649,12 +996,29 @@
                 }
             }
 
-            // Only enable hover in disassemble mode
-            if (currentMode !== 'disassemble') {
-                hideTooltip();
-                if (hoveredObject) {
-                    unhighlightObject(hoveredObject);
+            // Assembly mode: show "Coming Soon" on hover over any mesh
+            if (currentMode === 'assemble') {
+                const rect = renderer.domElement.getBoundingClientRect();
+                pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                raycaster.setFromCamera(pointer, camera);
+                const hits = raycaster.intersectObjects(assemblyGroup.children, true);
+                if (hits && hits.length > 0) {
+                    showTooltip(event.clientX, event.clientY, '<span style="font-style:italic;opacity:0.75">Coming Soon</span>');
+                    renderer.domElement.style.cursor = 'default';
+                } else {
+                    hideTooltip();
+                    renderer.domElement.style.cursor = 'default';
                 }
+                if (hoveredObject) unhighlightObject(hoveredObject);
+                return;
+            }
+
+            // Disassembly mode: rich tooltip + highlight
+            if (currentMode !== 'disassemble') {
+                console.log('[DBG hover] bailing — currentMode is', JSON.stringify(currentMode), '(expected "disassemble")');
+                hideTooltip();
+                if (hoveredObject) unhighlightObject(hoveredObject);
                 renderer.domElement.style.cursor = 'default';
                 return;
             }
@@ -665,6 +1029,7 @@
 
             raycaster.setFromCamera(pointer, camera);
             const intersects = raycaster.intersectObjects(disassemblyGroup.children, true);
+            console.log('[DBG hover] mode=' + currentMode + ' disassemblyChildren=' + disassemblyGroup.children.length + ' intersects=' + intersects.length);
 
             if (intersects && intersects.length > 0) {
                 const topObject = intersects[0].object;
@@ -678,31 +1043,59 @@
                 const source = targetObject.userData?.source ||
                     topObject.userData?.source ||
                     topObject.parent?.userData?.source;
+                const meshName = topObject.name || targetObject.name || '';
+                console.log('[DBG hover] topObject.name=' + topObject.name + ' targetObject.name=' + targetObject.name);
+                console.log('[DBG hover] topObject.userData=', JSON.stringify(topObject.userData));
+                console.log('[DBG hover] targetObject.userData=', JSON.stringify(targetObject.userData));
+                console.log('[DBG hover] source=', source);
 
-                if (source) {
-                    // Show highlight and tooltip
+                if (source || meshName) {
+                    const itemCode = getItemCode(meshName);
+                    // Lookup: try by item_code first (assembled OBJ mesh names encode the code),
+                    // then by file key (individual part OBJ filenames)
+                    const fileKey = source ? source.split('/').pop().replace(/\.(obj|glb|gltf)$/i, '') : '';
+                    const meta = partsMetaByCode[itemCode] || partsMeta[fileKey] || partsMeta[meshName];
+                    console.log('[DBG hover] itemCode=' + itemCode + ' fileKey=' + fileKey + ' metaFound=' + !!meta);
+
+                    let tooltipHtml;
+                    if (meta) {
+                        const code = meta.item_code ? `<div style="font-weight:600;font-size:12px">${meta.item_code}</div>` : '';
+                        const name = meta.displayName ? `<div style="font-size:11px;opacity:0.85">${meta.displayName}</div>` : '';
+                        const desc = meta.description ? `<div style="font-size:10px;opacity:0.7;max-width:200px;margin-top:3px">${meta.description}</div>` : '';
+                        tooltipHtml = code + name + desc;
+                    } else if (meshName) {
+                        // No metadata yet — show code + description parsed from mesh name
+                        const label = itemCode || meshName;
+                        const dispLabel = getDisplayLabel(meshName);
+                        tooltipHtml = `<div style="font-weight:600;font-size:12px">${label}</div>`
+                            + (dispLabel ? `<div style="font-size:11px;opacity:0.85">${dispLabel}</div>` : '');
+                    } else {
+                        tooltipHtml = null;
+                    }
+
                     highlightObject(targetObject);
-                    showTooltip(event.clientX, event.clientY, getPartNameFromPath(source));
+                    if (tooltipHtml) {
+                        showTooltip(event.clientX, event.clientY, tooltipHtml);
+                    } else {
+                        hideTooltip();
+                    }
                     renderer.domElement.style.cursor = 'pointer';
 
                     // Notify Flutter of hover
+                    const partLabel = meta ? (meta.displayName || itemCode) : (getDisplayLabel(meshName) || itemCode || meshName);
                     window.parent.postMessage(JSON.stringify({
                         type: 'partHover',
-                        model: source,
-                        partName: getPartNameFromPath(source)
+                        model: itemCode || source,
+                        partName: partLabel
                     }), '*');
                 } else {
                     hideTooltip();
-                    if (hoveredObject) {
-                        unhighlightObject(hoveredObject);
-                    }
+                    if (hoveredObject) unhighlightObject(hoveredObject);
                     renderer.domElement.style.cursor = 'default';
                 }
             } else {
                 hideTooltip();
-                if (hoveredObject) {
-                    unhighlightObject(hoveredObject);
-                }
+                if (hoveredObject) unhighlightObject(hoveredObject);
                 renderer.domElement.style.cursor = 'default';
             }
         }
@@ -715,6 +1108,7 @@
         }
 
         function onPointerUp(event) {
+            console.log('[DBG click] onPointerUp — isDragging=' + isDragging + ' currentMode=' + JSON.stringify(currentMode));
             // Only register click if not dragging and in disassemble mode
             if (isDragging || currentMode !== 'disassemble') {
                 pointerDownPos = { x: 0, y: 0 };
@@ -729,6 +1123,7 @@
             raycaster.setFromCamera(pointer, camera);
             // Use disassemblyGroup for consistent click detection with hover
             const intersects = raycaster.intersectObjects(disassemblyGroup.children, true);
+            console.log('[DBG click] disassemblyChildren=' + disassemblyGroup.children.length + ' intersects=' + intersects.length);
 
             if (intersects && intersects.length > 0) {
                 const topObject = intersects[0].object;
@@ -739,13 +1134,20 @@
                     targetObject = targetObject.parent;
                 }
 
+                const meshName = topObject.name || targetObject.name || '';
                 const source = targetObject.userData?.source ||
                     topObject.userData?.source ||
                     topObject.parent?.userData?.source;
+                console.log('[DBG click] topObject.name=' + topObject.name + ' source=' + source);
+                console.log('[DBG click] topObject.userData=', JSON.stringify(topObject.userData));
+                console.log('[DBG click] targetObject.userData=', JSON.stringify(targetObject.userData));
 
-                if (source) {
-                    console.log('three_viewer: Part clicked:', source);
-                    window.parent.postMessage(JSON.stringify({ type: 'partClick', model: source }), '*');
+                // Use item_code extracted from mesh name as the primary identifier for Flutter
+                const itemCode = getItemCode(meshName);
+                const identifier = itemCode || meshName || source;
+                if (identifier) {
+                    console.log('three_viewer: Part clicked:', identifier, '| meshName:', meshName);
+                    window.parent.postMessage(JSON.stringify({ type: 'partClick', model: identifier, meshName: meshName }), '*');
                 }
             }
 

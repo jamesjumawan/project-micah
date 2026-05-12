@@ -24,6 +24,10 @@ class ThreeDViewer extends StatefulWidget {
   /// Disassembly MTL paths aligned with disassemblyModelPaths — Phase 4 only
   final List<String?>? disassemblyMtlPaths;
 
+  /// Metadata for disassembly parts: map of OBJ filename (no ext) → {item_code, description, displayName}
+  /// Used by the viewer to show rich tooltips and populate the right-side details panel.
+  final Map<String, Map<String, String>>? partsMeta;
+
   final String modelName;
   final double height;
   final bool isAssembleMode;
@@ -71,6 +75,7 @@ class ThreeDViewer extends StatefulWidget {
     this.onPartSelected,
     this.disassemblyDistance = 1.0,
     this.onResetToAssemble,
+    this.partsMeta,
     // Phase 5
     this.hierarchyMode = false,
     this.groupLoadCommand,
@@ -85,7 +90,7 @@ class ThreeDViewer extends StatefulWidget {
 }
 
 class _ThreeDViewerState extends State<ThreeDViewer> {
-  late String viewType;
+  String viewType = '';
   StreamSubscription<html.MessageEvent>? _messageSub;
   html.IFrameElement? _iframe;
 
@@ -113,10 +118,15 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
       if (data == null) return;
       final type = data['type']?.toString();
       final model = data['model']?.toString();
+      final meshName = data['meshName']?.toString();
 
       switch (type) {
         case 'partClick':
-          if (model != null) widget.onPartSelected?.call(model);
+          // Pass both itemCode and meshName separated by ||| so views can use selectPartByCode
+          if (model != null) {
+            final payload = meshName != null ? '$model|||$meshName' : model;
+            widget.onPartSelected?.call(payload);
+          }
           break;
         case 'groupLoaded':
           final groupCode = data['groupCode']?.toString();
@@ -137,10 +147,6 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
   @override
   void didUpdateWidget(ThreeDViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.isAssembleMode != widget.isAssembleMode) {
-      _sendToggleModeMessage();
-    }
 
     if (oldWidget.disassemblyDistance != widget.disassemblyDistance) {
       _sendDisassemblyDistanceMessage(widget.disassemblyDistance);
@@ -165,28 +171,25 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
       _postMessage(widget.partLoadCommand!.toJson());
     }
 
-    // Re-register if assembly path changes (both modes) or disassembly changes (Phase 4)
+    // Re-register if mode, assembly paths, or disassembly paths change.
+    // Mode is baked into the URL so we always re-register rather than postMessage,
+    // which avoids timing issues (iframe JS listener not ready yet).
     final oldAssembly = oldWidget.assemblyModelPaths.join('|');
     final newAssembly = widget.assemblyModelPaths.join('|');
     final oldDisassembly = oldWidget.disassemblyModelPaths.join('|');
     final newDisassembly = widget.disassemblyModelPaths.join('|');
+    final modeChanged = oldWidget.isAssembleMode != widget.isAssembleMode;
 
-    if (oldAssembly != newAssembly ||
+    if (modeChanged ||
+        oldAssembly != newAssembly ||
         (!widget.hierarchyMode && oldDisassembly != newDisassembly)) {
-      debugPrint('ThreeDViewer: model paths changed — re-registering');
+      debugPrint('ThreeDViewer: re-registering (modeChanged=$modeChanged)');
       _registerViewer();
     }
   }
 
   void _postMessage(Map<String, dynamic> message) {
-    _iframe?.contentWindow?.postMessage(message, '*');
-  }
-
-  void _sendToggleModeMessage() {
-    _postMessage({
-      'type': 'toggleMode',
-      'mode': widget.isAssembleMode ? 'assemble' : 'disassemble'
-    });
+    _iframe?.contentWindow?.postMessage(json.encode(message), '*');
   }
 
   void _sendDisassemblyDistanceMessage(double distance) {
@@ -198,7 +201,8 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
   }
 
   void _registerViewer() {
-    viewType = 'three-d-viewer-${DateTime.now().microsecondsSinceEpoch}';
+    final newViewType =
+        'three-d-viewer-${DateTime.now().microsecondsSinceEpoch}';
 
     final String src;
 
@@ -223,6 +227,10 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
           widget.assemblyModelPaths.map(Uri.encodeComponent).join(',');
       final disassemblyEncoded =
           widget.disassemblyModelPaths.map(Uri.encodeComponent).join(',');
+      debugPrint(
+          '[ThreeDViewer] assembly paths (${widget.assemblyModelPaths.length}): ${widget.assemblyModelPaths}');
+      debugPrint(
+          '[ThreeDViewer] disassembly paths (${widget.disassemblyModelPaths.length}): ${widget.disassemblyModelPaths}');
       var p4src =
           '/three_viewer_obj.html?assemblyModels=$assemblyEncoded&disassemblyModels=$disassemblyEncoded';
 
@@ -240,13 +248,18 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
             .join(',');
         p4src = '$p4src&disassemblyMtls=$enc';
       }
+      if (widget.partsMeta != null && widget.partsMeta!.isNotEmpty) {
+        p4src =
+            '$p4src&partsMeta=${Uri.encodeComponent(json.encode(widget.partsMeta))}';
+      }
       p4src =
           '$p4src&mode=${widget.isAssembleMode ? 'assemble' : 'disassemble'}';
       p4src = '$p4src&disassemblyDistance=${widget.disassemblyDistance}';
+      p4src = '$p4src&_t=${DateTime.now().millisecondsSinceEpoch}';
       src = p4src;
     }
 
-    ui_web.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
+    ui_web.platformViewRegistry.registerViewFactory(newViewType, (int viewId) {
       final element = html.DivElement()
         ..style.width = '100%'
         ..style.height = '100%'
@@ -264,6 +277,15 @@ class _ThreeDViewerState extends State<ThreeDViewer> {
       element.append(_iframe!);
       return element;
     });
+
+    // Update viewType and rebuild so HtmlElementView uses the new iframe.
+    // During initState the first build hasn't run yet — just assign directly.
+    // On re-registration (didUpdateWidget), setState triggers a rebuild.
+    if (mounted && viewType != newViewType) {
+      setState(() => viewType = newViewType);
+    } else {
+      viewType = newViewType;
+    }
   }
 
   @override

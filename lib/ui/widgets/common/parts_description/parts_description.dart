@@ -14,6 +14,9 @@ class PartsDescription extends StatelessWidget {
   final String groupNo;
   final String label;
 
+  /// Optional widget shown at the top instead of the image (e.g. a 3D viewer).
+  final Widget? previewWidget;
+
   const PartsDescription({
     super.key,
     required this.imageUrl,
@@ -25,6 +28,7 @@ class PartsDescription extends StatelessWidget {
     required this.quantity,
     required this.groupNo,
     this.label = TTexts.clutchLabel,
+    this.previewWidget,
   });
 
   Widget _metaRow(String title, String value) {
@@ -78,34 +82,40 @@ class PartsDescription extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top: image area
-                Container(
-                  color: AppColors.surface,
-                  padding: const EdgeInsets.all(24),
-                  child: imageUrl.startsWith('http')
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.contain,
-                          height: 280,
-                          width: double.infinity,
-                          errorBuilder: (c, e, st) => const Icon(
-                            Icons.broken_image,
-                            size: 80,
-                            color: AppColors.textHint,
+                // Top: 3D preview or image
+                if (previewWidget != null)
+                  SizedBox(
+                    height: 280,
+                    child: Center(child: previewWidget!),
+                  )
+                else
+                  Container(
+                    color: AppColors.surface,
+                    padding: const EdgeInsets.all(24),
+                    child: imageUrl.startsWith('http')
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            height: 280,
+                            width: double.infinity,
+                            errorBuilder: (c, e, st) => const Icon(
+                              Icons.broken_image,
+                              size: 80,
+                              color: AppColors.textHint,
+                            ),
+                          )
+                        : Image.asset(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            height: 280,
+                            width: double.infinity,
+                            errorBuilder: (c, e, st) => const Icon(
+                              Icons.broken_image,
+                              size: 80,
+                              color: AppColors.textHint,
+                            ),
                           ),
-                        )
-                      : Image.asset(
-                          imageUrl,
-                          fit: BoxFit.contain,
-                          height: 280,
-                          width: double.infinity,
-                          errorBuilder: (c, e, st) => const Icon(
-                            Icons.broken_image,
-                            size: 80,
-                            color: AppColors.textHint,
-                          ),
-                        ),
-                ),
+                  ),
 
                 UIHelpers.verticalSpace24,
 

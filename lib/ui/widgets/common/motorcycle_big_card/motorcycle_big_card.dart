@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_micah/ui/utils/constants/app_colors.dart';
 import 'package:project_micah/ui/utils/constants/ui_helpers.dart';
+import 'package:project_micah/ui/widgets/common/loading/cog_loader.dart';
 import 'package:stacked/stacked.dart';
 
 import 'motorcycle_big_card_model.dart';
@@ -101,8 +102,7 @@ class MotorcycleBigCard extends StackedView<MotorcycleBigCardModel> {
                                         return SizedBox(
                                           height: height * 0.9,
                                           child: const Center(
-                                            child: CircularProgressIndicator(
-                                                strokeWidth: 2),
+                                            child: CogLoader(size: 32),
                                           ),
                                         );
                                       },

@@ -75,10 +75,11 @@ class PartGroup {
         groupHeader: map['group_header'] as String? ?? '',
         partType: map['part_type'] as String? ?? '',
         subAssemblies: ((map['sub_assemblies'] as List?) ?? [])
-            .map((e) => SubAssemblyRef.fromMap(e as Map<String, dynamic>))
+            .map((e) =>
+                SubAssemblyRef.fromMap(Map<String, dynamic>.from(e as Map)))
             .toList(),
         items: ((map['items'] as List?) ?? [])
-            .map((e) => PartItem.fromMap(e as Map<String, dynamic>))
+            .map((e) => PartItem.fromMap(Map<String, dynamic>.from(e as Map)))
             .toList(),
       );
 
@@ -117,7 +118,7 @@ class PartsHierarchy {
         brand: map['brand'] as String? ?? '',
         model: map['model'] as String? ?? '',
         groups: ((map['groups'] as List?) ?? [])
-            .map((e) => PartGroup.fromMap(e as Map<String, dynamic>))
+            .map((e) => PartGroup.fromMap(Map<String, dynamic>.from(e as Map)))
             .toList(),
       );
 }

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:project_micah/models/category_model.dart';
+import 'package:project_micah/models/motorcycle_model.dart';
 import 'package:project_micah/ui/utils/constants/ui_helpers.dart';
 import 'package:project_micah/ui/utils/constants/app_colors.dart';
 
 import 'motorcycle_showcase_model.dart';
 
 class MotorcycleShowcase extends StackedView<MotorcycleShowcaseModel> {
-  final List<CategoryModel> motorcycles;
+  final List<MotorcycleModel> motorcycles;
   final String? selectedMotorcycle;
   final Function(String) onMotorcycleSelected;
   final bool isCollapsed;
@@ -64,7 +64,7 @@ class MotorcycleShowcase extends StackedView<MotorcycleShowcaseModel> {
 }
 
 class _MotorcycleCard extends StatefulWidget {
-  final CategoryModel motorcycle;
+  final MotorcycleModel motorcycle;
   final bool isSelected;
   final bool isCollapsed;
   final VoidCallback onTap;

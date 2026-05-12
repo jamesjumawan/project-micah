@@ -20,6 +20,7 @@ class ThreeDViewer extends StatelessWidget {
   final void Function(String groupCode)? onGroupLoaded;
   final void Function(String partId, {required bool fromCache})? onPartLoaded;
   final bool pointerEventsDisabled;
+  final Map<String, Map<String, String>>? partsMeta;
 
   const ThreeDViewer({
     super.key,
@@ -40,6 +41,7 @@ class ThreeDViewer extends StatelessWidget {
     this.onGroupLoaded,
     this.onPartLoaded,
     this.pointerEventsDisabled = false,
+    this.partsMeta,
   });
 
   @override

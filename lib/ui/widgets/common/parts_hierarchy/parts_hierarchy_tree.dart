@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project_micah/models/parts_hierarchy_model.dart';
 import 'package:project_micah/ui/utils/constants/app_colors.dart';
 import 'package:project_micah/ui/utils/constants/ui_helpers.dart';
+import 'package:project_micah/ui/widgets/common/loading/cog_loader.dart';
 
 /// Phase 5 hierarchy tree.
 /// Shows groups → sub-assemblies → items. Groups are lazy-loaded on expand.
@@ -149,9 +150,7 @@ class _GroupTileState extends State<_GroupTile> {
                 UIHelpers.horizontalSpace4,
                 if (widget.isLoading)
                   const SizedBox(
-                      width: 12,
-                      height: 12,
-                      child: CircularProgressIndicator(strokeWidth: 1.5)),
+                      width: 12, height: 12, child: CogLoader(size: 12)),
                 if (widget.isLoaded && !widget.isLoading)
                   Icon(Icons.check_circle, size: 14, color: AppColors.success),
               ],

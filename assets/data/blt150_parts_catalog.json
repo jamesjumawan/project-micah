@@ -1,0 +1,2437 @@
+{
+    "brand": "skygo",
+    "model": "BLT150",
+    "generated_at": "2026-04-20T15:00:08",
+    "source_excel": "directory.xlsx",
+    "groups": [
+        {
+            "group": "F01",
+            "group_header": "LF150T-8G F-01 仪表总成 METER ASSY",
+            "part_type": "meter_assy",
+            "sub_assemblies": [],
+            "items": [
+                {
+                    "id": "F01-01",
+                    "description": "Meter Stay",
+                    "part_type": "meter_stay",
+                    "quantity": null,
+                    "depth_level": 3,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-01004X-B"
+                },
+                {
+                    "id": "F01-02",
+                    "description": "Case, Meter",
+                    "part_type": "case",
+                    "quantity": null,
+                    "depth_level": 1,
+                    "sub_assembly": null,
+                    "item_code": "SPD-06114X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F01-03",
+                    "description": "Meter Assy",
+                    "part_type": "meter_assy",
+                    "quantity": null,
+                    "depth_level": 2,
+                    "sub_assembly": null,
+                    "item_code": "SPD-37000X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": null,
+                    "description": "Case, Meter Screw",
+                    "part_type": "case",
+                    "quantity": 4,
+                    "depth_level": 1,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-01001X-B"
+                },
+                {
+                    "id": null,
+                    "description": "Meter Assy Screw",
+                    "part_type": "meter_assy_screw",
+                    "quantity": 3,
+                    "depth_level": 2,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-001002X-B"
+                },
+                {
+                    "id": null,
+                    "description": "Meter Assy Screw",
+                    "part_type": "meter_assy_screw",
+                    "quantity": 3,
+                    "depth_level": 2,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-001003X-B"
+                },
+                {
+                    "id": null,
+                    "description": "Meter Stay Screw",
+                    "part_type": "meter_stay_screw",
+                    "quantity": 2,
+                    "depth_level": 3,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-001005X-B"
+                }
+            ]
+        },
+        {
+            "group": "F02",
+            "group_header": "LF150T-8G F-02 车体护罩总成I FRAME MANTLE I",
+            "part_type": "frame_mantle_i",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F02-01",
+                    "name": "SA-F02-01"
+                },
+                {
+                    "code": "SA-F02-02",
+                    "name": "SA-F02-02"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F02-01",
+                    "description": "Front Windshield, Mounting Plate RH",
+                    "part_type": "front_windshield",
+                    "quantity": null,
+                    "depth_level": 1,
+                    "sub_assembly": null,
+                    "item_code": "SPD-73703X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-02",
+                    "description": "Front Windshield, Mounting Plate LH",
+                    "part_type": "front_windshield",
+                    "quantity": null,
+                    "depth_level": 1,
+                    "sub_assembly": null,
+                    "item_code": "SPD-73702X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-03",
+                    "description": "Windshield",
+                    "part_type": "windshield",
+                    "quantity": null,
+                    "depth_level": 2,
+                    "sub_assembly": null,
+                    "item_code": "SPD-43211X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-04",
+                    "description": "Headlight Assy - LED Type",
+                    "part_type": "headlight_assy_led_type",
+                    "quantity": null,
+                    "depth_level": 4,
+                    "sub_assembly": "SA-F02-01",
+                    "item_code": "SPD-33100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-05",
+                    "description": "Hood, Headlight",
+                    "part_type": "hood",
+                    "quantity": null,
+                    "depth_level": 5,
+                    "sub_assembly": "SA-F02-01",
+                    "item_code": "SPD-46965X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-06",
+                    "description": "Guard, Front Cover",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": 3,
+                    "sub_assembly": null,
+                    "item_code": "SPD-45467X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-07",
+                    "description": "Plate, Front Trunk Inner RH",
+                    "part_type": "plate",
+                    "quantity": null,
+                    "depth_level": 8,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-89301X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-08",
+                    "description": "Plate, Front Trunk Inner LH",
+                    "part_type": "plate",
+                    "quantity": null,
+                    "depth_level": 8,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-89201X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-09",
+                    "description": "Lugs, Front Compartment Mounting",
+                    "part_type": "lugs",
+                    "quantity": null,
+                    "depth_level": 11,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-88401X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-10",
+                    "description": "Torsional Spring, Front Trunk LH",
+                    "part_type": "torsional_spring",
+                    "quantity": null,
+                    "depth_level": 12,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-88501X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-11",
+                    "description": "Inner Cover, Front Trunk LH",
+                    "part_type": "inner_cover",
+                    "quantity": null,
+                    "depth_level": 10,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-06547X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-12",
+                    "description": "Front Trunk Cover LH",
+                    "part_type": "front_trunk_cover_lh",
+                    "quantity": null,
+                    "depth_level": 9,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-06545X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-13",
+                    "description": "Handle, Front Trunk Opening LH",
+                    "part_type": "handle",
+                    "quantity": null,
+                    "depth_level": 13,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-89001X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-14",
+                    "description": "Trunk, Front",
+                    "part_type": "trunk",
+                    "quantity": null,
+                    "depth_level": 7,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-06500X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-15",
+                    "description": "Steering Lock Cover",
+                    "part_type": "steering_lock_cover",
+                    "quantity": null,
+                    "depth_level": 6,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-90405X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-16",
+                    "description": "Inner Cover, Front Trunk RH",
+                    "part_type": "inner_cover",
+                    "quantity": null,
+                    "depth_level": 10,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-06548X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-17",
+                    "description": "Front Trunk Cover RH",
+                    "part_type": "front_trunk_cover_rh",
+                    "quantity": null,
+                    "depth_level": 9,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-06546X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-18",
+                    "description": "Handle, Front Trunk Opening RH",
+                    "part_type": "handle",
+                    "quantity": null,
+                    "depth_level": 13,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-89101X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-19",
+                    "description": "Torsional Spring, Front Trunk RH",
+                    "part_type": "torsional_spring",
+                    "quantity": null,
+                    "depth_level": 12,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-88601X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-20",
+                    "description": "Charger Comp.",
+                    "part_type": "charger_comp",
+                    "quantity": null,
+                    "depth_level": 14,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-36150X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F02-03",
+                    "description": "Windshield - Short",
+                    "part_type": "windshield_short",
+                    "quantity": null,
+                    "depth_level": 2,
+                    "sub_assembly": "SA-F02-02",
+                    "item_code": "SPD-43211X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": null,
+                    "description": "Front Windshield, Mounting Plate RH (SCREW)",
+                    "part_type": "front_windshield",
+                    "quantity": 2,
+                    "depth_level": 1,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-02001X-B"
+                },
+                {
+                    "id": null,
+                    "description": "Windshield (SCREW)",
+                    "part_type": "windshield_screw",
+                    "quantity": 4,
+                    "depth_level": 2,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-02002X-B"
+                },
+                {
+                    "id": null,
+                    "description": "Guard, Front Cover (SCREW)",
+                    "part_type": "guard",
+                    "quantity": 4,
+                    "depth_level": 3,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-002003X-B"
+                },
+                {
+                    "id": null,
+                    "description": "Guard, Front Cover (FASTENER)",
+                    "part_type": "guard",
+                    "quantity": 2,
+                    "depth_level": 3,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-002004X-B"
+                },
+                {
+                    "id": null,
+                    "description": "Hood, Headlight (SCREW)",
+                    "part_type": "hood",
+                    "quantity": 4,
+                    "depth_level": 5,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-002005X-B"
+                },
+                {
+                    "id": null,
+                    "description": "Hood, Headlight (SCREW)",
+                    "part_type": "hood",
+                    "quantity": 3,
+                    "depth_level": 5,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-002006X-B"
+                }
+            ]
+        },
+        {
+            "group": "F03",
+            "group_header": "LF150T-8G F-03 车体护罩总成II FRAME MANTLE II",
+            "part_type": "frame_mantle_ii",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F03-01",
+                    "name": "SA-F03-01"
+                },
+                {
+                    "code": "SA-F03-02",
+                    "name": "SA-F03-02"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F03-01",
+                    "description": "Ornament, Front Cowl",
+                    "part_type": "ornament",
+                    "quantity": null,
+                    "depth_level": 1,
+                    "sub_assembly": null,
+                    "item_code": "SPD-43268X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-02",
+                    "description": "Ornament, Headlight Housing RH (Black)",
+                    "part_type": "ornament",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-43264X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-02",
+                    "description": "Ornament, Headlight Housing RH (Gray)",
+                    "part_type": "ornament",
+                    "quantity": null,
+                    "depth_level": 2,
+                    "sub_assembly": "SA-F03-01",
+                    "item_code": "SPD-43264X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-03",
+                    "description": "Front Cowl Guard RH",
+                    "part_type": "front_cowl_guard_rh",
+                    "quantity": null,
+                    "depth_level": 3,
+                    "sub_assembly": "SA-F03-01",
+                    "item_code": "SPD-43261X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-04",
+                    "description": "Winker, Front RH - LED Type",
+                    "part_type": "winker",
+                    "quantity": null,
+                    "depth_level": 4,
+                    "sub_assembly": "SA-F03-01",
+                    "item_code": "SPD-33510X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-05",
+                    "description": "Ornament, Headlight Housing, LH (Black)",
+                    "part_type": "ornament",
+                    "quantity": null,
+                    "depth_level": 5,
+                    "sub_assembly": null,
+                    "item_code": "SPD-43265X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-05",
+                    "description": "Ornament, Headlight Housing, LH (Gray)",
+                    "part_type": "ornament",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F03-02",
+                    "item_code": "SPD-43265X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-06",
+                    "description": "Winker, Front LH - LED Type",
+                    "part_type": "winker",
+                    "quantity": null,
+                    "depth_level": 7,
+                    "sub_assembly": "SA-F03-02",
+                    "item_code": "SPD-33550X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-07",
+                    "description": "Front Cowl Guard LH",
+                    "part_type": "front_cowl_guard_lh",
+                    "quantity": null,
+                    "depth_level": 6,
+                    "sub_assembly": null,
+                    "item_code": "SPD-43262X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F03-08",
+                    "description": "Marked Price",
+                    "part_type": "marked_price",
+                    "quantity": 2,
+                    "depth_level": "4,6",
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-03001X-B"
+                },
+                {
+                    "id": null,
+                    "description": "screws",
+                    "part_type": "screws",
+                    "quantity": 12,
+                    "depth_level": "3,4",
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-03002X-B"
+                }
+            ]
+        },
+        {
+            "group": "F04",
+            "group_header": "LF150T-8G F-04 车体护罩总成III FRAME MANTLE III",
+            "part_type": "frame_mantle_iii",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F04-01",
+                    "name": "SA-F04-01"
+                },
+                {
+                    "code": "SA-F04-02",
+                    "name": "SA-F04-02"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F04-01",
+                    "description": "Plate, Guard RH",
+                    "part_type": "plate",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-38566X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-02",
+                    "description": "Guard, Lower RH",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-43433X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-03",
+                    "description": "Rubber, Treadle RH",
+                    "part_type": "rubber",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-10260X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-04",
+                    "description": "Rubber, Treadle II RH",
+                    "part_type": "rubber",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-10264X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-05",
+                    "description": "Guard, Outer Plate RH (Black)",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-90607X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-05",
+                    "description": "Guard, Outer Plate RH (Brown)",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-90607X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-06",
+                    "description": "Seat Lock Bracket",
+                    "part_type": "seat_lock_bracket",
+                    "quantity": null,
+                    "depth_level": 6,
+                    "sub_assembly": "SA-F04-01",
+                    "item_code": "SPD-88101X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-07",
+                    "description": "Spring, Fuel Tank Lock Return",
+                    "part_type": "spring",
+                    "quantity": null,
+                    "depth_level": 7,
+                    "sub_assembly": "SA-F04-01",
+                    "item_code": "SPD-88201X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-08",
+                    "description": "Cover, Fuel Tank Lock Ornament Inner",
+                    "part_type": "cover",
+                    "quantity": null,
+                    "depth_level": 3,
+                    "sub_assembly": "SA-F04-01",
+                    "item_code": "SPD-74402X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-09",
+                    "description": "Spring, Fuel Tank Lock Return II",
+                    "part_type": "spring",
+                    "quantity": null,
+                    "depth_level": 4,
+                    "sub_assembly": "SA-F04-01",
+                    "item_code": "SPD-88201X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-10",
+                    "description": "Cover, Fuel Tank Lock Ornament Outer",
+                    "part_type": "cover",
+                    "quantity": null,
+                    "depth_level": 2,
+                    "sub_assembly": "SA-F04-01",
+                    "item_code": "SPD-74302X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-11",
+                    "description": "Guard, Mid",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": 1,
+                    "sub_assembly": "SA-F04-01",
+                    "item_code": "SPD-38945X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-12",
+                    "description": "Plate, Guard LH",
+                    "part_type": "plate",
+                    "quantity": null,
+                    "depth_level": 9,
+                    "sub_assembly": "SA-F04-02",
+                    "item_code": "SPD-38440X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-13",
+                    "description": "Guard, Front",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-26674X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-14",
+                    "description": "Bottom Guard",
+                    "part_type": "bottom_guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-38946X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-15",
+                    "description": "Rubber, Treadle LH",
+                    "part_type": "rubber",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-10259X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-16",
+                    "description": "Rubber, Treadle II LH",
+                    "part_type": "rubber",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-10263X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-17",
+                    "description": "Guard, Lower LH",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-43333X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-18",
+                    "description": "Guard, Outer Plate LH (Black)",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": 8,
+                    "sub_assembly": "SA-F04-02",
+                    "item_code": "SPD-90507X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-18",
+                    "description": "Guard, Outer Plate LH (Brown)",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-90507X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-19",
+                    "description": "Ornament, Engine",
+                    "part_type": "ornament",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-43561X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-20",
+                    "description": "Bracket, Fuel Tank Cable",
+                    "part_type": "bracket",
+                    "quantity": null,
+                    "depth_level": 5,
+                    "sub_assembly": "SA-F04-01",
+                    "item_code": "SPD-05183X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F04-21",
+                    "description": "Guard, Trim Cover RH",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-89801X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": null,
+                    "description": "SPD-05183X-B & SPD-74402X-B (SCREW)",
+                    "part_type": "spd_05183x_b_spd_74402x_b_screw",
+                    "quantity": 3,
+                    "depth_level": "3,5",
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-04001X-B"
+                },
+                {
+                    "id": null,
+                    "description": "SPD-88101X-B (PUSH PIN)",
+                    "part_type": "spd_88101x_b_push_pin",
+                    "quantity": 2,
+                    "depth_level": 6,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-02001X-B"
+                }
+            ]
+        },
+        {
+            "group": "F05",
+            "group_header": "LF150T-8G F-05-Ⅰ 握把、开关、拉索 GRIP & SWITCH & CABLES",
+            "part_type": "grip_switch_cables",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F05-02",
+                    "name": "SA-F05-02"
+                },
+                {
+                    "code": "SA-F05-01",
+                    "name": "SA-F05-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F05-Ⅰ-01",
+                    "description": "Throttle Cable",
+                    "part_type": "throttle_cable",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-46300X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-01",
+                    "description": "Throttle Cable II",
+                    "part_type": "throttle_cable_ii",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-02",
+                    "item_code": "SPD-46300X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-02",
+                    "description": "Guard, Steering Bar",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-46513X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-03",
+                    "description": "Steering, Guard Mounting Plate",
+                    "part_type": "steering",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-90105X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-04",
+                    "description": "Throttle Grip Comp.",
+                    "part_type": "throttle_grip_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-47300X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-05",
+                    "description": "Balance Weight, Steering Bar",
+                    "part_type": "balance_weight",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-47420X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-06",
+                    "description": "Switch, Handlebar RH",
+                    "part_type": "switch",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-35100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-07",
+                    "description": "Grip Guard, Lower",
+                    "part_type": "grip_guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-46514X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-08",
+                    "description": "Mirror, Rear View RH",
+                    "part_type": "mirror",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-57100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-09",
+                    "description": "Mirror, Rear View LH",
+                    "part_type": "mirror",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-57200X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-10",
+                    "description": "Cable, Seat Lock",
+                    "part_type": "cable",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-02",
+                    "item_code": "SPD-46530X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-11",
+                    "description": "Cable, Fuel Tank Lock",
+                    "part_type": "cable",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-02",
+                    "item_code": "SPD-46520X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-12",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-02",
+                    "item_code": null,
+                    "internal_code": "CKI-005001X-B"
+                },
+                {
+                    "id": "F05-Ⅰ-13",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-02",
+                    "item_code": null,
+                    "internal_code": "CKI-005002X-B"
+                },
+                {
+                    "id": "F05-Ⅰ-14",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-02",
+                    "item_code": null,
+                    "internal_code": "CKI-005003X-B"
+                },
+                {
+                    "id": "F05-Ⅰ-15",
+                    "description": "Switch, Handlebar LH",
+                    "part_type": "switch",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-35200X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-16",
+                    "description": "Grip, LH",
+                    "part_type": "grip",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-47411X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F05-Ⅰ-17",
+                    "description": "Pipe, Steering Bar",
+                    "part_type": "pipe",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F05-01",
+                    "item_code": "SPD-47110X-B",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F06",
+            "group_header": "LF150T-8G F-06 前减震器总成 FRONT SHOCK ABSORBER",
+            "part_type": "front_shock_absorber",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F06-01",
+                    "name": "SA-F06-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F06-01",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F06-01",
+                    "item_code": null,
+                    "internal_code": "CKI-006001X-B"
+                },
+                {
+                    "id": "F06-02",
+                    "description": "Shock Absorber, Front RH",
+                    "part_type": "shock_absorber",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F06-01",
+                    "item_code": "SPD-52400X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F06-03",
+                    "description": "Fender, Front (Black)",
+                    "part_type": "fender",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-53111X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F06-03",
+                    "description": "Fender, Front (Gray)",
+                    "part_type": "fender",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F06-01",
+                    "item_code": "SPD-53111X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F06-04",
+                    "description": "Shock Absorber, Front LH",
+                    "part_type": "shock_absorber",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F06-01",
+                    "item_code": "SPD-52500X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F06-05",
+                    "description": "Stem Set, Steering",
+                    "part_type": "stem_set",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F06-01",
+                    "item_code": "SPD-51210X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F06-06",
+                    "description": "Steering Stem Bearing Set",
+                    "part_type": "steering_stem_bearing_set",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F06-01",
+                    "item_code": "SPD-51950X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F06-07",
+                    "description": "Oil Seal, Front Shock 30x42x10.5",
+                    "part_type": "oil_seal",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-52427X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "FO6--8",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F06-01",
+                    "item_code": null,
+                    "internal_code": "CKI-006002X-B"
+                }
+            ]
+        },
+        {
+            "group": "F07",
+            "group_header": "LF150T-8G F-07 前轮总成 FRONT WHEEL",
+            "part_type": "front_wheel",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F07-01",
+                    "name": "SA-F07-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F07-01",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F07-01",
+                    "item_code": null,
+                    "internal_code": "CKI-007001X-B"
+                },
+                {
+                    "id": "F07-02",
+                    "description": "Tire, Front 110/70-13",
+                    "part_type": "tire",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F07-01",
+                    "item_code": "SPD-54700X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F07-03",
+                    "description": "Bush, Front Wheel",
+                    "part_type": "bush",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F07-01",
+                    "item_code": "SPD-54912X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F07-04",
+                    "description": "Hub Comp., Front Wheel",
+                    "part_type": "hub_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F07-01",
+                    "item_code": "SPD-54100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F07-05",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-007002X-B"
+                },
+                {
+                    "id": "F07-06",
+                    "description": "Disc, Front Brake",
+                    "part_type": "disc",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F07-01",
+                    "item_code": "SPD-56311X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F07-07",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-007003X-B"
+                },
+                {
+                    "id": "F07-08",
+                    "description": "Axle, Front",
+                    "part_type": "axle",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F07-01",
+                    "item_code": "SPD-54911X-B",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F08",
+            "group_header": "LF150T-8G F-08 后轮总成 REAR WHEEL",
+            "part_type": "rear_wheel",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F08-01",
+                    "name": "SA-F08-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F08-01",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-008001X-B"
+                },
+                {
+                    "id": "F08-02",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": null,
+                    "internal_code": "CKI-008002X-B"
+                },
+                {
+                    "id": "F08-03",
+                    "description": "Nut, Rear Wheel",
+                    "part_type": "nut",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": "SPD-29004X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F08-04",
+                    "description": "Sleeve, Rear Fork Outer",
+                    "part_type": "sleeve",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": "SPD-61912X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F08-05",
+                    "description": "Rear Rocker Comp., Muffler Connection Plate",
+                    "part_type": "rear_rocker_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": "SPD-37726X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F08-06",
+                    "description": "Sleeve, Rear Fork Inner",
+                    "part_type": "sleeve",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": "SPD-61913X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F08-07",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": null,
+                    "internal_code": "CKI-008003X-B"
+                },
+                {
+                    "id": "F08-08",
+                    "description": "Disc, Rear Brake",
+                    "part_type": "disc",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": "SPD-66311X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F08-09",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-008004X-B"
+                },
+                {
+                    "id": "F08-10",
+                    "description": "Shock Absorber Assy, Rear",
+                    "part_type": "shock_absorber_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": "SPD-62100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F08-11",
+                    "description": "Tire, Rear 130/70-13",
+                    "part_type": "tire",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": "SPD-64700X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F08-12",
+                    "description": "Hub Set, Rear Wheel",
+                    "part_type": "hub_set",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F08-01",
+                    "item_code": "SPD-64100X-B",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F09",
+            "group_header": "LF150T-8G F-09 油箱总成 FUEL TANK",
+            "part_type": "fuel_tank",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F09-01",
+                    "name": "SA-F09-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F09-01",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": null,
+                    "internal_code": "CKI-009001X-B"
+                },
+                {
+                    "id": "F09-02",
+                    "description": "Body, Reservoir Tank",
+                    "part_type": "body",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": "SPD-19121X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F09-03",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": null,
+                    "internal_code": "CKI-009002X-B"
+                },
+                {
+                    "id": "F09-04",
+                    "description": "Sensor, Fuel",
+                    "part_type": "sensor",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-37810X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F09-04",
+                    "description": "Sensor, Fuel II",
+                    "part_type": "sensor",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": "SPD-37810X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F09-05",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": null,
+                    "internal_code": "CKI-009003X-B"
+                },
+                {
+                    "id": "F09-06",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": null,
+                    "internal_code": "CKI-009004X-B"
+                },
+                {
+                    "id": "F09-07",
+                    "description": "Weldment Comp., Fuel Tank",
+                    "part_type": "weldment_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": "SPD-16620X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F09-08",
+                    "description": "Cap, Fuel Filler",
+                    "part_type": "cap",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": "SPD-16530X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F09-09",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": null,
+                    "internal_code": "CKI-009005X-B"
+                },
+                {
+                    "id": "F09-10",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": null,
+                    "internal_code": "CKI-009006X-B"
+                },
+                {
+                    "id": "F09-11",
+                    "description": "Pump, Fuel",
+                    "part_type": "pump",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": "SPD-39520X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F09-12",
+                    "description": "Hose Comp.",
+                    "part_type": "hose_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F09-01",
+                    "item_code": "SPD-16700X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F09-13",
+                    "description": "Filter, Fuel Pump",
+                    "part_type": "filter",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-39513X-B",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F10",
+            "group_header": "LF150T-8G F-10 座垫、后置物箱 SEAT & REAR LUGGAGE",
+            "part_type": "seat_rear_luggage",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F10-01",
+                    "name": "SA-F10-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F10-01",
+                    "description": "Seat Assy",
+                    "part_type": "seat_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F10-01",
+                    "item_code": "SPD-44100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F10-02",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F10-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0010001X-B"
+                },
+                {
+                    "id": "F10-03",
+                    "description": "Seat Cushion, Opening Bracket",
+                    "part_type": "seat_cushion",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F10-01",
+                    "item_code": "SPD-03468X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F10-04",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F10-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0010002X-B"
+                },
+                {
+                    "id": "F10-05",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F10-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0010003X-B"
+                },
+                {
+                    "id": "F10-06",
+                    "description": "Rear Trunk II",
+                    "part_type": "rear_trunk_ii",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F10-01",
+                    "item_code": "SPD-43661X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F10-07",
+                    "description": "Cover, Rear Trunk",
+                    "part_type": "cover",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F10-01",
+                    "item_code": "SPD-43662X-B",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F11",
+            "group_header": "LF150T-8G F-11 排气消声器 空气滤清器总成 EXHAUST MUFFLER & AIR CLEANER",
+            "part_type": "exhaust_muffler_air_cleaner",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F11-01",
+                    "name": "SA-F11-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F11-01",
+                    "description": "Air Cleaner Assy.",
+                    "part_type": "air_cleaner_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F11-01",
+                    "item_code": "SPD-17100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F11-02",
+                    "description": "Filter Comp., Air Cleaner",
+                    "part_type": "filter_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F11-01",
+                    "item_code": "SPD-17120X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F11-03",
+                    "description": "Gasket, Exhaust Muffler",
+                    "part_type": "gasket",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F11-01",
+                    "item_code": "SPD-18211X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F11-04",
+                    "description": "Mantle, Muffler",
+                    "part_type": "mantle",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F11-01",
+                    "item_code": "SPD-18396X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F11-05",
+                    "description": "Exhaust Muffler Assy.",
+                    "part_type": "exhaust_muffler_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F11-01",
+                    "item_code": "SPD-18000X-B",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F12",
+            "group_header": "LF150T-8G F-12 后围板组合 REAR PANEL COMP",
+            "part_type": "rear_panel_comp",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F12-01",
+                    "name": "SA-F12-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F12-01",
+                    "description": "Guard, Rear Panel RH (Black)",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-43361X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-01",
+                    "description": "Guard, Rear Panel RH (Gray)",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-43361X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-02",
+                    "description": "Tail Light Cover, RH",
+                    "part_type": "tail_light_cover",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-89701X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-03",
+                    "description": "Guard, Rear Panel LH (Black)",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-43461X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-03",
+                    "description": "Guard, Rear Panel LH (Gray)",
+                    "part_type": "guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-43461X-B1",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-04",
+                    "description": "Tail Light Cover, LH",
+                    "part_type": "tail_light_cover",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-89601X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-05",
+                    "description": "Taillight Assy., RH",
+                    "part_type": "taillight_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-33700X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-06",
+                    "description": "Taillight Assy., LH",
+                    "part_type": "taillight_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-30700X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-07",
+                    "description": "Rear-Mid Connecting Plate (Black)",
+                    "part_type": "rear_mid_connecting_plate_black",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-43751X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F12-07",
+                    "description": "Rear-Mid Connecting Plate (Gray)",
+                    "part_type": "rear_mid_connecting_plate_gray",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F12-01",
+                    "item_code": "SPD-43751X-B1",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F13",
+            "group_header": "LF150T-8G F-13 后挡泥板组合 REAR FENDER COMP",
+            "part_type": "rear_fender_comp",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F13-01",
+                    "name": "SA-F13-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F13-01",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F13-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0013001X-B"
+                },
+                {
+                    "id": "F13-02",
+                    "description": "Tail Light Guard",
+                    "part_type": "tail_light_guard",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F13-01",
+                    "item_code": "SPD-27909X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F13-03",
+                    "description": "Fender Rear, Front Body",
+                    "part_type": "fender_rear",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F13-01",
+                    "item_code": "SPD-63131X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F13-04",
+                    "description": "Bracket Set, Rear Fender",
+                    "part_type": "bracket_set",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F13-01",
+                    "item_code": "SPD-63910X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F13-05",
+                    "description": "Fender, Rear",
+                    "part_type": "fender",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F13-01",
+                    "item_code": "SPD-63111X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F13-06",
+                    "description": "Light Comp., License Plate",
+                    "part_type": "light_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F13-01",
+                    "item_code": "SPD-33760X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F13-07",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F13-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0013002X-B"
+                },
+                {
+                    "id": "F13-08",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-0013003X-B"
+                }
+            ]
+        },
+        {
+            "group": "F14",
+            "group_header": "LF150T-8G F-14 车架焊接总成 FRAME WELDMENT ASSY",
+            "part_type": "frame_weldment_assy",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F14-01",
+                    "name": "SA-F14-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F14-01",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-0014001X-B"
+                },
+                {
+                    "id": "F14-02",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0014002X-B"
+                },
+                {
+                    "id": "F14-03",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0014003X-B"
+                },
+                {
+                    "id": "F14-04",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0014004X-B"
+                },
+                {
+                    "id": "F14-05",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-0014005X-B"
+                },
+                {
+                    "id": "F14-06",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-0014006X-B"
+                },
+                {
+                    "id": "F14-07",
+                    "description": "Passenger Footrest Comp., RH",
+                    "part_type": "passenger_footrest_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-42510X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-08",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": null,
+                    "internal_code": "CKI-0014007X-B"
+                },
+                {
+                    "id": "F14-09",
+                    "description": "Bracket, Footrest Comp. Rider",
+                    "part_type": "bracket",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": "SPD-42300X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-10",
+                    "description": "Stand, Side",
+                    "part_type": "stand",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": "SPD-42200X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-11",
+                    "description": "Spring, Side Stand",
+                    "part_type": "spring",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": "SPD-42922X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-12",
+                    "description": "Stand Set, Center",
+                    "part_type": "stand_set",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-42110X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-13",
+                    "description": "Rubber, Center Stand",
+                    "part_type": "rubber",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-16812X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-14",
+                    "description": "Spring, Center Stand",
+                    "part_type": "spring",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-42913X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-15",
+                    "description": "Shaft, Center Stand",
+                    "part_type": "shaft",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-42260X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-16",
+                    "description": "Passenger Footrest Comp., LH",
+                    "part_type": "passenger_footrest_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-42610X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-17",
+                    "description": "Engine Suspension Mounting",
+                    "part_type": "engine_suspension_mounting",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": "SPD-02465X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-18",
+                    "description": "Shaft II, Engine Mounting",
+                    "part_type": "shaft_ii",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": "SPD-03733X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-19",
+                    "description": "Shaft I, Engine Mounting",
+                    "part_type": "shaft",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": "SPD-03732X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-20",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-0014008X-B"
+                },
+                {
+                    "id": "F14-21",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-0014009X-B"
+                },
+                {
+                    "id": "F14-22",
+                    "description": "Seat Lock Comp.",
+                    "part_type": "seat_lock_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-48340X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-23",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F14-01",
+                    "item_code": null,
+                    "internal_code": "CKI-00140010X-B"
+                },
+                {
+                    "id": "F14-24",
+                    "description": "Handrail, RH",
+                    "part_type": "handrail",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-45511X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-25",
+                    "description": "Handrail, LH",
+                    "part_type": "handrail",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-45531X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F14-26",
+                    "description": "Kill Switch, Side Stand",
+                    "part_type": "kill_switch",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-53303X-B",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F15",
+            "group_header": "LF150T-8G F-15 电器 ELECTRICAL ELEMENT",
+            "part_type": "electrical_element",
+            "sub_assemblies": [],
+            "items": [
+                {
+                    "id": "F15-01",
+                    "description": "Cable, Main",
+                    "part_type": "cable",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-32100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F15-02",
+                    "description": "Switch, Ignition (Keyless)",
+                    "part_type": "switch",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-48000X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F15-03",
+                    "description": "Controller, Automatic Start-up and Shutdown",
+                    "part_type": "controller",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-34790X",
+                    "internal_code": null
+                },
+                {
+                    "id": "F15-04",
+                    "description": "Horn",
+                    "part_type": "horn",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-38100X",
+                    "internal_code": null
+                },
+                {
+                    "id": "F15-05",
+                    "description": "Relay, EFI Main",
+                    "part_type": "relay",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-38280X",
+                    "internal_code": null
+                },
+                {
+                    "id": "F15-06",
+                    "description": "Auxiliary Relay",
+                    "part_type": "auxiliary_relay",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-38270X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F15-07",
+                    "description": "Relay, Flasher",
+                    "part_type": "relay",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-38210X",
+                    "internal_code": null
+                },
+                {
+                    "id": "F15-08",
+                    "description": "FUJI/VOLTZ Battery DTX7A-BS (MF)",
+                    "part_type": "fuji_voltz_battery_dtx7a_bs_mf",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-31500U",
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F17",
+            "group_header": "LF150T-8G F-17 前、后液压制动器总成 FRONT & REAR HYDRAULIC BRAKE ASSY",
+            "part_type": "front_rear_hydraulic_brake_assy",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F17-02",
+                    "name": "SA-F17-02"
+                },
+                {
+                    "code": "SA-F17-01",
+                    "name": "SA-F17-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F17-01",
+                    "description": "Front Hydraulic Brake Assy",
+                    "part_type": "front_hydraulic_brake_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-02",
+                    "item_code": "SPD-56000X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F17-02",
+                    "description": "Front Disc Brake Pad",
+                    "part_type": "front_disc_brake_pad",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-01",
+                    "item_code": "SPD-56520X",
+                    "internal_code": null
+                },
+                {
+                    "id": "F17-03",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-01",
+                    "item_code": null,
+                    "internal_code": null
+                },
+                {
+                    "id": "F17-04",
+                    "description": "Front Brake Switch",
+                    "part_type": "front_brake_switch",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-01",
+                    "item_code": "SPD-35330F",
+                    "internal_code": null
+                },
+                {
+                    "id": "F17-05",
+                    "description": "Front Brake Lever",
+                    "part_type": "front_brake_lever",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-01",
+                    "item_code": "SPD-47511X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F17-06",
+                    "description": "Rear Hydraulic Brake Assy",
+                    "part_type": "rear_hydraulic_brake_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-02",
+                    "item_code": "SPD-66000X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F17-08",
+                    "description": "Rear Brake Lever",
+                    "part_type": "rear_brake_lever",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-01",
+                    "item_code": "SPD-47651X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F17-09",
+                    "description": "Rear Brake Pad",
+                    "part_type": "rear_brake_pad",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-01",
+                    "item_code": "SPD-66520X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F17-10",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F17-01",
+                    "item_code": null,
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F18",
+            "group_header": "LF150T-8G F-18 燃油蒸发系统 FUEL EVAPORATING SYSTEM",
+            "part_type": "fuel_evaporating_system",
+            "sub_assemblies": [],
+            "items": [
+                {
+                    "id": "F18-01",
+                    "description": "Canister, Active Carbon",
+                    "part_type": "canister",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-39580X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F18-02",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": null
+                },
+                {
+                    "id": "F18-03",
+                    "description": "Valve, Anti-tilt",
+                    "part_type": "valve",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": "SPD-20380X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F18-04",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": null
+                },
+                {
+                    "id": "F18-05",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": null
+                }
+            ]
+        },
+        {
+            "group": "F19",
+            "group_header": "LF150T-8G F-19 电喷系统 EFI SYSTEM",
+            "part_type": "efi_system",
+            "sub_assemblies": [
+                {
+                    "code": "SA-F19-01",
+                    "name": "SA-F19-01"
+                }
+            ],
+            "items": [
+                {
+                    "id": "F19-01",
+                    "description": "ECU",
+                    "part_type": "ecu",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-39100X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F19-02",
+                    "description": null,
+                    "part_type": null,
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": null,
+                    "item_code": null,
+                    "internal_code": "CKI-0019001X-B"
+                },
+                {
+                    "id": "F19-03",
+                    "description": "Rail Comp., Fuel",
+                    "part_type": "rail_comp",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-39630X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F19-04",
+                    "description": "Nozzle",
+                    "part_type": "nozzle",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-39650X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F19-05",
+                    "description": "Inlet Pipe Insulator",
+                    "part_type": "inlet_pipe_insulator",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-17331X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F19-06",
+                    "description": "Sensor, Oxygen",
+                    "part_type": "sensor",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-39310X",
+                    "internal_code": null
+                },
+                {
+                    "id": "F19-07",
+                    "description": "Pipe Set, Inlet",
+                    "part_type": "pipe_set",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-17310X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F19-08",
+                    "description": "Sensor, Intake Air Pressure",
+                    "part_type": "sensor",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-39330X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F19-09",
+                    "description": "Throttle Valve Assy.",
+                    "part_type": "throttle_valve_assy",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-39601X-B",
+                    "internal_code": null
+                },
+                {
+                    "id": "F19-10",
+                    "description": "Sensor, Water Temperature",
+                    "part_type": "sensor",
+                    "quantity": null,
+                    "depth_level": null,
+                    "sub_assembly": "SA-F19-01",
+                    "item_code": "SPD-25983X-L",
+                    "internal_code": null
+                }
+            ]
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_micah/ui/widgets/common/footer/footer.dart';
 import 'package:project_micah/ui/widgets/common/header/header.dart';
+import 'package:project_micah/ui/widgets/common/loading/cog_loader.dart';
 
 class TabletView extends StatelessWidget {
   const TabletView({
@@ -33,7 +34,7 @@ class TabletView extends StatelessWidget {
           const Header(),
           Expanded(
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: CogLoader())
                 : isScrollable
                     ? SingleChildScrollView(
                         child: Column(

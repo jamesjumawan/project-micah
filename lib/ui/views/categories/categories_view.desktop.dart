@@ -5,6 +5,7 @@ import 'package:project_micah/ui/utils/screen_types/desktop_view.dart';
 import 'package:project_micah/ui/widgets/common/categories_card/categories_card.dart';
 import 'package:project_micah/ui/widgets/common/breadcrumbs/breadcrumbs.dart';
 import 'package:project_micah/ui/widgets/common/parts_card/parts_card.dart';
+import 'package:project_micah/ui/widgets/common/loading/cog_loader.dart';
 import 'package:stacked/stacked.dart';
 
 import 'categories_viewmodel.dart';
@@ -84,7 +85,7 @@ class CategoriesViewDesktop extends ViewModelWidget<CategoriesViewModel> {
                 ? const Center(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(),
+                      child: CogLoader(),
                     ),
                   )
                 : GridView.builder(

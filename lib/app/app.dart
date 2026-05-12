@@ -5,6 +5,7 @@ import 'package:project_micah/ui/views/details/details_view.dart';
 import 'package:project_micah/ui/views/home/home_view.dart';
 import 'package:project_micah/ui/views/search/search_view.dart';
 import 'package:project_micah/ui/views/startup/startup_view.dart';
+import 'package:project_micah/services/motorcycle_service.dart';
 import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
 
@@ -20,6 +21,7 @@ import 'package:stacked_services/stacked_services.dart';
     LazySingleton(classType: BottomSheetService),
     LazySingleton(classType: DialogService),
     LazySingleton(classType: RouterService),
+    LazySingleton(classType: MotorcycleService),
   ],
   bottomsheets: [StackedBottomsheet(classType: NoticeSheet)],
   dialogs: [StackedDialog(classType: InfoAlertDialog)],
