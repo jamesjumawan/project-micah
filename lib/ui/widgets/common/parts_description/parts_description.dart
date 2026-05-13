@@ -146,23 +146,22 @@ class PartsDescription extends StatelessWidget {
                     _metaRow(TTexts.skuLabel, sku),
                     _metaRow(TTexts.categoryLabel, category),
                     _metaRow(TTexts.groupNoLabel, groupNo),
-                    _metaRow(TTexts.partNoLabel, partNo),
                     _metaRow(TTexts.quantityLabel, quantity.toString()),
-                    UIHelpers.verticalSpace24,
-                    Text(
-                      TTexts.descriptionLabel,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    UIHelpers.verticalSpace12,
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            height: 1.6,
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
+                    // UIHelpers.verticalSpace24,
+                    // Text(
+                    //   TTexts.descriptionLabel,
+                    //   style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    //         fontWeight: FontWeight.bold,
+                    //       ),
+                    // ),
+                    // UIHelpers.verticalSpace12,
+                    // Text(
+                    //   description,
+                    //   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    //         height: 1.6,
+                    //         color: AppColors.textSecondary,
+                    //       ),
+                    // ),
                   ],
                 ),
               ],

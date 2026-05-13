@@ -142,8 +142,7 @@ class DetailsViewModel extends BaseViewModel {
   Future<void> initialize() async {
     try {
       final response = await _motorcycleService.getMotorcycles();
-      _motorcycles =
-          response.motorcycles.map(MotorcycleModel.fromMap).toList();
+      _motorcycles = response.motorcycles.map(MotorcycleModel.fromMap).toList();
       // Default to first motorcycle so the viewer is never empty.
       if (_motorcycles.isNotEmpty) {
         _selectedMotorcycle = _motorcycles.first.name;
@@ -251,8 +250,7 @@ class DetailsViewModel extends BaseViewModel {
           'category': category,
           'groupNo': group?['group'] as String? ?? '',
           'sku': item['item_code'] as String? ?? '',
-          'partNo':
-              item['id'] as String? ?? item['item_code'] as String? ?? '',
+          'partNo': item['id'] as String? ?? item['item_code'] as String? ?? '',
           'quantity': (item['quantity'] as num?)?.toInt() ?? 1,
           'description': group?['group_header'] as String? ?? '',
           'imageUrl': '',
@@ -335,11 +333,13 @@ class DetailsViewModel extends BaseViewModel {
 
   /// OBJ/MTL paths for the focused sub-assembly 3D viewer.
   /// Returns empty string when no sub-assembly is focused.
-  String get focusedSubAssemblyObjPath =>
-      _focusedSubAssembly != null ? 'assets/Objects/$_focusedSubAssembly.obj' : '';
+  String get focusedSubAssemblyObjPath => _focusedSubAssembly != null
+      ? 'assets/Objects/$_focusedSubAssembly.obj'
+      : '';
 
-  String? get focusedSubAssemblyMtlPath =>
-      _focusedSubAssembly != null ? 'assets/Objects/$_focusedSubAssembly.mtl' : null;
+  String? get focusedSubAssemblyMtlPath => _focusedSubAssembly != null
+      ? 'assets/Objects/$_focusedSubAssembly.mtl'
+      : null;
 
   /// OBJ path for the currently selected individual part (for sidebar 3D viewer).
   String get selectedPartSingleObjPath {
@@ -381,7 +381,8 @@ class DetailsViewModel extends BaseViewModel {
 
   /// True when this motorcycle has Blender-exported per-group explosion OBJs
   /// in `assets/models/{modelKey}/`. Declared per-motorcycle in the JSON data.
-  bool get hasExplosionModels => _currentMotorcycle?.hasExplosionModels ?? false;
+  bool get hasExplosionModels =>
+      _currentMotorcycle?.hasExplosionModels ?? false;
 
   List<String> get allDisassemblyModelPaths {
     if (!has3DModel) return [];
@@ -393,7 +394,8 @@ class DetailsViewModel extends BaseViewModel {
     if (!has3DModel) return [];
     if (hasExplosionModels) return _explosionMtlPaths;
     return partsModels.values
-        .map((m) => (m['mtl'] != null && m['mtl']!.isNotEmpty) ? m['mtl'] : null)
+        .map(
+            (m) => (m['mtl'] != null && m['mtl']!.isNotEmpty) ? m['mtl'] : null)
         .toList(growable: false);
   }
 
@@ -513,6 +515,7 @@ class DetailsViewModel extends BaseViewModel {
     _focusedSubAssembly = null;
     _selectedPart = null;
     _selectedItemCode = null;
+    _partDistance = 0.4;
     // Return to full disassembly view (don't go back to assemble mode)
     notifyListeners();
   }

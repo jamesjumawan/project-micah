@@ -4,6 +4,47 @@ All 3D assets follow strict naming rules. The Flutter app and the Three.js viewe
 
 ---
 
+## Uniform Facing Direction (non-negotiable)
+
+**Every exported part must face +X (positive X-axis) as its front.**
+
+```
+Blender world axes used in this project:
+  +X  →  front of the motorcycle / front of the part
+  -X  →  rear
+  +Y  →  left side of the motorcycle (rider's left)
+  -Y  →  right side of the motorcycle (rider's right)
+  +Z  →  up
+```
+
+### Why this matters
+The Three.js viewer initialises its camera looking at the front (+X direction).
+Parts exported with a different orientation will load sideways or backwards in the sidebar 3D preview.
+
+### How to apply before exporting (do this ONCE per Blender session)
+In the Blender N-panel → **BLT150 tab**, press **"Rotate All Objects +90° Z"**.
+
+What it does internally:
+1. Selects all mesh objects.
+2. Rotates the entire scene **+90° around the world Z-axis** (same as A → R → Z → 90 → Enter).
+3. Applies the transform to vertex positions so the OBJ exports bake it in.
+
+This converts the original Blender default (+Y forward) to +X forward, which matches the viewer.
+
+> ⚠️ Only run "Rotate All Objects +90° Z" **once**. Running it again will over-rotate the mesh.
+
+### Reference viewport angle (for thumbnail / preview renders)
+Use **"Set Reference View"** in the same N-panel tab.
+
+| Setting | Value | Meaning |
+|---|---|---|
+| Azimuth | 45° | Orbits toward -Y so the bike's right side is partially visible |
+| Elevation | 15° | Slight top-down angle, not dead-level |
+
+The camera ends up: front-right quarter view, slightly above, front of motorcycle (+X) facing toward viewer.
+
+---
+
 ## File Naming Rules (non-negotiable)
 
 **File names must be exactly the `item_code` or `internal_code` — nothing else.**

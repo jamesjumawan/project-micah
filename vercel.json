@@ -18,6 +18,14 @@
     ],
     "rewrites": [
         {
+            "source": "/assets/models/:path*",
+            "destination": "/assets/assets/models/:path*"
+        },
+        {
+            "source": "/assets/Objects/:path*",
+            "destination": "/assets/assets/Objects/:path*"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }
